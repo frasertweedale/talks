@@ -1,0 +1,229 @@
+[text-align=center]
+[transition=swing]
+
+---
+
+<tt>Test::Builder::Clutch</tt>
+
+an introduction
+
+<span size="small">Fraser Tweedale &lt;frase@frase.id.au&gt;</span>
+
+
+---
+C hacker
+---
+Perl Monger
+---
+PHP victim
+---
+Pythonisto
+---
+Rubyist
+
+
+---
+<tt>Test::Builder::Clutch</tt>
+motivation
+
+---
+when you have a test that does
+something useful...
+
+---
+why not just
+turn off the TAP?
+
+
+--- [top] [text-align=left] [font=monospace 50px] [command=Terminal -e 'zsh -c "prove -v clutch.t ; read"']
+
+ 
+ use Test::More
+ <span color="yellow">use Test::Builder::Clutch;</span>
+
+ plan tests => 2;
+
+ pass;
+ <span color="yellow">Test::Builder::Clutch::disengage; </span>
+ fail;
+ <span color="yellow">Test::Builder::Clutch::engage;</span>
+ pass;
+
+
+---
+BUT HOW?
+
+
+---
+<tt>Class::MOP</tt>
+
+
+---
+modifies <tt>Test::Builder</tt>
+
+
+---
+works with any testing module
+that uses <tt>Test::Builder</tt>
+
+---
+works with subtests and TODO
+
+
+---
+alters <tt>$Test::Builder::Level</tt> for
+sensible failture reporting
+
+---
+metaprogram non-tests from tests
+
+
+--- [top] [text-align=left] [font=monospace 50px] [command=Terminal -e 'zsh -c "prove -v antitest.t ; read"']
+
+ 
+use Modern::Perl;
+
+use Test::More;
+use Test::Builder::Clutch;
+
+plan tests => 1;
+
+sub hello_ok { say "Hello, world!"; pass; }
+
+BEGIN {
+  <span color="yellow">Test::Builder::Clutch::antitest 'hello_ok'</span>
+}
+
+hello_ok;
+<span color="yellow">hello;</span>
+
+
+--- [text-align=left]
+<tt>antitest</tt> args:
+
+• <tt>"foo_ok"</tt>
+• <tt>{ "test" => "non_test" }</tt>
+
+---
+now something slightly less contrived...
+
+
+--- [text-align=left] [font=monospace 50px]
+
+package DuckDuckGo;
+
+use Modern::Perl;
+
+use Test::WWW::Mechanize;
+use Test::More;
+use Web::Scraper;
+
+<span color="yellow">use Test::Builder::Clutch;</span>
+
+
+sub search_ok {
+  ...
+}
+
+
+ # no BEGIN block
+<span color="yellow">Test::Builder::Clutch::antitest 'search_ok';</span>
+
+1;
+
+
+--- [text-align=left] [font=monospace 50px]
+
+sub search_ok {
+  my $term = shift;
+  my $links;
+  subtest 'perform search' => sub {
+    <span color="yellow">plan tests => 3;</span>
+    my $mech = Test::WWW::Mechanize->new();
+    <span color="yellow">$mech->get_ok("http://duckduckgo.com/html/");</span>
+    my $response = <span color="yellow">$mech->submit_form_ok(
+      { fields => { q => $term } },
+      'submit the search'
+    );</span>
+    my $scraper = scraper {
+      process "//div[\@class='url']", "links[]" => "TEXT";
+    };
+    my $result = $scraper->scrape($mech->content);
+    @$links = $result->{links} // [];
+    <span color="yellow">ok @$links, 'got some links';</span>
+  };
+  @$links ? $links : undef;
+}
+
+
+---
+
+a script to test <tt>search</tt>
+
+
+--- [text-align=left] [font=monospace 50px] [command=Terminal -e 'zsh -c "prove -v duckduckgo.t ; read"']
+
+use Modern::Perl;
+
+use Test::More;
+
+use DuckDuckGo;
+
+plan tests => 1;
+
+<span color="yellow">DuckDuckGo::search_ok('perl');</span>
+
+
+---
+
+a script to <i>do</i> a search
+
+
+--- [text-align=left] [font=monospace 50px] [command=Terminal -e 'zsh -c "perl duckduckgo.pl perl 6 ; read"']
+
+
+use Modern::Perl;
+
+use List::Enumerator qw( E );
+
+use DuckDuckGo;
+
+my $term = join ' ', @ARGV;
+say "searching for '$term'";
+E(@{<span color="yellow">DuckDuckGo::search($term)</span>})->with_index->each(
+  sub {
+    my ($url, $index) = @$_;
+    say "$index $url";
+  }
+);
+
+
+---
+
+FIN
+
+--- [text-align=left]
+
+https://gitorious.org/frasertweedale/talks
+
+Copyright © 2012 Fraser Tweedale
+
+This work is licensed under the Creative Commons
+Attribution-ShareAlike 3.0 Unported License. To view a copy of this
+license, visit http://creativecommons.org/licenses/by-sa/3.0/ or
+send a letter to Creative Commons, 444 Castro Street, Suite 900,
+Mountain View, California, 94041, USA.
+
+---
+
+me:
+
+Fraser Tweedale
+
+frase@frase.id.au
+
+@hackuador
+
+https://gitorious.org/~frasertweedale
+https://github.com/frasertweedale
+https://bitbucket.org/frasertweedale
