@@ -1,0 +1,111 @@
+Functional programming concepts
+===============================
+
+Paradigm
+--------
+
+- programming paradigm that treats computation as evaluation
+  of mathematical functions and avoids state and mutable data
+- you declare what things *are*, not what to *do*
+
+Higher order functions
+----------------------
+
+- functions that can take as argument or return other functions
+- partial application a.k.a. currying
+- function composition - f o g(x) == f(g(x))
+
+Pure functions
+--------------
+
+- same input -> same output, always
+- memoisation
+- easier to reason about, verify code
+- parallelisable
+
+Recursion
+---------
+
+- recursion is the only way to iterate/loop
+- tail recursion optimisation can be performed in many cases
+
+Type system
+-----------
+
+- in many functional languages, strong compile-time type checking
+  and type inference
+
+Evaluation
+----------
+
+- laziness
+- infinite data structure
+
+
+Functional programming in Python
+================================
+
+Python Language
+---------------
+
+- higher order functions
+  - lambda
+- functions can be pure (if you write them that way)
+- functions support recursion
+  - NO tail recursion optimisation; you WILL blow the stack
+- NO type checking or type inference
+  - unless you do it yourself, at runtime
+- list comprehensions since 2.0
+  - lazy generator expressions since 2.4
+- generators can provide infinite lazy sequences
+
+Python Standard Library
+-----------------------
+
+- operator
+  - provides implementations of operators as functions
+- builtins
+  - map, filter
+    - lazy from 3.0; lazy versions for 2.x in itertools
+  - reduce
+    - removed in 3.0, lives on as functools.reduce
+- functools.partial
+  - partial application a.k.a. currying
+
+functional
+----------
+
+- partial (same as functools.partial)
+- foldl (same as reduce) and foldr (eats from right to left)
+- scanl and scanr (similar to fold; outputs "log" of accumulator)
+- compose (function composition)
+
+Things Python doesn't have
+--------------------------
+
+- type checking
+- pattern matching
+- "do" syntax (for monads)
+  - people have come close using generators, but without
+    reentrancy only simple, linear monads can be implemented
+
+
+Functional programming examples
+===============================
+
+- using map, filter, reduce, comprehensions
+- iteration via recusion (recursive functions)
+- monads in Python
+  - types that encapsulate context logic as well as data
+  - divide-by-zero example (Maybe monad)
+  - chess moves example, (nondeterministic Set monad)
+
+
+References
+==========
+
+- https://en.wikipedia.org/wiki/Functional_programming
+- https://en.wikipedia.org/wiki/Monad_(functional_programming)
+- http://docs.python.org/index.html
+- http://pypi.python.org/pypi/functional
+- http://learnyouahaskell.com/chapters
