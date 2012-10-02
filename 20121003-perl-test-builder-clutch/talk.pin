@@ -31,11 +31,16 @@ when you have a test that does
 something useful...
 
 ---
+
+# ask about test/TAP knowledge
+
 why not just
 turn off the TAP?
 
 
---- [top] [text-align=left] [font=monospace 50px] [command=Terminal -e 'zsh -c "prove -v clutch.t ; read"']
+--- [top] [text-align=left] [font=monospace 50px] [command=$TERMINAL -e 'zsh -c "prove -v clutch.t ; read"']
+
+# COMMAND
 
  
  use Test::More
@@ -66,20 +71,24 @@ modifies <tt>Test::Builder</tt>
 works with any testing module
 that uses <tt>Test::Builder</tt>
 
+# Test::Builder being at the heart
+# of almost all Perl testing
+
 ---
 works with subtests and TODO
 
 
 ---
 alters <tt>$Test::Builder::Level</tt> for
-sensible failture reporting
+sensible failure reporting
 
 ---
 metaprogram non-tests from tests
 
 
---- [top] [text-align=left] [font=monospace 50px] [command=Terminal -e 'zsh -c "prove -v antitest.t ; read"']
+--- [top] [text-align=left] [font=monospace 50px] [command=$TERMINAL -e 'zsh -c "prove -v antitest.t ; read"']
 
+# COMMAND
  
 use Modern::Perl;
 
@@ -96,6 +105,10 @@ BEGIN {
 
 hello_ok;
 <span color="yellow">hello;</span>
+
+# note BEGIN block; necessary so that
+# call to hello() is recognised and
+# script can be compiled.
 
 
 --- [text-align=left]
@@ -131,6 +144,8 @@ sub search_ok {
 
 1;
 
+# Note no BEGIN block
+
 
 --- [text-align=left] [font=monospace 50px]
 
@@ -161,7 +176,9 @@ sub search_ok {
 a script to test <tt>search</tt>
 
 
---- [text-align=left] [font=monospace 50px] [command=Terminal -e 'zsh -c "prove -v duckduckgo.t ; read"']
+--- [text-align=left] [font=monospace 50px] [command=$TERMINAL -e 'zsh -c "prove -v duckduckgo.t ; read"']
+
+# COMMAND
 
 use Modern::Perl;
 
@@ -179,7 +196,9 @@ plan tests => 1;
 a script to <i>do</i> a search
 
 
---- [text-align=left] [font=monospace 50px] [command=Terminal -e 'zsh -c "perl duckduckgo.pl perl 6 ; read"']
+--- [text-align=left] [font=monospace 50px] [command=$TERMINAL -e 'zsh -c "perl duckduckgo.pl perl 6 ; read"']
+
+# COMMAND
 
 
 use Modern::Perl;
