@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=1024, user-scalable=no">
+
+	<title>Your deck.js Presentation</title>
+	
+	<!-- Required stylesheet -->
+	<link rel="stylesheet" href="../deck.js/core/deck.core.css">
+	
+	<!-- Extension CSS files go here. Remove or add as needed. -->
+	<link rel="stylesheet" href="../deck.js/extensions/goto/deck.goto.css">
+	<link rel="stylesheet" href="../deck.js/extensions/menu/deck.menu.css">
+	<link rel="stylesheet" href="../deck.js/extensions/navigation/deck.navigation.css">
+	<link rel="stylesheet" href="../deck.js/extensions/status/deck.status.css">
+	<link rel="stylesheet" href="../deck.js/extensions/hash/deck.hash.css">
+	<link rel="stylesheet" href="../deck.js/extensions/scale/deck.scale.css">
+
+	<!-- Style theme. More available in /themes/style/ or create your own. -->
+	<link rel="stylesheet" href="../deck.js/themes/style/web-2.0.css">
+	
+	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
+	<link rel="stylesheet" href="../deck.js/themes/transition/horizontal-slide.css">
+	
+	<!-- Required Modernizr file -->
+	<script src="../deck.js/modernizr.custom.js"></script>
+</head>
+<body class="deck-container">
+
+    <style>
+        code { white-space: pre; }
+    </style>
+
+<!-- Begin slides. Just make elements with a class of slide. -->
+
+<section class="slide">
+    <h1><em>aeson</em></h1>
+</section>
+
+<section class="slide">
+    <h2>me</h2>
+    <ul>
+        <li class="slide">day job = Ruby and JavaScript (mostly)</li>
+        <li class="slide">have used many languages</li>
+        <li class="slide">Haskell n00b</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>this talk</h2>
+    <ul>
+        <li class="slide">beginner–intermediate level</li>
+        <li class="slide">teach <em>aeson</em> for JSON (de)serialisation in Haskell</li>
+        <li class="slide">experience report: using <em>aeson</em> in web crypto lib</li>
+        <li class="slide">hopefully interesting for non-Haskellers</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>JSON</h2>
+    <ul>
+        <li class="slide"><strong>J</strong>ava<strong>S</strong>cript <strong>O</strong>bject <strong>N</strong>otation</li>
+        <li class="slide">derived from JavaScript; now ubiquitous</li>
+        <li class="slide">comparable in intent and use to YAML, XML</li>
+        <li class="slide"><a href="http://tools.ietf.org/html/rfc4627">RFC 4627</a></li>
+        <li class="slide"><a href="http://json.org/">http://json.org/</a></li>
+        <li class="slide"><code>application/json</code> media type (not always)</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>JSON example</h2>
+<pre><code>{
+    "id": 1,
+    "name": "Foo",
+    "price": 19.99,
+    "made_in_AU": false,
+    "tags": [ "Bar", "Eek" ],
+    "stock": {
+        "warehouse": 300,
+        "retail": 20
+    },
+    "promotion": null
+}</code></pre>
+</section>
+
+<section class="slide">
+    <h2>JSON data in Haskell</h2>
+<pre><code>type Object = HashMap Text Value
+
+type Array = Vector Value
+
+data Value = Object !Object
+           | Array !Array
+           | String !Text
+           | Number !Number
+           | Bool !Bool
+           | Null</code></pre></section>
+
+<section class="slide">
+    <h2><em>aeson</em> (<code>Data.Aeson</code>)</h2>
+    <ul>
+        <li class="slide">Types and functions for working efficiently with JSON data.</li>
+        <li class="slide">Name: in Greek mythology, Aeson was the father of Jason.</li>
+        <li class="slide">Authored by Bryan O'Sullivan (bos).</li>
+        <li class="slide">Lazy by default (strict functions available)</li>
+        <li class="slide">Defines <code>ToJSON</code> and <code>FromJSON</code> type classes
+            and functions for encoding and decoding.</li>
+        <li class="slide">Provides instances for types from <em>base</em>,
+            <em>bytestring</em>, <em>text</em>, <em>containers</em>,
+            <em>vector</em> et al.</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Encoding and decoding</h2>
+    <li class="slide"><code>encode :: ToJSON a =&gt; a -&gt; ByteString</code></li>
+    <li class="slide"><code>decode :: FromJSON a =&gt; ByteString -&gt; Maybe a</code></li>
+    <li class="slide"><code>eitherDecode :: FromJSON a =&gt; ByteString -&gt; Either String a</code></li>
+    <li class="slide">For strict decoding: <code>decode'</code> and <code>eitherDecode'</code></li>
+</section>
+
+<section class="slide">
+    <h2><code>ToJSON</code></h2>
+<pre><code>class ToJSON a where
+    toJSON :: a -&gt; Value
+
+instance (ToJSON a) =&gt; ToJSON (Maybe a) where
+    toJSON (Just a) = toJSON a
+    toJSON Nothing  = Null</code></pre>
+</section>
+
+<section class="slide">
+    <h2><code>FromJSON</code></h2>
+<pre><code>class FromJSON a where
+    parseJSON :: Value -&gt; Parser a
+
+instance (FromJSON a) =&gt; FromJSON (Maybe a) where
+    parseJSON Null   = pure Nothing
+    parseJSON a      = Just <$> parseJSON a</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Parsing JSON objects</h2>
+    <ul>
+        <li class="slide"><code>(.:)  :: (FromJSON a) =&gt; Object -&gt; Text -&gt; Parser a</code></li>
+        <li class="slide"><code>(.:?) :: (FromJSON a) =&gt; Object -&gt; Text -&gt; Parser (Maybe a)</code></li>
+        <li class="slide"><code>(.!=) :: Parser (Maybe a) -&gt; a -&gt; Parser a</code></li>
+    </ul>
+<pre class="slide"><code>Prelude Data.Aeson&gt; :t (.:)
+  :: FromJSON a =&gt;
+    Object
+    -&gt; Data.Text.Internal.Text
+    -&gt; aeson-0.6.1.0:Data.Aeson.Types.Internal.Parser a
+Prelude Data.Aeson&gt; :t \obj -&gt; (.!= "default") . (obj .:?)
+  :: (Data.String.IsString a, FromJSON a) =&gt;
+    Object
+    -&gt; Data.Text.Internal.Text
+    -&gt; aeson-0.6.1.0:Data.Aeson.Types.Internal.Parser a</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Parsing: Haskell type</h2>
+<pre><code>data Person = Person
+    { name   :: Text
+    , age    :: Int
+    , spouse :: Maybe Person
+    , lang   :: String        -- default to "en-US"
+    }</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Parsing: <code>FromJSON</code> instance</h2>
+<pre><code>instance FromJSON Coord where
+    parseJSON (Object v) = Person <$>
+                         v .:  "name" <*>
+                         v .:  "age" <*>
+                         v .:? "spouse" <*>
+                         v .:? "lang" .!= "en-US"
+    -- A non-Object value is of the wrong type, so fail.
+    parseJSON _          = empty
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Gotchas</h2>
+    <ul>
+        <li class="slide">
+            Only objects and arrays allowed as top-level objects
+            <ul><li class="slide">Use the <code>value</code> function instead</li></ul>
+        </li>
+        <li class="slide">
+            Object keys are <code>Text</code>
+            <ul><li class="slide">Use <code>{-# LANGUAGE OverloadedStrings #-}</code></li></ul>
+        <li class="slide">Unhelpful error messages</li>
+    </ul>
+</section>
+
+<section class="slide" id="jose">
+    <h2>Experience report: JOSE</h2>
+    <ul>
+        <li class="slide"><strong>J</strong>avascript <strong>O</strong>bject <strong>S</strong>igning and <strong>E</strong>ncryption</li>
+        <li class="slide">web crypto formats used in Mozilla Persona (BrowserID)</li>
+        <li class="slide">serialisations for keys, signatures, encrypted payloads</li>
+        <li class="slide"><a href="https://datatracker.ietf.org/wg/jose/">https://datatracker.ietf.org/wg/jose/</a></li>
+        <li class="slide">still rapidly evolving (currently at 11th revision)</li>
+        <li class="slide">
+            only existing implementation (that I know of):
+            <ul><li><a href="https://github.com/mozilla/jwcrypto">https://github.com/mozilla/jwcrypto</a> (JavaScript)</li></ul>
+        </li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2><em>jose</em></h2>
+    <ul>
+        <li class="slide">I'm currently working on a Haskell implementation</li>
+        <li class="slide">very early days</li>
+        <li class="slide">could be doing things the wrong way</li>
+        <li class="slide">review/advice/patches welcome</li>
+        <li class="slide">some implementation details...</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>sized integers</h2>
+    <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-11#section-5.3.1.1">
+        <cite>§ 5.3.1.1. draft-ietf-jose-json-web-algorithms-11</cite>
+    </a>
+<small><small><pre>The "n" (modulus) member contains the modulus value for the RSA
+public key.  It is represented as the base64url encoding of the
+value's unsigned big endian representation as an octet sequence.  The
+array representation MUST NOT be shortened to omit any leading zero
+octets.  For instance, when representing 2048 bit integers, the octet
+sequence to be base64url encoded MUST contain 256 octets, including
+any leading zero octets.</pre></small></small>
+</section>
+
+<section class="slide">
+    <h2>sized integers: <code>FromJSON</code></h2>
+<pre><code>data SizedBase64Integer = SizedBase64Integer Int Integer
+
+instance FromJSON SizedBase64Integer where
+  parseJSON (String s) = case B64.decode $ T.unpack s of
+    Nothing    -&gt; fail "invalid base64 integer"
+    Just bytes -&gt; pure $ SizedBase64Integer size val where
+      size    = length bytes * 8
+      val     = foldl accByte 0 bytes
+      accByte = \acc x -&gt; acc * 256 + toInteger x
+  parseJSON _          = empty
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>JSON Web Key (JWK) Format</h2>
+    <ul>
+        <li class="slide">JSON object</li>
+        <li class="slide">common parameters:<code> "kty"</code>,<code> "use"</code>,<code> "alg"</code>,<code> "kid"</code>, &hellip;</li>
+        <li class="slide"><code>"kty"</code> values:<code> "EC"</code>,<code> "RSA"</code>,<code> "oct"</code></li>
+        <li class="slide">EC public key parameters:<code> "crv"</code>,<code> "x"</code>,<code> "y"</code></li>
+        <li class="slide">EC private key parameters:<code> "d"</code></li>
+        <li class="slide">RSA public key parameters:<code> "n"</code>,<code> "e"</code></li>
+        <li class="slide">RSA private key parameters:<code> "d"</code>,<code> "p"</code>,<code> "q"</code>,<code> "dp"</code>,<code> "dq"</code>,<code> "qi"</code>, maybe<code> "oth"</code></li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Problem?</h2>
+    <ul>
+        <li class="slide"><code>"kty"</code> does not distinguish between public and private keys</li>
+        <li class="slide">have to "peek" into object to see what keys are there</li>
+        <li class="slide">prefer private keys over public keys</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>JWK types</h2>
+<pre><code>data Key = Key {
+  kty :: Kty,          -- Data Kty = EC | RSA | Oct
+  alg :: Maybe Alg,
+  &hellip;
+  params :: KeyParameters
+  }
+
+data KeyParameters =
+  ECPublicKeyParameters {
+    crv :: Crv,
+    x   :: SizedBase64Integer,
+    y   :: SizedBase64Integer
+    }
+  | ECPrivateKeyParameters {
+    d   :: SizedBase64Integer
+    }
+  &hellip;
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>JWK <code>FromJSON</code> instances</h2>
+<pre><code>instance FromJSON Key where
+  parseJSON (Object o) = Key &lt;$&gt;
+    o .:  "kty" &lt;*&gt;
+    o .:? "alg" &lt;*&gt;
+    &hellip;
+    parseJSON (Object o)
+  parseJSON _ = empty
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>JWK <code>FromJSON</code> instances</h2>
+<pre><code>instance FromJSON KeyParameters where
+  parseJSON (Object o)
+    | Just (String "EC") &lt;- lookup "kty" o
+    , Just _             &lt;- lookup "crv" o
+    , Just _             &lt;- lookup   "x" o
+    , Just _             &lt;- lookup   "y" o
+    = ECPublicKeyParameters &lt;$&gt;
+      o .: "crv" &lt;*&gt;
+      o .:   "x" &lt;*&gt;
+      o .:   "y"
+    | Just (String "EC") &lt;- lookup "kty" o
+    , Just _             &lt;- lookup   "d" o
+    = ECPrivateKeyParameters &lt;$&gt;
+      o .: "d"
+    &hellip;
+    | otherwise = empty
+  parseJSON _ = empty
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>JWS JSON Serialization</h2>
+<pre><code>{
+ "protected":  "<strong>eyJhbGciOiJSUzI1NiJ9</strong>",
+ "payload":    "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzM&hellip;",
+ "signatures": [
+  {
+   "header":     {"kid": "2010-12-29"},
+   "signature":  "cC4hiUPoj9Eetdgtv3hF80EGrhuB_&hellip;"
+  }
+ ]
+}
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Encoded JWS Header</h2>
+    <ul>
+        <li class="slide"><em>Base64url encoding of the JWS Protected Header.</em></li>
+        <li class="slide">JWS Protected Header: <em>A JSON Text Object that contains the portion of
+            the JWS Header that is integrity protected.</em></li>
+        <li class="slide">previous slide: <code>{"alg":"RS256"}</code></li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2><code>Header</code></h2>
+<pre><code>data Header = Header {
+  alg :: JWA.JWSAlg
+  -- TODO other fields
+  }
+
+instance FromJSON Header where
+  parseJSON (Object o) = Header <$> o .: "alg"
+  parseJSON _ = empty
+
+instance ToJSON Header where
+  toJSON (Header alg) = object [
+    "alg" .= JWA.jwsAlgToKey alg
+    ]
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2><code>EncodedHeader</code></h2>
+<pre><code>data EncodedHeader = EncodedHeader Header
+
+instance FromJSON EncodedHeader where
+  parseJSON (String s) = case B64.decode $ T.unpack s of
+    Just bytes -&gt;  case decode $ BS.pack bytes of
+      Just h  -&gt; pure $ EncodedHeader h
+      Nothing -&gt; fail "invalid JSON"
+    Nothing -&gt; fail "invalid base64url"
+  parseJSON _ = empty
+
+instance ToJSON EncodedHeader where
+  toJSON (EncodedHeader h) = String $ T.pack $ B64.encode
+                             $ BS.unpack $ encode h
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2><em>aeson</em>: advanced usage</h2>
+    <h3 class="slide"><code>Data.Aeson.Generic</code></h3>
+    <ul>
+        <li class="slide"><code>decode :: Data a =&gt; ByteString -&gt; Maybe a</code></li>
+        <li class="slide"><code>encode :: Data a =&gt; a -&gt; ByteString</code></li>
+    </ul>
+
+    <h3 class="slide"><code>Data.Aeson.TH</code></h3>
+    <ul>
+        <li class="slide"><code>deriveToJSON   :: (String -&gt; String) -&gt; Name -&gt; Q [Dec]</code></li>
+        <li class="slide"><code>deriveFromJSON :: (String -&gt; String) -&gt; Name -&gt; Q [Dec]</code></li>
+        <li class="slide"><code>deriveJSON     :: (String -&gt; String) -&gt; Name -&gt; Q [Dec]</code></li>
+        <li class="slide">example...</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Template Haskell example</h2>
+<pre><code>data D a = Nullary
+     | Unary Int
+     | Product String Char a
+     | Record { testOne   :: Double
+              , testTwo   :: Bool
+              , testThree :: D a
+              } deriving Eq
+
+$(deriveJSON (drop 4) ''D)</code></pre>
+</section>
+
+<section class="slide">
+<pre><code>instance ToJSON a =&gt; ToJSON (D a) where
+  toJSON =
+    \value -&gt;
+      case value of
+        Nullary -&gt;
+          object [T.pack "Nullary" .= toJSON ([] :: [()])]
+        Unary arg1 -&gt;
+          object [T.pack "Unary" .= toJSON arg1]
+        Product arg1 arg2 arg3 -&gt;
+          object [ T.pack "Product"
+            .= (Array $ create $
+            &hellip;
+
+instance FromJSON a =&gt; FromJSON (D a) where
+  parseJSON =
+    \value -&gt;
+      case value of
+        Object obj -&gt;
+          case H.toList obj of
+            [(conKey, conVal)] -&gt;
+              case conKey of
+                _ | conKey == T.pack "Nullary" -&gt;
+                  case conVal of
+                    Array arr -&gt;
+                      if V.null arr
+                      &hellip;</code></pre>
+</section>
+
+<section class="slide">
+    <h2>cf. <em>json</em> (<code>Text.Json</code>)</h2>
+    <ul>
+        <li class="slide">
+            <em>json</em> has a single, unified typeclass
+<pre><code>class JSON a where
+    readJSON  :: JSValue -&gt; Result a
+    showJSON  :: a -&gt; JSValue
+</code></pre>
+        </li>
+        <li class="slide">
+            <em>aeson</em> is 3× faster (bos, 2011)<br/>
+            <a href="http://www.serpentine.com/blog/2011/02/25/faster-better-cleaner-new-aeson-and-attoparsec-releases/">http://www.serpentine.com/blog/2011/02/25/faster-better-cleaner-new-aeson-and-attoparsec-releases/</a>
+        </li>
+        <li class="slide">otherwise, similar</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>cf. <em>argonaut</em> (Scala library)</h2>
+    <ul>
+        <li class="slide"><code>EncodeJson</code> and <code>DecodeJson</code> typeclasses</li>
+        <li class="slide">
+            alternatively: <code>CodecJson</code> typeclass
+            <ul><li class="slide">convenience methods for building <code>CodecJson</code> instances</li></ul>
+        </li>
+        <li class="slide">decoders defined in terms of zippers (cf. parsers)</li>
+        <li class="slide">strict only</li>
+        <li class="slide">zippers, lenses, pretty printing and more!</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Fin</h2>
+    <ul>
+        <li class="slide"><a href="https://github.com/frasertweedale/talks">https://github.com/frasertweedale/talks</a></li>
+        <li class="slide"><a href="https://github.com/frasertweedale/jose">https://github.com/frasertweedale/jose</a></li>
+        <li class="slide">frase&#64;frase.id.au</li>
+        <li class="slide">&#64;hackuador</li>
+    </ul>
+<small><pre class="slide">Copyright © 2013 Fraser Tweedale
+
+This work is licensed under the Creative Commons
+Attribution-ShareAlike 3.0 Unported License. To view a copy of this
+license, visit http://creativecommons.org/licenses/by-sa/3.0/ or
+send a letter to Creative Commons, 444 Castro Street, Suite 900,
+Mountain View, California, 94041, USA.</pre></small>
+</section>
+
+<!-- End slides. -->
+
+
+<!-- Begin extension snippets. Add or remove as needed. -->
+
+<!-- deck.navigation snippet -->
+<a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+<a href="#" class="deck-next-link" title="Next">&#8594;</a>
+
+<!-- deck.status snippet -->
+<p class="deck-status">
+	<span class="deck-status-current"></span>
+	/
+	<span class="deck-status-total"></span>
+</p>
+
+<!-- deck.goto snippet -->
+<form action="." method="get" class="goto-form">
+	<label for="goto-slide">Go to slide:</label>
+	<input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+	<datalist id="goto-datalist"></datalist>
+	<input type="submit" value="Go">
+</form>
+
+<!-- deck.hash snippet -->
+<a href="." title="Permalink to this slide" class="deck-permalink">#</a>
+
+<!-- End extension snippets. -->
+
+
+<!-- Required JS files. -->
+<script src="../deck.js/jquery-1.7.2.min.js"></script>
+<script src="../deck.js/core/deck.core.js"></script>
+
+<!-- Extension JS files. Add or remove as needed. -->
+<script src="../deck.js/core/deck.core.js"></script>
+<script src="../deck.js/extensions/hash/deck.hash.js"></script>
+<script src="../deck.js/extensions/menu/deck.menu.js"></script>
+<script src="../deck.js/extensions/goto/deck.goto.js"></script>
+<script src="../deck.js/extensions/status/deck.status.js"></script>
+<script src="../deck.js/extensions/navigation/deck.navigation.js"></script>
+<script src="../deck.js/extensions/scale/deck.scale.js"></script>
+
+<!-- Initialize the deck. You can put this in an external file if desired. -->
+<script>
+	$(function() {
+		$.deck('.slide');
+	});
+</script>
+</body>
+</html>
