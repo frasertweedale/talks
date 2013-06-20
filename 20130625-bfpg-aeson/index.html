@@ -145,21 +145,9 @@ instance (FromJSON a) =&gt; FromJSON (Maybe a) where
 
 <section class="slide">
     <h2>Parsing JSON objects</h2>
-    <ul>
-        <li class="slide"><code>(.:)  :: (FromJSON a) =&gt; Object -&gt; Text -&gt; Parser a</code></li>
-        <li class="slide"><code>(.:?) :: (FromJSON a) =&gt; Object -&gt; Text -&gt; Parser (Maybe a)</code></li>
-        <li class="slide"><code>(.!=) :: Parser (Maybe a) -&gt; a -&gt; Parser a</code></li>
-    </ul>
-<pre class="slide"><code>Prelude Data.Aeson&gt; :t (.:)
-  :: FromJSON a =&gt;
-    Object
-    -&gt; Data.Text.Internal.Text
-    -&gt; aeson-0.6.1.0:Data.Aeson.Types.Internal.Parser a
-Prelude Data.Aeson&gt; :t \obj -&gt; (.!= "default") . (obj .:?)
-  :: (Data.String.IsString a, FromJSON a) =&gt;
-    Object
-    -&gt; Data.Text.Internal.Text
-    -&gt; aeson-0.6.1.0:Data.Aeson.Types.Internal.Parser a</code></pre>
+    <pre><code>(.:)  :: (FromJSON a) =&gt; Object -&gt; Text -&gt; Parser a</code></pre>
+    <pre><code>(.:?) :: (FromJSON a) =&gt; Object -&gt; Text -&gt; Parser (Maybe a)</code></pre>
+    <pre><code>(.!=) :: Parser (Maybe a) -&gt; a -&gt; Parser a</code></pre>
 </section>
 
 <section class="slide">
