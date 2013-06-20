@@ -1,3 +1,6 @@
 [submodule "deck.js"]
 	path = deck.js
 	url = https://github.com/frasertweedale/deck.js.git
+[submodule "deck.js-codemirror"]
+	path = deck.js-codemirror
+	url = https://github.com/iros/deck.js-codemirror.git
