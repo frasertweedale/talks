@@ -88,16 +88,17 @@
 
 <section class="slide">
     <h2>JSON data in Haskell</h2>
-<pre><code>type Object = HashMap Text Value
+<pre><code>data Value = Object Object
+           | Array  Array
+           | String Text
+           | Number Number
+           | Bool   Bool
+           | Null
 
-type Array = Vector Value
+type Object = HashMap Text Value
 
-data Value = Object !Object
-           | Array !Array
-           | String !Text
-           | Number !Number
-           | Bool !Bool
-           | Null</code></pre></section>
+type Array = Vector Value</code></pre>
+</section>
 
 <section class="slide">
     <h2><em>aeson</em> (<code>Data.Aeson</code>)</h2>
