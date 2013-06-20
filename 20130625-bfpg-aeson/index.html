@@ -174,7 +174,7 @@ Prelude Data.Aeson&gt; :t \obj -&gt; (.!= "default") . (obj .:?)
 
 <section class="slide">
     <h2>Parsing: <code>FromJSON</code> instance</h2>
-<pre><code>instance FromJSON Coord where
+<pre><code>instance FromJSON Person where
     parseJSON (Object v) = Person <$>
                          v .:  "name" <*>
                          v .:  "age" <*>
@@ -215,7 +215,7 @@ Prelude Data.Aeson&gt; :t \obj -&gt; (.!= "default") . (obj .:?)
 </section>
 
 <section class="slide">
-    <h2><em>jose</em></h2>
+    <h2><em>jose</em> (the library)</h2>
     <ul>
         <li class="slide">I'm currently working on a Haskell implementation</li>
         <li class="slide">very early days</li>
@@ -271,7 +271,7 @@ instance FromJSON SizedBase64Integer where
     <h2>Problem?</h2>
     <ul>
         <li class="slide"><code>"kty"</code> does not distinguish between public and private keys</li>
-        <li class="slide">have to "peek" into object to see what keys are there</li>
+        <li class="slide">have to "peek" into object to see what fields are present</li>
         <li class="slide">prefer private keys over public keys</li>
     </ul>
 </section>
