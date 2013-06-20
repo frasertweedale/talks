@@ -226,35 +226,6 @@ Prelude Data.Aeson&gt; :t \obj -&gt; (.!= "default") . (obj .:?)
 </section>
 
 <section class="slide">
-    <h2>sized integers</h2>
-    <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-11#section-5.3.1.1">
-        <cite>§ 5.3.1.1. draft-ietf-jose-json-web-algorithms-11</cite>
-    </a>
-<small><small><pre>The "n" (modulus) member contains the modulus value for the RSA
-public key.  It is represented as the base64url encoding of the
-value's unsigned big endian representation as an octet sequence.  The
-array representation MUST NOT be shortened to omit any leading zero
-octets.  For instance, when representing 2048 bit integers, the octet
-sequence to be base64url encoded MUST contain 256 octets, including
-any leading zero octets.</pre></small></small>
-</section>
-
-<section class="slide">
-    <h2>sized integers: <code>FromJSON</code></h2>
-<pre><code>data SizedBase64Integer = SizedBase64Integer Int Integer
-
-instance FromJSON SizedBase64Integer where
-  parseJSON (String s) = case B64.decode $ T.unpack s of
-    Nothing    -&gt; fail "invalid base64 integer"
-    Just bytes -&gt; pure $ SizedBase64Integer size val where
-      size    = length bytes * 8
-      val     = foldl accByte 0 bytes
-      accByte = \acc x -&gt; acc * 256 + toInteger x
-  parseJSON _          = empty
-</code></pre>
-</section>
-
-<section class="slide">
     <h2>JSON Web Key (JWK) Format</h2>
     <ul>
         <li class="slide">JSON object</li>
