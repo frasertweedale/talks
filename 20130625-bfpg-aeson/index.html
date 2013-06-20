@@ -44,17 +44,23 @@
     <ul>
         <li class="slide">day job = Ruby and JavaScript (mostly)</li>
         <li class="slide">have used many languages</li>
-        <li class="slide">Haskell n00b</li>
+        <li class="slide">
+            not even remotely a Haskell or FP expert
+            <ul><li class="slide">but I enjoy learning FP and experiencing the benefits</li></ul>
+        </li>
     </ul>
 </section>
 
 <section class="slide">
     <h2>this talk</h2>
     <ul>
-        <li class="slide">beginner–intermediate level</li>
+        <li class="slide">
+            beginner–intermediate level
+            <ul><li class="slide">if you understand types and typeclasses, you'll be fine</li></ul>
+        </li>
         <li class="slide">teach <em>aeson</em> for JSON (de)serialisation in Haskell</li>
         <li class="slide">experience report: using <em>aeson</em> in web crypto lib</li>
-        <li class="slide">hopefully interesting for non-Haskellers</li>
+        <li class="slide">compare and contrast</li>
     </ul>
 </section>
 
@@ -64,9 +70,7 @@
         <li class="slide"><strong>J</strong>ava<strong>S</strong>cript <strong>O</strong>bject <strong>N</strong>otation</li>
         <li class="slide">derived from JavaScript; now ubiquitous</li>
         <li class="slide">comparable in intent and use to YAML, XML</li>
-        <li class="slide"><a href="http://tools.ietf.org/html/rfc4627">RFC 4627</a></li>
-        <li class="slide"><a href="http://json.org/">http://json.org/</a></li>
-        <li class="slide"><code>application/json</code> media type (not always)</li>
+        <li class="slide"><a href="http://tools.ietf.org/html/rfc4627">RFC 4627</a> ; <a href="http://json.org/">http://json.org/</a></li>
     </ul>
 </section>
 
@@ -117,18 +121,19 @@ type Array = Vector Value</code></pre>
 
 <section class="slide">
     <h2>Encoding and decoding</h2>
-    <li class="slide"><code>encode :: ToJSON a =&gt; a -&gt; ByteString</code></li>
-    <li class="slide"><code>decode :: FromJSON a =&gt; ByteString -&gt; Maybe a</code></li>
+    <li class="slide"><code>encode       :: ToJSON   a =&gt; a          -&gt; ByteString</code></li>
+    <li class="slide"><code>decode       :: FromJSON a =&gt; ByteString -&gt; Maybe a</code></li>
     <li class="slide"><code>eitherDecode :: FromJSON a =&gt; ByteString -&gt; Either String a</code></li>
     <li class="slide">For strict decoding: <code>decode'</code> and <code>eitherDecode'</code></li>
 </section>
 
 <section class="slide">
     <h2><code>ToJSON</code></h2>
-<pre><code>class ToJSON a where
-    toJSON :: a -&gt; Value
 
-instance (ToJSON a) =&gt; ToJSON (Maybe a) where
+<pre><code>class ToJSON a where
+    toJSON :: a -&gt; Value</code></pre>
+
+<pre class="slide"><code>instance (ToJSON a) =&gt; ToJSON (Maybe a) where
     toJSON (Just a) = toJSON a
     toJSON Nothing  = Null</code></pre>
 </section>
@@ -136,9 +141,9 @@ instance (ToJSON a) =&gt; ToJSON (Maybe a) where
 <section class="slide">
     <h2><code>FromJSON</code></h2>
 <pre><code>class FromJSON a where
-    parseJSON :: Value -&gt; Parser a
+    parseJSON :: Value -&gt; Parser a</code></pre>
 
-instance (FromJSON a) =&gt; FromJSON (Maybe a) where
+<pre class="slide"><code>instance (FromJSON a) =&gt; FromJSON (Maybe a) where
     parseJSON Null   = pure Nothing
     parseJSON a      = Just <$> parseJSON a</code></pre>
 </section>
@@ -163,9 +168,9 @@ instance (FromJSON a) =&gt; FromJSON (Maybe a) where
 <section class="slide">
     <h2>Parsing: <code>FromJSON</code> instance</h2>
 <pre><code>instance FromJSON Person where
-    parseJSON (Object v) = Person <$>
-                         v .:  "name" <*>
-                         v .:  "age" <*>
+    parseJSON (Object v) = Person       <$>
+                         v .:  "name"   <*>
+                         v .:  "age"    <*>
                          v .:? "spouse" <*>
                          v .:? "lang" .!= "en-US"
     -- A non-Object value is of the wrong type, so fail.
@@ -237,14 +242,14 @@ instance (FromJSON a) =&gt; FromJSON (Maybe a) where
 
 <section class="slide">
     <h2>JWK types</h2>
-<pre><code>data Key = Key {
-  kty :: Kty,          -- Data Kty = EC | RSA | Oct
-  alg :: Maybe Alg,
+<pre class="slide"><code>data Key = Key {
+  kty    :: Kty,          -- Data Kty = EC | RSA | Oct
+  alg    :: Maybe Alg,
   &hellip;
   params :: KeyParameters
-  }
+  }</code></pre>
 
-data KeyParameters =
+<pre class="slide"><code>data KeyParameters =
   ECPublicKeyParameters {
     crv :: Crv,
     x   :: SizedBase64Integer,
@@ -309,46 +314,48 @@ data KeyParameters =
 <section class="slide">
     <h2>Encoded JWS Header</h2>
     <ul>
-        <li class="slide"><em>Base64url encoding of the JWS Protected Header.</em></li>
+        <li class="slide"><em>base64 encoding of the JWS Protected Header.</em></li>
         <li class="slide">JWS Protected Header: <em>A JSON Text Object that contains the portion of
             the JWS Header that is integrity protected.</em></li>
-        <li class="slide">previous slide: <code>{"alg":"RS256"}</code></li>
+        <li class="slide">example on previous slide: <code>{"alg":"RS256"}</code></li>
     </ul>
 </section>
 
 <section class="slide">
     <h2><code>Header</code></h2>
 <pre><code>data Header = Header {
-  alg :: JWA.JWSAlg
-  -- TODO other fields
+  alg :: JWSAlg                     -- TODO other fields
   }
+</code></pre>
 
-instance FromJSON Header where
+<pre class="slide"><code>instance ToJSON Header where
+  toJSON (Header alg) = object [
+    "alg" .= jwsAlgToKey alg
+    ]
+</code></pre>
+
+<pre class="slide"><code>instance FromJSON Header where
   parseJSON (Object o) = Header <$> o .: "alg"
   parseJSON _ = empty
-
-instance ToJSON Header where
-  toJSON (Header alg) = object [
-    "alg" .= JWA.jwsAlgToKey alg
-    ]
 </code></pre>
 </section>
 
 <section class="slide">
     <h2><code>EncodedHeader</code></h2>
-<pre><code>data EncodedHeader = EncodedHeader Header
+<pre><code>data EncodedHeader = EncodedHeader Header</code></pre>
 
-instance FromJSON EncodedHeader where
+<pre class="slide"><code>instance ToJSON EncodedHeader where
+  toJSON (EncodedHeader h) = String $ T.pack $ B64.encode
+                             $ BS.unpack $ encode h
+</code></pre>
+
+<pre class="slide"><code>instance FromJSON EncodedHeader where
   parseJSON (String s) = case B64.decode $ T.unpack s of
     Just bytes -&gt;  case decode $ BS.pack bytes of
       Just h  -&gt; pure $ EncodedHeader h
       Nothing -&gt; fail "invalid JSON"
-    Nothing -&gt; fail "invalid base64url"
+    Nothing -&gt; fail "invalid base64"
   parseJSON _ = empty
-
-instance ToJSON EncodedHeader where
-  toJSON (EncodedHeader h) = String $ T.pack $ B64.encode
-                             $ BS.unpack $ encode h
 </code></pre>
 </section>
 
@@ -439,6 +446,7 @@ instance FromJSON a =&gt; FromJSON (D a) where
         </li>
         <li class="slide">decoders defined in terms of zippers (cf. parsers)</li>
         <li class="slide">strict only</li>
+        <li class="slide">useful error messages</li>
         <li class="slide">zippers, lenses, pretty printing and more!</li>
     </ul>
 </section>
