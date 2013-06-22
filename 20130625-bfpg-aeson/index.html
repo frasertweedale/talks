@@ -275,7 +275,7 @@ data KeyParameters =
 </section>
 
 <section class="slide">
-    <h2>JWK <code>FromJSON</code> instances</h2>
+    <h2><code>Key</code> <code>FromJSON</code> instance</h2>
 <textarea class="code" mode="haskell">instance FromJSON Key where
   parseJSON (Object o) = Key <$>
     o .:  "kty" <*>
@@ -286,25 +286,41 @@ data KeyParameters =
 </section>
 
 <section class="slide">
-    <h2>JWK <code>FromJSON</code> instances</h2>
+    <h2><code>KeyParameters</code> <code>FromJSON</code> instance</h2>
 <textarea class="code" mode="haskell">instance FromJSON KeyParameters where
   parseJSON (Object o)
-    | Just (String "EC") <- lookup "kty" o
-    , Just _             <- lookup "crv" o
-    , Just _             <- lookup   "x" o
-    , Just _             <- lookup   "y" o
-    = ECPublicKeyParameters <$>
-      o .: "crv" <*>
-      o .:   "x" <*>
-      o .:   "y"
     | Just (String "EC") <- lookup "kty" o
     , Just _             <- lookup   "d" o
     = ECPrivateKeyParameters <$>
       o .: "d"
+    | Just (String "EC") <- lookup "kty" o
+    = ECPublicKeyParameters <$>
+      o .: "crv" <*>
+      o .:   "x" <*>
+      o .:   "y"
     &hellip;
     | otherwise = empty
-  parseJSON _ = empty
-</textarea>
+  parseJSON _ = empty</textarea>
+</section>
+
+<section class="slide">
+    <h2><code>KeyParameters</code> <code>FromJSON</code> instance'</h2>
+<textarea class="code" mode="haskell">import Data.Attoparsec.Combinator (choice)
+
+instance FromJSON KeyParameters where
+  parseJSON (Object o)
+    | Just (String "EC") <- M.lookup "kty" o
+    = choice [
+      ECPrivateKeyParameters <$>
+        o .: "d",
+      ECPublicKeyParameters <$>
+        o .: "crv"          <*>
+        o .: "x"            <*>
+        o .: "y"
+      ]
+    &hellip;
+    | otherwise = empty
+  parseJSON _ = empty</textarea>
 </section>
 
 <section class="slide">
