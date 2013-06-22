@@ -53,7 +53,7 @@
         <li class="slide">day job = Ruby and JavaScript (mostly)</li>
         <li class="slide">have used many languages</li>
         <li class="slide">
-            not even remotely a Haskell or FP expert
+            not even remotely a Haskell or functional programming expert
             <ul><li class="slide">but I enjoy learning FP and experiencing the benefits</li></ul>
         </li>
     </ul>
@@ -228,7 +228,7 @@ instance (FromJSON a) => FromJSON (Maybe a) where
 </section>
 
 <section class="slide">
-    <h2>JSON Web Key (JWK) Format</h2>
+    <h2>JSON Web Key (JWK) format</h2>
     <ul>
         <li class="slide">JSON object</li>
         <li class="slide">common parameters: <code>"kty"</code>,
@@ -241,6 +241,7 @@ instance (FromJSON a) => FromJSON (Maybe a) where
         <li class="slide">RSA private key parameters: <code>"d"</code>,
             <code>"p"</code>, <code>"q"</code>, <code>"dp"</code>,
             <code>"dq"</code>, <code>"qi"</code>, maybe <code>"oth"</code></li>
+        <li class="slide">symmetric key parameters: <code>"k"</code>
     </ul>
 </section>
 
@@ -248,7 +249,8 @@ instance (FromJSON a) => FromJSON (Maybe a) where
     <h2>Problem?</h2>
     <ul>
         <li class="slide"><code>"kty"</code> does not distinguish between public and private keys</li>
-        <li class="slide">have to look at what fields are present to decide how to parse</li>
+        <li class="slide">have to look at what fields are present to decide how to parse&hellip;</li>
+        <li class="slide">&hellip;or try parsing it in different ways and see what sticks</li>
         <li class="slide">prefer private keys over public keys</li>
     </ul>
 </section>
@@ -321,6 +323,9 @@ instance FromJSON KeyParameters where
     &hellip;
     | otherwise = empty
   parseJSON _ = empty</textarea>
+  <ul>
+    <li class="slide">downside: error messages suppressed</li>
+  </ul>
 </section>
 
 <section class="slide">
@@ -384,6 +389,7 @@ instance FromJSON EncodedHeader where
     <h2><em>aeson</em>: advanced usage</h2>
     <h3 class="slide"><code>Data.Aeson.Generic</code></h3>
     <ul>
+        <li class="slide">if using <code>{-# LANGUAGE DeriveDataTypeable #-}</code> and <code>derive (Typeable, Data)</code>&hellip;</li>
         <li class="slide"><code>decode :: Data a =&gt; ByteString -&gt; Maybe a</code></li>
         <li class="slide"><code>encode :: Data a =&gt; a -&gt; ByteString</code></li>
     </ul>
