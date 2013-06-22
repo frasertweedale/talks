@@ -30,7 +30,15 @@
 <body class="deck-container">
 
     <style>
-        code { white-space: pre; }
+        code {
+            white-space: pre;
+            color: DeepPink;
+        }
+        .slide li code {
+            padding: 2px;
+            border: 1px solid LightGray;
+            border-radius: 4px;
+        }
     </style>
 
 <!-- Begin slides. Just make elements with a class of slide. -->
@@ -223,12 +231,16 @@ instance (FromJSON a) => FromJSON (Maybe a) where
     <h2>JSON Web Key (JWK) Format</h2>
     <ul>
         <li class="slide">JSON object</li>
-        <li class="slide">common parameters:<code> "kty"</code>,<code> "use"</code>,<code> "alg"</code>,<code> "kid"</code>, &hellip;</li>
-        <li class="slide"><code>"kty"</code> values:<code> "EC"</code>,<code> "RSA"</code>,<code> "oct"</code></li>
-        <li class="slide">EC public key parameters:<code> "crv"</code>,<code> "x"</code>,<code> "y"</code></li>
-        <li class="slide">EC private key parameters:<code> "d"</code></li>
-        <li class="slide">RSA public key parameters:<code> "n"</code>,<code> "e"</code></li>
-        <li class="slide">RSA private key parameters:<code> "d"</code>,<code> "p"</code>,<code> "q"</code>,<code> "dp"</code>,<code> "dq"</code>,<code> "qi"</code>, maybe<code> "oth"</code></li>
+        <li class="slide">common parameters: <code>"kty"</code>,
+            <code>"use"</code>, <code>"alg"</code>, <code>"kid"</code>,
+            &hellip;</li>
+        <li class="slide"><code>"kty"</code> values: <code>"EC"</code>, <code>"RSA"</code>, <code>"oct"</code></li>
+        <li class="slide">EC public key parameters: <code>"crv"</code>, <code>"x"</code>, <code>"y"</code></li>
+        <li class="slide">EC private key parameters: <code>"d"</code></li>
+        <li class="slide">RSA public key parameters: <code>"n"</code>, <code>"e"</code></li>
+        <li class="slide">RSA private key parameters: <code>"d"</code>,
+            <code>"p"</code>, <code>"q"</code>, <code>"dp"</code>,
+            <code>"dq"</code>, <code>"qi"</code>, maybe <code>"oth"</code></li>
     </ul>
 </section>
 
