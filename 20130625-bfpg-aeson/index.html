@@ -17,13 +17,13 @@
 	<link rel="stylesheet" href="../deck.js/extensions/status/deck.status.css">
 	<link rel="stylesheet" href="../deck.js/extensions/hash/deck.hash.css">
 	<link rel="stylesheet" href="../deck.js/extensions/scale/deck.scale.css">
-
-	<!-- Style theme. More available in /themes/style/ or create your own. -->
-	<link rel="stylesheet" href="../deck.js/themes/style/web-2.0.css">
 	
 	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
 	<link rel="stylesheet" href="../deck.js/themes/transition/horizontal-slide.css">
 	
+        <link rel="stylesheet" href="../deck.js-codemirror/deck.codemirror.css">
+        <link rel="stylesheet" href="../deck.js-codemirror/themes/default.css">
+
 	<!-- Required Modernizr file -->
 	<script src="../deck.js/modernizr.custom.js"></script>
 </head>
@@ -76,7 +76,7 @@
 
 <section class="slide">
     <h2>JSON example</h2>
-<pre><code>{
+<textarea class="code" mode="javascript">{
     "id": 1,
     "name": "Foo",
     "price": 19.99,
@@ -87,12 +87,12 @@
         "retail": 20
     },
     "promotion": null
-}</code></pre>
+}</textarea>
 </section>
 
 <section class="slide">
     <h2>JSON data in Haskell</h2>
-<pre><code>data Value = Object Object
+<textarea class="code" mode="haskell">data Value = Object Object
            | Array  Array
            | String Text
            | Number Number
@@ -101,7 +101,7 @@
 
 type Object = HashMap Text Value
 
-type Array = Vector Value</code></pre>
+type Array = Vector Value</textarea>
 </section>
 
 <section class="slide">
@@ -130,52 +130,53 @@ type Array = Vector Value</code></pre>
 <section class="slide">
     <h2><code>ToJSON</code></h2>
 
-<pre><code>class ToJSON a where
-    toJSON :: a -&gt; Value</code></pre>
+<textarea class="code" mode="haskell">class ToJSON a where
+    toJSON :: a -> Value
 
-<pre class="slide"><code>instance (ToJSON a) =&gt; ToJSON (Maybe a) where
+instance (ToJSON a) => ToJSON (Maybe a) where
     toJSON (Just a) = toJSON a
-    toJSON Nothing  = Null</code></pre>
+    toJSON Nothing  = Null</textarea>
 </section>
 
 <section class="slide">
     <h2><code>FromJSON</code></h2>
-<pre><code>class FromJSON a where
-    parseJSON :: Value -&gt; Parser a</code></pre>
+<textarea class="code" mode="haskell">class FromJSON a where
+    parseJSON :: Value -> Parser a
 
-<pre class="slide"><code>instance (FromJSON a) =&gt; FromJSON (Maybe a) where
-    parseJSON Null   = pure Nothing
-    parseJSON a      = Just <$> parseJSON a</code></pre>
+instance (FromJSON a) => FromJSON (Maybe a) where
+    parseJSON Null = pure Nothing
+    parseJSON a    = Just <$> parseJSON a</textarea>
 </section>
 
 <section class="slide">
     <h2>Parsing JSON objects</h2>
-    <pre><code>(.:)  :: (FromJSON a) =&gt; Object -&gt; Text -&gt; Parser a</code></pre>
-    <pre><code>(.:?) :: (FromJSON a) =&gt; Object -&gt; Text -&gt; Parser (Maybe a)</code></pre>
-    <pre><code>(.!=) :: Parser (Maybe a) -&gt; a -&gt; Parser a</code></pre>
+<textarea class="code" mode="haskell">(.:)  :: (FromJSON a) => Object -> Text -> Parser a
+
+(.:?) :: (FromJSON a) => Object -> Text -> Parser (Maybe a)
+
+(.!=) :: Parser (Maybe a) -> a -> Parser a</textarea>
 </section>
 
 <section class="slide">
     <h2>Parsing: Haskell type</h2>
-<pre><code>data Person = Person
+<textarea class="code" mode="haskell">data Person = Person
     { name   :: Text
     , age    :: Int
     , spouse :: Maybe Person
     , lang   :: String        -- default to "en-US"
-    }</code></pre>
+    }</textarea>
 </section>
 
 <section class="slide">
     <h2>Parsing: <code>FromJSON</code> instance</h2>
-<pre><code>instance FromJSON Person where
+<textarea class="code" mode="haskell">instance FromJSON Person where
     parseJSON (Object v) = Person       <$>
                          v .:  "name"   <*>
                          v .:  "age"    <*>
                          v .:? "spouse" <*>
                          v .:? "lang" .!= "en-US"
     -- A non-Object value is of the wrong type, so fail.
-    parseJSON _          = empty
-</code></pre>
+    parseJSON _          = empty</textarea>
 </section>
 
 <section class="slide">
@@ -235,21 +236,21 @@ type Array = Vector Value</code></pre>
     <h2>Problem?</h2>
     <ul>
         <li class="slide"><code>"kty"</code> does not distinguish between public and private keys</li>
-        <li class="slide">have to "peek" into object to see what fields are present</li>
+        <li class="slide">have to look at what fields are present to decide how to parse</li>
         <li class="slide">prefer private keys over public keys</li>
     </ul>
 </section>
 
 <section class="slide">
     <h2>JWK types</h2>
-<pre class="slide"><code>data Key = Key {
+<textarea class="code" mode="haskell">data Key = Key {
   kty    :: Kty,          -- Data Kty = EC | RSA | Oct
   alg    :: Maybe Alg,
   &hellip;
   params :: KeyParameters
-  }</code></pre>
+  }
 
-<pre class="slide"><code>data KeyParameters =
+data KeyParameters =
   ECPublicKeyParameters {
     crv :: Crv,
     x   :: SizedBase64Integer,
@@ -258,48 +259,46 @@ type Array = Vector Value</code></pre>
   | ECPrivateKeyParameters {
     d   :: SizedBase64Integer
     }
-  &hellip;
-</code></pre>
+  &hellip;</textarea>
 </section>
 
 <section class="slide">
     <h2>JWK <code>FromJSON</code> instances</h2>
-<pre><code>instance FromJSON Key where
-  parseJSON (Object o) = Key &lt;$&gt;
-    o .:  "kty" &lt;*&gt;
-    o .:? "alg" &lt;*&gt;
+<textarea class="code" mode="haskell">instance FromJSON Key where
+  parseJSON (Object o) = Key <$>
+    o .:  "kty" <*>
+    o .:? "alg" <*>
     &hellip;
     parseJSON (Object o)
-  parseJSON _ = empty
-</code></pre>
+  parseJSON _ = empty</textarea>
 </section>
 
 <section class="slide">
     <h2>JWK <code>FromJSON</code> instances</h2>
-<pre><code>instance FromJSON KeyParameters where
+<textarea class="code" mode="haskell">instance FromJSON KeyParameters where
   parseJSON (Object o)
-    | Just (String "EC") &lt;- lookup "kty" o
-    , Just _             &lt;- lookup "crv" o
-    , Just _             &lt;- lookup   "x" o
-    , Just _             &lt;- lookup   "y" o
-    = ECPublicKeyParameters &lt;$&gt;
-      o .: "crv" &lt;*&gt;
-      o .:   "x" &lt;*&gt;
+    | Just (String "EC") <- lookup "kty" o
+    , Just _             <- lookup "crv" o
+    , Just _             <- lookup   "x" o
+    , Just _             <- lookup   "y" o
+    = ECPublicKeyParameters <$>
+      o .: "crv" <*>
+      o .:   "x" <*>
       o .:   "y"
-    | Just (String "EC") &lt;- lookup "kty" o
-    , Just _             &lt;- lookup   "d" o
-    = ECPrivateKeyParameters &lt;$&gt;
+    | Just (String "EC") <- lookup "kty" o
+    , Just _             <- lookup   "d" o
+    = ECPrivateKeyParameters <$>
       o .: "d"
     &hellip;
     | otherwise = empty
   parseJSON _ = empty
-</code></pre>
+</textarea>
 </section>
 
 <section class="slide">
     <h2>JWS JSON Serialization</h2>
-<pre><code>{
- "protected":  "<strong>eyJhbGciOiJSUzI1NiJ9</strong>",
+<textarea class="code" mode="javascript">{
+ "protected":  "eyJhbGciOiJSUzI1NiJ9",
  "payload":    "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzM&hellip;",
  "signatures": [
   {
@@ -307,8 +306,7 @@ type Array = Vector Value</code></pre>
    "signature":  "cC4hiUPoj9Eetdgtv3hF80EGrhuB_&hellip;"
   }
  ]
-}
-</code></pre>
+}</textarea>
 </section>
 
 <section class="slide">
@@ -323,40 +321,35 @@ type Array = Vector Value</code></pre>
 
 <section class="slide">
     <h2><code>Header</code></h2>
-<pre><code>data Header = Header {
+<textarea class="code" mode="haskell">data Header = Header {
   alg :: JWSAlg                     -- TODO other fields
   }
-</code></pre>
 
-<pre class="slide"><code>instance ToJSON Header where
+instance ToJSON Header where
   toJSON (Header alg) = object [
     "alg" .= jwsAlgToKey alg
     ]
-</code></pre>
 
-<pre class="slide"><code>instance FromJSON Header where
+instance FromJSON Header where
   parseJSON (Object o) = Header <$> o .: "alg"
-  parseJSON _ = empty
-</code></pre>
+  parseJSON _          = empty</textarea>
 </section>
 
 <section class="slide">
     <h2><code>EncodedHeader</code></h2>
-<pre><code>data EncodedHeader = EncodedHeader Header</code></pre>
+<textarea class="code" mode="haskell">data EncodedHeader = EncodedHeader Header
 
-<pre class="slide"><code>instance ToJSON EncodedHeader where
+instance ToJSON EncodedHeader where
   toJSON (EncodedHeader h) = String $ T.pack $ B64.encode
                              $ BS.unpack $ encode h
-</code></pre>
 
-<pre class="slide"><code>instance FromJSON EncodedHeader where
+instance FromJSON EncodedHeader where
   parseJSON (String s) = case B64.decode $ T.unpack s of
-    Just bytes -&gt;  case decode $ BS.pack bytes of
-      Just h  -&gt; pure $ EncodedHeader h
-      Nothing -&gt; fail "invalid JSON"
-    Nothing -&gt; fail "invalid base64"
-  parseJSON _ = empty
-</code></pre>
+    Nothing    -> fail "invalid base64"
+    Just bytes ->  case decode $ BS.pack bytes of
+      Nothing -> fail "invalid JSON"
+      Just h  -> pure $ EncodedHeader h
+  parseJSON _ = empty</textarea>
 </section>
 
 <section class="slide">
@@ -378,7 +371,7 @@ type Array = Vector Value</code></pre>
 
 <section class="slide">
     <h2>Template Haskell example</h2>
-<pre><code>data D a = Nullary
+<textarea class="code" mode="haskell">data D a = Nullary
      | Unary Int
      | Product String Char a
      | Record { testOne   :: Double
@@ -386,47 +379,47 @@ type Array = Vector Value</code></pre>
               , testThree :: D a
               } deriving Eq
 
-$(deriveJSON (drop 4) ''D)</code></pre>
+$(deriveJSON (drop 4) ''D)</textarea>
 </section>
 
 <section class="slide">
-<pre><code>instance ToJSON a =&gt; ToJSON (D a) where
+    <h3>Derived instances</h3>
+<textarea class="code" mode="haskell">instance ToJSON a => ToJSON (D a) where
   toJSON =
-    \value -&gt;
+    \value ->
       case value of
-        Nullary -&gt;
+        Nullary ->
           object [T.pack "Nullary" .= toJSON ([] :: [()])]
-        Unary arg1 -&gt;
+        Unary arg1 ->
           object [T.pack "Unary" .= toJSON arg1]
-        Product arg1 arg2 arg3 -&gt;
+        Product arg1 arg2 arg3 ->
           object [ T.pack "Product"
             .= (Array $ create $
             &hellip;
 
-instance FromJSON a =&gt; FromJSON (D a) where
+instance FromJSON a => FromJSON (D a) where
   parseJSON =
-    \value -&gt;
+    \value ->
       case value of
-        Object obj -&gt;
+        Object obj ->
           case H.toList obj of
-            [(conKey, conVal)] -&gt;
+            [(conKey, conVal)] ->
               case conKey of
-                _ | conKey == T.pack "Nullary" -&gt;
+                _ | conKey == T.pack "Nullary" ->
                   case conVal of
-                    Array arr -&gt;
+                    Array arr ->
                       if V.null arr
-                      &hellip;</code></pre>
+                      &hellip;</textarea>
 </section>
 
 <section class="slide">
     <h2>cf. <em>json</em> (<code>Text.Json</code>)</h2>
     <ul>
         <li class="slide">
-            <em>json</em> has a single, unified typeclass
-<pre><code>class JSON a where
-    readJSON  :: JSValue -&gt; Result a
-    showJSON  :: a -&gt; JSValue
-</code></pre>
+            <em>json</em> has a single, unified typeclass:
+<textarea class="code" mode="haskell">class JSON a where
+    readJSON  :: JSValue -> Result a
+    showJSON  :: a -> JSValue</textarea>
         </li>
         <li class="slide">
             <em>aeson</em> is 3× faster (bos, 2011)<br/>
@@ -510,6 +503,18 @@ Mountain View, California, 94041, USA.</pre></small>
 <script src="../deck.js/extensions/status/deck.status.js"></script>
 <script src="../deck.js/extensions/navigation/deck.navigation.js"></script>
 <script src="../deck.js/extensions/scale/deck.scale.js"></script>
+
+<!-- Base codemiror code -->
+<script src="../deck.js-codemirror/codemirror.js"></script>
+
+<!-- Syntax highlighting Modes -->
+
+<!-- highlighting modes -->
+<script src="../deck.js-codemirror/mode/javascript/javascript.js"></script>
+<script src="../deck.js-codemirror/mode/haskell/haskell.js"></script>
+
+<!-- Plugin code -->
+<script src="../deck.js-codemirror/deck.codemirror.js"></script>
 
 <!-- Initialize the deck. You can put this in an external file if desired. -->
 <script>
