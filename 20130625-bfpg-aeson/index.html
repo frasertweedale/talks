@@ -149,7 +149,9 @@ instance (ToJSON a) => ToJSON (Maybe a) where
 
 <section class="slide">
     <h2><code>FromJSON</code></h2>
-<textarea class="code" mode="haskell">class FromJSON a where
+<textarea class="code" mode="haskell">import Control.Applicative
+
+class FromJSON a where
     parseJSON :: Value -> Parser a
 
 instance (FromJSON a) => FromJSON (Maybe a) where
@@ -178,7 +180,9 @@ instance (FromJSON a) => FromJSON (Maybe a) where
 
 <section class="slide">
     <h2>Parsing: <code>FromJSON</code> instance</h2>
-<textarea class="code" mode="haskell">instance FromJSON Person where
+<textarea class="code" mode="haskell">import Control.Applicative
+
+instance FromJSON Person where
     parseJSON (Object v) = Person       <$>
                          v .:  "name"   <*>
                          v .:  "age"    <*>
@@ -279,7 +283,9 @@ data KeyParameters =
 
 <section class="slide">
     <h2><code>Key</code> <code>FromJSON</code> instance</h2>
-<textarea class="code" mode="haskell">instance FromJSON Key where
+<textarea class="code" mode="haskell">import Control.Applicative
+
+instance FromJSON Key where
   parseJSON (Object o) = Key <$>
     o .:  "kty" <*>
     o .:? "alg" <*>
@@ -290,7 +296,11 @@ data KeyParameters =
 
 <section class="slide">
     <h2><code>KeyParameters</code> <code>FromJSON</code> instance</h2>
-<textarea class="code" mode="haskell">instance FromJSON KeyParameters where
+<textarea class="code" mode="haskell">{-# LANGUAGE PatternGuards #-}
+
+import Control.Applicative
+
+instance FromJSON KeyParameters where
   parseJSON (Object o)
     | Just (String "EC") <- lookup "kty" o
     , Just _             <- lookup   "d" o
@@ -308,25 +318,22 @@ data KeyParameters =
 
 <section class="slide">
     <h2><code>KeyParameters</code> <code>FromJSON</code> instance'</h2>
-<textarea class="code" mode="haskell">import Data.Attoparsec.Combinator (choice)
+<textarea class="code" mode="haskell">{-# LANGUAGE PatternGuards #-}
+
+import Control.Applicative
 
 instance FromJSON KeyParameters where
   parseJSON (Object o)
     | Just (String "EC") <- M.lookup "kty" o
-    = choice [
-      ECPrivateKeyParameters <$>
-        o .: "d",
-      ECPublicKeyParameters <$>
+    = ECPrivateKeyParameters <$>
+        o .: "d"
+      <|> ECPublicKeyParameters <$>
         o .: "crv"          <*>
         o .: "x"            <*>
         o .: "y"
-      ]
     &hellip;
     | otherwise = empty
   parseJSON _ = empty</textarea>
-  <ul>
-    <li class="slide">downside: error messages suppressed</li>
-  </ul>
 </section>
 
 <section class="slide">
