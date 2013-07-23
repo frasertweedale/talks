@@ -213,7 +213,7 @@ instance FromJSON Person where
         <li class="slide">web crypto formats used in Mozilla Persona (BrowserID)</li>
         <li class="slide">serialisations for keys, signatures, encrypted payloads</li>
         <li class="slide"><a href="https://datatracker.ietf.org/wg/jose/">https://datatracker.ietf.org/wg/jose/</a></li>
-        <li class="slide">still rapidly evolving (currently at 11th revision)</li>
+        <li class="slide">still rapidly evolving (currently at <del>11th</del> 13th revision)</li>
         <li class="slide">
             only existing implementation (that I know of):
             <ul><li><a href="https://github.com/mozilla/jwcrypto">https://github.com/mozilla/jwcrypto</a> (JavaScript)</li></ul>
@@ -353,6 +353,7 @@ instance FromJSON KeyParameters where
 <section class="slide">
     <h2>Encoded JWS Header</h2>
     <ul>
+        <li class="slide">JWS = JSON Web Signature</li>
         <li class="slide"><em>base64 encoding of the JWS Protected Header.</em></li>
         <li class="slide">JWS Protected Header: <em>A JSON Text Object that contains the portion of
             the JWS Header that is integrity protected.</em></li>
