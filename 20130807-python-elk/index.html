@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=1024, user-scalable=no">
+
+	<title>Your deck.js Presentation</title>
+	
+	<!-- Required stylesheet -->
+	<link rel="stylesheet" href="../deck.js/core/deck.core.css">
+	
+	<!-- Extension CSS files go here. Remove or add as needed. -->
+	<link rel="stylesheet" href="../deck.js/extensions/goto/deck.goto.css">
+	<link rel="stylesheet" href="../deck.js/extensions/menu/deck.menu.css">
+	<link rel="stylesheet" href="../deck.js/extensions/navigation/deck.navigation.css">
+	<link rel="stylesheet" href="../deck.js/extensions/status/deck.status.css">
+	<link rel="stylesheet" href="../deck.js/extensions/hash/deck.hash.css">
+	<link rel="stylesheet" href="../deck.js/extensions/scale/deck.scale.css">
+	
+	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
+	<link rel="stylesheet" href="../deck.js/themes/transition/horizontal-slide.css">
+	
+        <link rel="stylesheet" href="../deck.js-codemirror/deck.codemirror.css">
+        <link rel="stylesheet" href="../deck.js-codemirror/themes/default.css">
+
+	<!-- Required Modernizr file -->
+	<script src="../deck.js/modernizr.custom.js"></script>
+</head>
+<body class="deck-container">
+
+    <style>
+        code {
+            white-space: pre;
+            color: DeepPink;
+        }
+        .slide li code {
+            padding: 2px;
+            border: 1px solid LightGray;
+            border-radius: 4px;
+        }
+        .split2 .col {
+            display: inline-block;
+            vertical-align: top;
+            width: 49%;
+            margin-left: 1%;
+        }
+        .split2 .col:first-child {
+            margin-left: 0;
+        }
+    </style>
+
+<!-- Begin slides. Just make elements with a class of slide. -->
+
+<section class="slide">
+    <h1><em>Elk</em></h1>
+</section>
+
+<section class="slide">
+    <h2>About me</h2>
+    <ul>
+        <li class="slide">day job = Ruby and JavaScript (mostly)</li>
+        <li class="slide">have used many languages</li>
+        <li class="slide">
+            use to feed my bank account with Python
+            <ul><li class="slide">for now, only side-projects</li></ul>
+        </li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>This talk</h2>
+    <ul>
+        <li class="slide">intermediate level</li>
+        <li class="slide">introduce <em>Elk</em>
+          <ul>
+            <li class="slide">history</li>
+            <li class="slide">objectives</li>
+            <li class="slide">tour of major features</li>
+          </ul>
+        </li>
+        <li class="slide">discuss Python language features used in implementation</li>
+        <li class="slide">live-code a (small) subset of <em>Elk</em></li>
+        <li class="slide">the future of <em>Elk</em></li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>What is <em>Elk</em>?</h2>
+    <ul>
+        <li class="slide">a Python port of <a href="https://metacpan.org/module/Moose::Manual"><em>Moose</em></a>,
+            an object system for Perl</li>
+        <li class="slide">
+            I came to Python from Perl and missed <em>Moose</em> a lot
+            <ul><li class="slide">&hellip;at first, but I survived just fine</li></ul>
+        </li>
+        <li class="slide">kept wondering
+          what <em>Moose</em> in Python would look like&hellip;</li>
+        <li class="slide">so I wrote <em>Elk</em>!</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>What is <em>Moose</em>?</h2>
+    <ul>
+        <li class="slide">declarative object system for Perl 5</li>
+        <li class="slide">powerful attribute system</li>
+        <li class="slide">inheritance and roles (mixins)</li>
+        <li class="slide">many other features, and extensible</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Objectives</h2>
+    <ul>
+        <li class="slide"><em>Moose</em>-like object system in idiomatic Python</li>
+        <li class="slide">pure Python</li>
+        <li class="slide">
+          compatibility (CPython, PyPy, IronPython et al.)
+          <ul>
+            <li class="slide">CPython 2.7.x</li>
+            <li class="slide">PyPy &gt;= 2.1</li>
+            <li class="slide">some tests fail in IronPython; need to investigate</li>
+            <li class="slide">need to test with more interpreters</li>
+            <li class="slide">eventually Python 3</li>
+          </ul>
+        </li>
+        <li class="slide">clean implementation (no stack or scope hacks)</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h1><em>Moose</em>/<em>Elk</em> features</h1>
+</section>
+
+<section class="slide">
+    <h2>Classes</h2>
+<div class="split2">
+<div class="col">
+<textarea class="code" mode="clike">package Person;
+
+use Moose;
+
+has 'first_name' => (
+  is  => 'rw',
+  isa => 'Str',
+);
+
+has 'last_name' => (
+  is  => 'rw',
+  isa => 'Str',
+);</textarea>
+</div>
+
+<div class="col">
+<textarea class="code" mode="python">import elk
+
+class Person(elk.Elk):
+
+  first_name = elk.ElkAtrribute(
+    mode='rw'  # optional
+    type=str
+  )
+
+  last_name = elk.ElkAtrribute(
+    type=str  # accepts tuple
+  )</textarea>
+</div>
+</div>
+</section>
+
+<section class="slide">
+    <h2>Inheritance</h2>
+<div class="split2">
+<div class="col">
+<textarea class="code" mode="clike">package User;
+
+use DateTime;
+use Moose;
+
+extends 'Person';
+
+has 'password' => (
+  is  => 'rw',
+  isa => 'Str',
+);
+
+has 'last_login' => (
+  is      => 'rw',
+  isa     => 'DateTime',
+  handles => {'date_of_last_login' => 'date'},
+);
+
+sub login {
+  my $self = shift;
+  my $pw   = shift;
+
+  return 0 if $pw ne $self->password;
+
+  $self->last_login(DateTime->now());
+}</textarea>
+</div>
+<div class="col">
+<textarea class="code" mode="python">
+import datetime
+
+import elk
+
+
+class User(Person):
+
+  password = elk.ElkAtrribute(
+    type=str
+  )
+
+  last_login = elk.ElkAtrribute(
+    type=datetime.datetime,
+    handles={
+      'date_of_last_login': 'date'
+    }
+  )
+
+  def login(self, pw):
+    if pw != self.password:
+      return False
+    self.last_login = \
+      datetime.datetime.now()
+    return True</textarea>
+</div>
+</div>
+</section>
+
+<section class="slide">
+    <h2>Roles</h2>
+<div class="split2">
+<div class="col">
+<textarea class="code" mode="clike">
+package Breakable;
+
+use Moose::Role;
+
+has 'is_broken' => (
+    is  => 'rw',
+    isa => 'Bool',
+);
+
+sub break {
+    my $self = shift;
+
+    print "I broke\n";
+
+    $self->is_broken(1);
+}</textarea>
+</div>
+<div class="col">
+<textarea class="code" mode="python">
+import elk
+
+class Breakable(elk.ElkRole):
+
+  is_broken = elk.ElkAttribute(
+    type=bool,
+    default=False
+  )
+
+  def break_(self):
+    print "I broke"
+    self.is_broken = True</textarea>
+</div>
+</div>
+</section>
+
+<section class="slide">
+    <h2>Roles (2)</h2>
+<div class="split2">
+<div class="col">
+<textarea class="code" mode="clike">package Car;
+
+use Moose;
+
+with 'Breakable';
+
+has 'engine' => (
+    is  => 'ro',
+    isa => 'Engine',
+);</textarea>
+</div>
+<div class="col">
+<textarea class="code" mode="python">
+import elk
+
+class Car(elk.Elk):
+
+  __with__ = Breakable
+
+  engine = elk.ElkAttribute(
+    mode='ro',
+    type=Engine
+  )</textarea>
+</div>
+</div>
+</section>
+
+<section class="slide">
+  <h2>Roles (3)</h2>
+<div class="split2">
+<div class="col">
+<textarea class="code" mode="clike">
+my $car = Car->new(
+  engine => Engine->new
+);
+
+$car->is_broken;  # true
+$car->break;
+$car->is_broken;  # false
+
+$car->does('Breakable');  # true</textarea>
+</div>
+<div class="col">
+<textarea class="code" mode="python">
+car = Car(
+  engine=Engine()
+)
+
+car.is_broken  # True
+car.break_()
+car.is_broken  # False
+
+isinstance(car, Breakable)  # True</textarea>
+</div>
+</div>
+</section>
+
+<section class="slide">
+    <h2>Method modifiers</h2>
+<div class="split2">
+<div class="col">
+<textarea class="code" mode="clike">
+package Example;
+
+use Moose;
+
+sub foo {
+  print "    foo\n";
+}
+
+before 'foo' => sub {
+  print "about to call foo\n";
+};
+
+after 'foo'  => sub {
+  print "just called foo\n";
+};
+
+around 'foo' => sub {
+  my $orig = shift;
+  my $self = shift;
+
+  print "  I'm around foo\n";
+  $self->$orig(@_);
+  print "  I'm still around foo\n";
+};</textarea>
+</div>
+<div class="col">
+<textarea class="code" mode="python">
+import elk
+
+class Example(elk.Elk):
+
+def foo(self):
+  print "    foo"
+
+
+@elk.before('foo')
+def _before_foo(self):
+  print "about to call foo"
+
+@elk.after('foo')
+def _after_foo(self):
+  print "just called foo"
+
+@elk.around('foo')
+def _around_foo(self, orig):
+  print "  I'm around foo"
+  orig()
+  print "  I'm still around foo"
+</textarea>
+</div>
+</div>
+</section>
+
+<section class="slide">
+    <h2>Attributes</h2>
+<div class="split2">
+<div class="col">
+<textarea class="code" mode="clike">
+has 'size' => (
+  is        => 'ro',
+  isa       => 'Bool',
+  lazy      => 1,
+  builder   => '_build_size',
+  predicate => 'has_size',
+  clearer   => 'clear_size'
+);
+
+has 'hair_color' => (
+  isa => 'Graphics::Color::RGB',
+  handles => {
+    hair_color_hex
+      => 'as_hex_string'
+  }
+);
+
+sub _build_size {
+    my $i = int(rand 3);
+    return ('S', 'M', 'L')[$i];
+}</textarea>
+</div>
+<div class="col">
+<textarea class="code" mode="python">
+size = elk.ElkAttribute(
+  mode='ro',
+  type=bool,
+  lazy=True,
+  builder='_build_size',
+  # hasattr(obj, 'size')
+  # delete obj.size
+)
+
+hair_color = elk.ElkAttribute(
+  type=graphics.color.RGB,
+  handles={
+    'hair_color_hex':
+      'as_hex_string'
+  }
+)
+
+def build_size(self):
+  return random.choice(
+    ['S', 'M', 'L']
+  )</textarea>
+</div>
+</div>
+</section>
+
+<section class="slide" id="building">
+  <h1>Building <em>Elk</em></h1>
+</section>
+
+<section class="slide">
+    <h2>Language features used</h2>
+    <ul>
+        <li class="slide">metaclasses: <code>Elk</code> and <code>ElkRole</code></li>
+        <li class="slide">descriptors: <code>ElkAttribute</code> and delegation</li>
+        <li class="slide">decorators: method modifiers</li>
+        <li class="slide">implementation is currently ~ 450 lines</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Metaclasses</h2>
+    <ul>
+        <li class="slide">if assigned, <code>__metaclass__</code> is called
+          instead of <code>type</code> when defining a class</li>
+        <li class="slide">typically a subclass of <code>type</code></li>
+        <li class="slide">
+          <code>__new__</code>
+          <ul>
+            <li class="slide">called when class is defined</li>
+            <li class="slide">modify class dict</li>
+            <li class="slide">return some other class</li>
+          </ul>
+        </li>
+        <li class="slide">
+          <code>__call__</code>
+          <ul>
+            <li class="slide">called when class is instantiated,
+              prior to <code>__init__</code></li>
+            <li class="slide">modify instance dict</li>
+            <li class="slide">munge constructor arguments</li>
+          </ul>
+        </li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Descriptors</h2>
+    <ul>
+        <li class="slide">
+          objects that implement descriptor protocol (or subset)
+          <ul>
+            <li class="slide"><code>__get__(self, instance, owner)</code></li>
+            <li class="slide"><code>__set__(self, instance, value)</code></li>
+            <li class="slide"><code>__delete__(self, instance)</code></li>
+          </ul>
+        </li>
+        <li class="slide">
+          must be in <em>class</em> dict
+          <ul>
+            <li class="slide">actually, <code>__mro__</code></li>
+          </ul>
+        <li class="slide">new-style classes only</li>
+        <li class="slide"><code>property</code> is implemented as a descriptor</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Live-coding: subset of <em>Elk</em></h2>
+    <ul>
+        <li class="slide">implement default values and type constraints</li>
+        <li class="slide">test-driven development</li>
+        <li class="slide">will use metaclass and descriptors</li>
+    </ul>
+</section>
+
+<section class="slide">
+  <h1>Let's hack!</h1>
+</section>
+
+<section class="slide">
+  <h2>Future</h2>
+  <ul>
+    <li class="slide">more features!
+      <ul>
+        <li class="slide">
+          see <a href="https://metacpan.org/module/Moose::Manual">Moose::Manual</a>
+          or <a href="https://github.com/frasertweedale/elk/blob/master/TODO">TODO</a>
+          to get an idea</li>
+        <li class="slide">extension interface/guidelines</li>
+      </ul>
+    </li>
+    <li class="slide">support Python 3.3+</li>
+    <li class="slide">test with more interpreters</li>
+    <li class="slide">improve API (feedback welcome)</li>
+    <li class="slide">dogfood it!</li>
+    <li class="slide">collaboration?
+      <ul>
+        <li class="slide">feature requests, testing, bug reports, patches,
+          welcome</li>
+        <li class="slide"><a href="https://github.com/frasertweedale/elk">https://github.com/frasertweedale/elk</a></li>
+      </ul>
+  </ul>
+</section>
+
+<section class="slide">
+    <h2>Fin</h2>
+    <ul>
+        <li class="slide">This talk: <a href="https://github.com/frasertweedale/talks">https://github.com/frasertweedale/talks</a></li>
+        <li class="slide"><em>Elk</em> repo: <a href="https://github.com/frasertweedale/elk">https://github.com/frasertweedale/elk</a></li>
+        <li class="slide">Documentation: <a href="http://frasertweedale.github.io/elk/">http://frasertweedale.github.io/elk/</a></li>
+        <li class="slide">frase&#64;frase.id.au</li>
+        <li class="slide">&#64;hackuador</li>
+    </ul>
+<small><pre class="slide">Copyright © 2013 Fraser Tweedale
+
+This work is licensed under the Creative Commons
+Attribution-ShareAlike 3.0 Unported License. To view a copy of this
+license, visit http://creativecommons.org/licenses/by-sa/3.0/ or
+send a letter to Creative Commons, 444 Castro Street, Suite 900,
+Mountain View, California, 94041, USA.</pre></small>
+</section>
+
+<!-- End slides. -->
+
+
+<!-- Begin extension snippets. Add or remove as needed. -->
+
+<!-- deck.navigation snippet -->
+<a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+<a href="#" class="deck-next-link" title="Next">&#8594;</a>
+
+<!-- deck.status snippet -->
+<p class="deck-status">
+	<span class="deck-status-current"></span>
+	/
+	<span class="deck-status-total"></span>
+</p>
+
+<!-- deck.goto snippet -->
+<form action="." method="get" class="goto-form">
+	<label for="goto-slide">Go to slide:</label>
+	<input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+	<datalist id="goto-datalist"></datalist>
+	<input type="submit" value="Go">
+</form>
+
+<!-- deck.hash snippet -->
+<a href="." title="Permalink to this slide" class="deck-permalink">#</a>
+
+<!-- End extension snippets. -->
+
+
+<!-- Required JS files. -->
+<script src="../deck.js/jquery-1.7.2.min.js"></script>
+<script src="../deck.js/core/deck.core.js"></script>
+
+<!-- Extension JS files. Add or remove as needed. -->
+<script src="../deck.js/core/deck.core.js"></script>
+<script src="../deck.js/extensions/hash/deck.hash.js"></script>
+<script src="../deck.js/extensions/menu/deck.menu.js"></script>
+<script src="../deck.js/extensions/goto/deck.goto.js"></script>
+<script src="../deck.js/extensions/status/deck.status.js"></script>
+<script src="../deck.js/extensions/navigation/deck.navigation.js"></script>
+<script src="../deck.js/extensions/scale/deck.scale.js"></script>
+
+<!-- Base codemiror code -->
+<script src="../deck.js-codemirror/codemirror.js"></script>
+
+<!-- Syntax highlighting Modes -->
+
+<!-- highlighting modes -->
+<script src="../deck.js-codemirror/mode/clike/clike.js"></script>
+<script src="../deck.js-codemirror/mode/python/python.js"></script>
+
+<!-- Plugin code -->
+<script src="../deck.js-codemirror/deck.codemirror.js"></script>
+
+<!-- Initialize the deck. You can put this in an external file if desired. -->
+<script>
+	$(function() {
+		$.deck('.slide');
+	});
+</script>
+</body>
+</html>
