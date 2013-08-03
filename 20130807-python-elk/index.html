@@ -62,7 +62,7 @@
         <li class="slide">day job = Ruby and JavaScript (mostly)</li>
         <li class="slide">have used many languages</li>
         <li class="slide">
-            use to feed my bank account with Python
+            used to feed my bank account with Python
             <ul><li class="slide">for now, only side-projects</li></ul>
         </li>
     </ul>
@@ -381,8 +381,7 @@ def _after_foo(self):
 def _around_foo(self, orig):
   print "  I'm around foo"
   orig()
-  print "  I'm still around foo"
-</textarea>
+  print "  I'm still around foo"</textarea>
 </div>
 </div>
 </section>
@@ -462,7 +461,7 @@ def build_size(self):
           instead of <code>type</code> when defining a class</li>
         <li class="slide">typically a subclass of <code>type</code></li>
         <li class="slide">
-          <code>__new__</code>
+          <code>__new__(mcs, name, bases, dict)</code>
           <ul>
             <li class="slide">called when class is defined</li>
             <li class="slide">modify class dict</li>
@@ -470,7 +469,7 @@ def build_size(self):
           </ul>
         </li>
         <li class="slide">
-          <code>__call__</code>
+          <code>__call__(cls, *args, **kwargs)</code>
           <ul>
             <li class="slide">called when class is instantiated,
               prior to <code>__init__</code></li>
@@ -478,6 +477,8 @@ def build_size(self):
             <li class="slide">munge constructor arguments</li>
           </ul>
         </li>
+        <li class="slide"><code>__instancecheck__(self, instance)</code></li>
+        <li class="slide"><code>__subclasscheck__(self, subclass)</code></li>
     </ul>
 </section>
 
@@ -536,6 +537,7 @@ def build_size(self):
         <li class="slide">feature requests, testing, bug reports, patches,
           welcome</li>
         <li class="slide"><a href="https://github.com/frasertweedale/elk">https://github.com/frasertweedale/elk</a></li>
+        <li class="slide">if you think it's cool, tell others</li>
       </ul>
   </ul>
 </section>
