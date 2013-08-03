@@ -308,9 +308,9 @@ my $car = Car->new(
   engine => Engine->new
 );
 
-$car->is_broken;  # true
-$car->break;
 $car->is_broken;  # false
+$car->break;
+$car->is_broken;  # true
 
 $car->does('Breakable');  # true</textarea>
 </div>
@@ -320,9 +320,9 @@ car = Car(
   engine=Engine()
 )
 
-car.is_broken  # True
-car.break_()
 car.is_broken  # False
+car.break_()
+car.is_broken  # True
 
 isinstance(car, Breakable)  # True</textarea>
 </div>
