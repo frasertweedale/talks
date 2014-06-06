@@ -1,0 +1,3 @@
+-- "But it's useful to do things based on type!"
+--
+-- A brief detour into ghci...
