@@ -1,0 +1,11 @@
+-- Thanks for listening.
+--
+-- * Fraser Tweedale <frase@frase.id.au>
+--
+-- * Twitter: @hackuador
+--
+-- * Github: @frasertweedale
+--
+-- * This talk: https://github.com/frasertweedale/talks
+--
+-- * slide-madness: https://github.com/nkpart/slide-madness

@@ -1,0 +1,8 @@
+-- Bonus theory (thanks Dave!)
+--
+--
+-- * Church encoding: encoding of algebraic data types
+--   using functions only.
+--
+-- * "Finally tagless" interpreters, Oleg Kiselyov et al.
+--   http://www.cs.rutgers.edu/~ccshan/tagless/jfp.pdf
