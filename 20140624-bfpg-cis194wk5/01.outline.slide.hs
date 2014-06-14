@@ -11,5 +11,3 @@ outline =
   , "Type class examples"
   , "Homework tips"
   ]
-
--- :set nonumber

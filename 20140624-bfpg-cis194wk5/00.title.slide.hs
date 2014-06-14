@@ -16,5 +16,3 @@ data Lecture = Lecture
   , week :: Int
   , title :: String
   }
-
--- :set nonumber
