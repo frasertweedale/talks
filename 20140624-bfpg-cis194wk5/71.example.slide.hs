@@ -2,7 +2,7 @@
 --
 
 class Food a where
-  nutrition :: a -> Int
+  nutrition :: a -> Nutrition
 
 instance Food Apple where
   nutrition (Apple mass) = mass `div` 2       -- 1/2 of mass is nutrition

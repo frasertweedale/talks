@@ -8,6 +8,7 @@ outline =
   , "Type classes"
   , "Type classes cf classes in other languages"
   , "Standard type classes"
+  , "Type class examples"
   , "Homework tips"
   ]
 

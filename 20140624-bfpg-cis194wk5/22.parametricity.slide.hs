@@ -7,7 +7,8 @@
 --          = "works uniformly for any type used by caller"
 -- * Kind of like Java generics
 
--- Possible implementations of f :: a -> a -> a
+-- Possible implementations of 'f :: a -> a -> a'
+
 f1 :: a -> a -> a
 f1 x _ = x
                     -- OR --

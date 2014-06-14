@@ -1,9 +1,11 @@
 -- Parametricity 1
 --
 
-someFunction :: a -> a -> a
-someFunction = undefined
---someFunction x y = x && y
+-- | some function
+--
+f :: a -> a -> a
+f = undefined
+--f x y = x && y
 
 -- NOTES
 -- * Caller of a polymorphic function chooses the type

@@ -1,4 +1,4 @@
--- Parametricity 5
+-- Parametricity 4
 --
 -- What possible implementations could these functions have?
 

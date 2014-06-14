@@ -18,7 +18,3 @@ def f(a, b):
     return a
 
 -}
-
-data Type = Int | Bool | Other
-typeOf :: a -> Type
-typeOf = const Int
