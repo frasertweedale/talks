@@ -2,7 +2,7 @@ module Outline where
 
 outline :: [String]
 outline =
-  [ "Review weeks 1..4"
+  [ "Review lectures 1..4"
   , "Parametricity"
   , "Views of parametricity"
   , "Type classes"
