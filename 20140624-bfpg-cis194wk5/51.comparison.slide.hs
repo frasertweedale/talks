@@ -1,29 +1,18 @@
--- Type classes** in other languages
---   **or something more closely resembling them
+-- Type classes (or features resembling them) in other languages
+--
 
 -- SUGGESTIONS FROM THE FLOOR
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--- Idris
--- Scala: implicits (can be used for them, via context bounds)
--- Agda: (similar to above)
--- Coq: (infers appropriate instances)
--- Go: interfaces (structural)
--- Rust: traits
+-- {{{
+--
+-- Idris:   type classes
+-- Coq:     type classes (with laws!)
+-- Swift:   protocols
+-- Clojure: protocols
+-- Go:      interfaces
+-- Rust:    traits
+-- Scala:   implicits (used w/ context bounds)
+-- Agda:    similar to Scala
+-- ML:      modules
+--
+-- }}}

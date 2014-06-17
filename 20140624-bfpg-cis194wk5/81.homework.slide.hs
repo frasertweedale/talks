@@ -4,5 +4,8 @@
 -- * Church encoding: encoding of algebraic data types
 --   using functions only.
 --
--- * "Finally tagless" interpreters, Oleg Kiselyov et al.
---   http://www.cs.rutgers.edu/~ccshan/tagless/jfp.pdf
+-- * "Tagless final" interpreters, Oleg Kiselyov
+--    http://okmij.org/ftp/tagless-final/course/lecture.pdf
+--
+-- * Haste and Tagless Final Style:
+--    http://www.slideshare.net/takeoutweight/haste-and-tagless-final-style

@@ -10,6 +10,7 @@ instance Food Apple where
 instance Food Orange where
   nutrition (Orange mass) = mass * 3 `div` 4  -- 3/4 of mass is nutrition
 
+
 -- {{{
 type Mass = Int
 type Nutrition = Int

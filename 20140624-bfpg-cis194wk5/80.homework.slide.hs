@@ -8,7 +8,4 @@
 --
 -- * Typo in exercise 5; should be 'stackVM exp == Right (IVal exp)'
 --
--- * 'import qualified ...' may needed to avoid name collisions.
---
--- * 'Control.Applicative' module is useful in at least one of the
---   later problems.
+-- * 'import qualified ...' may be needed to avoid name collisions.

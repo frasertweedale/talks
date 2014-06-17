@@ -1,9 +1,11 @@
--- Type classes 3
+-- Type classes 3: default implementations
 --
+-- {{{
 {-# LANGUAGE NoImplicitPrelude #-}
 import Prelude (Bool, not)
 {-# ANN module "HLint: ignore Use ==" #-}
 {-# ANN module "HLint: ignore Use /=" #-}
+-- }}}
 
 -- | Actual declaration of Eq
 --

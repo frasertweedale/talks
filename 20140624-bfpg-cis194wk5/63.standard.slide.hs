@@ -10,4 +10,4 @@ class (Real a, Enum a) => Integral a where
   divMod    :: a -> a -> (a, a)
   toInteger :: a -> Integer
 
--- instances for Integral and Int
+-- instances for Integer and Int
