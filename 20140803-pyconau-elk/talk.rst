@@ -6,9 +6,9 @@
   http://creativecommons.org/licenses/by/4.0/.
 
 
-***********************************************
-Descriptors - a tool for every Python developer
-***********************************************
+****************************************
+Descriptors - attribute access redefined
+****************************************
 
 Fraser Tweedale
 ***************
@@ -16,10 +16,26 @@ Fraser Tweedale
 Me
 ==
 
-- Developer at Red Hat
-- FreeIPA identity management and Dogtag PKI
-- Mostly Python and Java at work
-- Mostly Haskell at home
+- Developer at Red Hat.
+
+- FreeIPA identity management and Dogtag PKI.
+
+- Mostly Python and Java at work.
+
+- Mostly Haskell at home.
+
+
+This talk
+=========
+
+- What problems do descriptors solve?
+
+- How are descriptors implemented, and used?
+
+- Show me something cool that uses descriptors!
+
+- Assumed knowledge: *clases*, *decorators*.  Familiarity with
+  ``__getattr__`` and ``__setattr__`` will help.
 
 
 Motivation
@@ -27,44 +43,58 @@ Motivation
 
 - Attribute access is an *abstraction*.
 
-- The default attribute access behaviour is often appropriate...
+- Python's default behaviour is to read and write values in an
+  *instance dictionary*.
 
-- but sometimes it is useful to *augment* or
-  *replace* this default behaviour.
+- The default implementation is well understood and sometimes
+  appropriate.
 
-- Such non-default access behaviours should be *re-usable*.
-
-- It should be possible to use non-default access behaviours
-  *declaratively*.
+- It is often useful to *augment* or *replace* the default
+  behaviour.
+  - ORMs
+  - Type checking and other kinds of validation
+  - Callbacks (for extensibility, audit, etc)
+  - Things I haven't thought of...
 
 
 Motivation
 ==========
 
-**Descriptors do this.**
+- What about ``__getattr__``, ``__setattr__``, etc?
+
+- Can only have one ``__getattr__`` per class (and ``__setattr__``,
+  etc); different behaviours must be multiplexed.
+
+- Implementations cannot easily be shared or reused except through
+  inheritance.
 
 
-Use cases
-=========
+Motivation
+==========
 
-- ORMs
+- We want custom attribute access behaviours.
 
-- Type* checking or other validation
+- We want *reusable* custom attribute access behaviours.
 
-- Callbacks
+- It would be nice to be able to use them *declaratively*.
 
-- \* Not real types.  See Tony's DjangoCon keynote.
+- It would also be nice to be able to parameterise the behaviours.
+
+- **Descriptors can do this.**
 
 
-Descriptors you might have used
+Descriptors in standard library
 ===============================
 
 - ``property``
+
 - ``classmethod``
+
 - ``staticmethod``
+
 - ``functools.partialmethod``
-- ``unittest.mock.PropertyMock``
-- ``types.DynamicClassAttribute``
+
+- ... and a few more.
 
 
 Descriptor protocol
@@ -86,7 +116,9 @@ following methods implemented:
 
 
 - ``self`` is the **descriptor** instance
+
 - ``owner`` is the **class**
+
 - ``instance`` is the **instance** of ``owner`` (or ``None`` if
   accessing via the class object)
 
@@ -99,16 +131,27 @@ Example: type constraints
     class TypeConstraint(object):
         def __init__(self, constraint):
             self.constraint = constraint
-            self.map = weakref.WeakKeyDictionary()
+            self.data = weakref.WeakKeyDictionary()
 
         def __get__(self, instance, owner):
-            return self.map[instance]
+            return self.data[instance]
 
         def __set__(self, instance, value):
             if not isinstance(value, self.constraint):
                 raise TypeError
             else:
-                self.map[instance] = value
+                self.data[instance] = value
+
+
+Example: type constraints
+=========================
+
+- Now we have a *reusable* alternative attribute-access behaviour.
+  - Checks type when setting attribute.
+
+- It is also *parameterised* over the ``constraint``.
+
+- Great.  So how do we use it?
 
 
 Example: type constraints
@@ -128,6 +171,21 @@ a **class** attribute (new-style classes only):
             self.y = y
 
 
+Example: type constraints
+=========================
+
+- Example on previous slide uses two ``TypeConstraint`` descriptor
+  *instances*.
+
+- They are used *declaratively*. Interpret as: "``x``/``y`` is
+  *constrained* to ``Real`` numbers."
+
+- We *could* use other kinds descriptors alongside ``x`` and ``y``
+  just as easily.
+  - With ``__getattr__`` we would have to multiplex
+    the behaviours.
+
+
 Example: ``classmethod``
 ========================
 
@@ -137,9 +195,9 @@ Example: ``classmethod``
         def __init__(self, func):
             self.func = func
 
-        def __get__(self, instance, cls):
+        def __get__(self, instance, owner):
             def newfunc(*args, **kwargs):
-                return self.func(cls, *args, **kwargs)
+                return self.func(owner, *args, **kwargs)
             return newfunc
 
 Adapted from class method example:
@@ -161,53 +219,65 @@ Example: ``classmethod``
             )
 
 
-Implementation notes
-====================
+Implementation
+==============
 
-- One descriptor *instance* shared by *all* classes, for a
-  descriptor-based attribute.
+- In Python since 2.2.  Supported by PyPy, IronPython, Jython?  You
+  almost certainly have them in your Python.
+
+- One descriptor *instance* is shared by *all* instances of a class,
+  for a descriptor-based attribute.
 
 - Descriptors can be implemented using the C API.
 
 
-Implementation notes
-====================
+Implementation: when keys collide
+=================================
 
 - Descriptors that define ``__get__`` *and* ``__set__`` are called
   *data descriptors*.
 
 - Descriptors only defining ``__get__`` are *non-data descriptors*.
 
-- Difference: data descriptors take precedence over instance
-  dictionary, and vice versa.
+- What's the difference?  Key collision for a descriptor in class
+  dictionary and value in instance dictionary.
+  - For data descriptors, the descriptor takes precedence.
+  - For non-data descriptors, instance dict takes precedence.
+
+- To define a *read-only data descriptor*, implement ``__set__`` and
+  raise ``AttributeError``.
 
 
-Implementation notes
-====================
+Implementation: storing values
+==============================
 
-- If storing instance data, have to decide where to store it.
+- If using descriptors to store instance data or other values, have
+  to decide *where* to store it.
 
-- Could store on *instance* (in some attribute, by convention; using
-  ``id`` of descriptor object can be handy).
+  - Store against the *instance* (in some attribute, by
+    convention; using ``id`` of descriptor object can be handy).
 
-- Could store on *descriptor* (as in ``WeakKeyDictionary`` example).
+  - Store against the *descriptor* object (as in
+    ``WeakKeyDictionary`` example).
 
-- I prefer storing in instance; use case or space/performance
-  considerations may commend a particular approach.
+- I prefer storing in the instance.
+
+- Use case or space/performance considerations may commend a
+  particular approach.
 
 
 Descriptors and metaclasses
 ===========================
 
 - Remarkable things are possible by combining descriptors with
-  metaclasses
+  *metaclasses*.
 
-- Metaclasses can look for descriptors in *class dictionary* and set
-  up even more advanced behaviours.
+- Metaclasses can look for descriptors in the *class dictionary* and
+  set up even more advanced behaviours.
 
 - Make sure your use case justifies the complexity!
 
-- No more details here. Different topic---different talk.
+- No more metaclass details here. Different topic---different talk.
 
 - This is what I did in Elk_.
 
@@ -221,28 +291,88 @@ Elk
   default values, lazy initialisation*, read-only attributes*,
   required attributes*, type constraints*.
 
-- \* uses descriptors
+  - \* uses descriptors
+
+- Constructors for free.  Works well with inheritance.
+  Comprehensive test suite.
 
 
-Elk
-===
+Elk - example
+=============
 
 .. code:: python
 
   class Point(elk.Elk):
-      x = elk.ElkAttribute(mode='rw', type=int)
-      y = elk.ElkAttribute(mode='rw', type=int)
+      x = elk.ElkAttribute(
+        mode='rw', type=numbers.Real, required=True)
 
-      def clear(self):
-          self.x = 0
-          self.y = 0
+      y = elk.ElkAttribute(
+        mode='rw', type=numbers.Real, required=True)
 
   class Point3D(Point):
-      z = elk.ElkAttribute(mode='rw', type=int)
+      z = elk.ElkAttribute(
+        mode='rw', type=numbers.Real, required=True)
 
-      @elk.after('clear')
-      def clear_z(self):
-          self.z = 0
+
+Elk - example
+=============
+
+.. code:: python
+
+  >>> Point()
+  Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "elk/meta.py", line 105, in __call__
+      if getattr(attrdescs[k], method)(obj, value):
+    File "elk/attribute.py", line 182, in init_instance_required
+      raise AttributeError('required attribute not provided')
+  AttributeError: required attribute not provided
+
+
+Elk - example
+=============
+
+.. code:: python
+
+  >>> Point(x=0, y='wat')
+  Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "elk/meta.py", line 105, in __call__
+      if getattr(attrdescs[k], method)(obj, value):
+    File "elk/attribute.py", line 150, in init_instance_value
+      self.__set__(instance, value[0], force=True)
+    File "elk/attribute.py", line 199, in __set__
+      .format(self._name, self._type)
+  TypeError: 'y' attribute must be a <class 'numbers.Real'>
+
+
+Elk - example
+=============
+
+.. code:: python
+
+  >>> p = Point(x=0, y=0)
+  >>> p.y = 'wat'
+  Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "elk/attribute.py", line 199, in __set__
+      .format(self._name, self._type)
+  TypeError: 'y' attribute must be a <class 'numbers.Real'>
+
+
+Elk - example
+=============
+
+.. code:: python
+
+  >>> del p.x
+  Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "elk/attribute.py", line 42, in wrapped
+      return method(self, instance, *args)
+    File "elk/attribute.py", line 206, in __delete__
+      raise AttributeError('cannot delete required attribute')
+  AttributeError: cannot delete required attribute
 
 
 Elk - ``ElkAttribute``
@@ -295,6 +425,23 @@ Elk - ``ElkAttribute``
         del instance.__elk_attrs__[id(self)]
 
 
+Summary
+=======
+
+- We want *reusable* *alternative* attribute-access
+  semantics.
+  - Many use cases: ORMs, audit, validation etc.
+  - ``__getattr__`` and friends don't cut it---poor *reusability*
+    and hard to *parameterise*.
+  - Descriptors solve these problems!
+
+- Descriptor *protocol* and implementation examples.
+  - Looked at a few technical tradeoffs and gotchas.
+
+- You can do useful and powerful things with descriptors.
+  - Especially when combined with *metaclasses*.
+
+
 Resources
 =========
 
@@ -309,17 +456,22 @@ Resources
 .. _Descriptor HowTo Guide: https://docs.python.org/2/howto/descriptor.html
 
 
-Questions
-=========
-
-
 Thanks for listening
 ====================
 
-Copyright 2014  Fraser Tweedale.
+Copyright 2014  Fraser Tweedale
 
 This work is licensed under the Creative Commons Attribution 4.0
 International License. To view a copy of this license, visit
 http://creativecommons.org/licenses/by/4.0/.
 
-Slides at https://github.com/frasertweedale/talks/.
+Slides
+  https://github.com/frasertweedale/talks/
+Email
+  ``frase@frase.id.au``
+Twitter
+  ``@hackuador``
+
+
+Questions
+=========
