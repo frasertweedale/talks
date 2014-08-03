@@ -13,8 +13,8 @@ Descriptors - attribute access redefined
 Fraser Tweedale
 ***************
 
-Me
-==
+About me
+========
 
 - Developer at Red Hat.
 
@@ -25,8 +25,8 @@ Me
 - Mostly Haskell at home.
 
 
-This talk
-=========
+About this talk
+===============
 
 - What problems do descriptors solve?
 
@@ -51,10 +51,10 @@ Motivation
 
 - It is often useful to *augment* or *replace* the default
   behaviour.
-  - ORMs
-  - Type checking and other kinds of validation
-  - Callbacks (for extensibility, audit, etc)
-  - Things I haven't thought of...
+  - ORMs or other data abstractions
+  - Type checking and data validation
+  - Callbacks (for extensibility, audit, ...)
+  - things I haven't thought of...
 
 
 Motivation
