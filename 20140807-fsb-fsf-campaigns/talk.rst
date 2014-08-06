@@ -294,7 +294,7 @@ International License. To view a copy of this license, visit
 http://creativecommons.org/licenses/by/4.0/.
 
 Slides
-  https://github.com/frasertweedale/talks/20140807-fsb-fsf-campaigns
+  https://github.com/frasertweedale/talks
 Email
   ``frase@frase.id.au``
 Twitter
