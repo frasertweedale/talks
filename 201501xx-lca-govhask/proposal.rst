@@ -26,37 +26,41 @@ interesting and useful apps, mashups or remixes.
 
 Three hackers (including the presenter) who are passionate about
 Haskell - a strongly typed, purely functional programming language -
-decided to put their skills to the test and entered GovHack 2014 to
-see what they could build in a weekend using Haskell.
+entered GovHack 2014 to see what they could build in a weekend using
+Haskell.  `Brisbane Park Finder`_ - a site for searching for parks
+in Brisbane based on location and facilities - was born.
+
+.. _Brisbane Park Finder: http://brisparks.info/
+
 
 This presentation will:
 
 - Introduce the team and explain why we are passionate about
   Haskell, types and functional programming.
 
-- Demonstrate the thing we built during GovHack.
+- Briefly demonstrate Brisbane Park Finder and provide some
+  high-level implementation details including import of the
+  datasets, and request processing and markup generation via the
+  Snap_ web framework.  Particularly useful features of Snap and
+  some other libraries will be discussed.  No prior Haskell or
+  functional programming knowledge required.
 
-- Provide some high-level implementation details of the submission
-  (no prior Haskell or functional programming knowledge required).
+.. _Snap: http://snapframework.com/
 
-- Discuss how we benefited from using Haskell in this competition,
-  as well as the pain points.
+- Discuss how we benefited from using Haskell and strong types
+  during the competition, and identify the pain points and places
+  where type safety was not accomplished, along with the reasons
+  why.
 
-- Encourage people to try Haskell, and exhort them to support open
-  data initiatives.
+- Platform support and options for deploying Haskell applications
+  will be outlined in brief.
+
+- Encourage people to try Haskell and to support open data
+  initiatives.
 
 This presentation will not:
 
 - Attempt to explain monads.
-
-
-Private abstract
-================
-
-The abstract was written *prior to* GovHack 2014 - this is why
-details about the project are conspicuously absent.  If possible, I
-may amend the abstract later to include some information about
-whatever we do end up building.
 
 
 Target audience
@@ -80,7 +84,6 @@ Relevant experience
 
 Having presented at various Brisbane user groups over the past few
 years (Brisbane Functional Programming Group, BrisPy, Brisbane Perl
-Mongers; 5 talks that I can remember), I'm levelling up to
-conferences.  In August I will be presenting at PyCon Australia, and
-I'm submitting another FreeIPA-related talk for OSDC, so perhaps I
-will have also presented on FreeIPA, come January.
+Mongers, Brisbane Free Software), I have levelled up and begun
+submitting talk proposals for conferences.  In August I was a
+speaker at PyCon Australia.
