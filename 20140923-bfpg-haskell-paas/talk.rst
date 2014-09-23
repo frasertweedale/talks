@@ -17,8 +17,8 @@ Fraser Tweedale
 Disclosure
 ==========
 
-- I work for Red Hat.
-- Red Hat is a PaaS provider (OpenShift Online).
+  - I work for Red Hat.
+  - Red Hat is a PaaS provider (OpenShift Online).
 
 
 What is PaaS?
@@ -43,7 +43,7 @@ Who is PaaS?
 
 - OpenShift (Red Hat) †‡
 - Heroku †
-- CloudFoundry ‡
+- Cloud Foundry (Pivotal) ‡
 - FP Haskell Centre (FP Complete) ‡
 - ...various others.
 - †  free tier available
@@ -53,7 +53,7 @@ Who is PaaS?
 Haskell on OpenShift
 ====================
 
-- Community cartridges
+- Supported via "community cartridges"
   - GHC 7.8
   - Variants for major frameworks (Snap, Yesod, scotty, HappStack)
   - Manifest URLs: http://www.haskell.org/haskellwiki/Web/Cloud
@@ -81,7 +81,8 @@ Haskell on Heroku
 
 - Manage using ``heroku`` command line tool.
 
-- CloudFoundry *appears* to be similar, but I haven't tried it.
+- Cloud Foundry *appears* to be similar, but I haven't tried it yet.
+
 
 Haskell on Heroku
 =================
@@ -96,13 +97,13 @@ Haskell on Heroku
   % git push heroku master
 
 
-Haskell on FP Application Server/Keter
-======================================
+Haskell on FP Application Server
+================================
 
 - The only Haskell-centric PaaS (that I know of).
   - So it might be nice...?
 
-- There is no free tier #sadface
+- There is no free tier.  #sadface
 
 - Haven't tried it...
   - but I would love to hear about your experiences if you have/do!
@@ -111,7 +112,7 @@ Haskell on FP Application Server/Keter
 Configuring apps for PaaS
 =========================
 
-- Most PaaSen have app configuration in env vars.
+- Most PaaS provide app configuration through **env vars**.
   - Differences between providers.
   - More services (databases, metrics, etc) = more config.
   - I'm chipping away on a small library to abstract (some of) this.
@@ -146,7 +147,7 @@ Future
 
 - Stackage
   - Infrastructure to create stable builds of complete package sets.
-  - OpenShift cartridges seem to be moving to Stackage.
+  - OpenShift cartridges might support Stackage soon.
 
 - Docker
   - Easier to set up container images.
@@ -162,20 +163,22 @@ Future
 Summary
 =======
 
-- PaaS is cool.
-- Go play.
-- Help make Haskell on PaaS a better experience.
+  - PaaS is cool.
+  - Go play.
+  - Help make Haskell on PaaS a better experience.
+    - Talk to me or Katie for ideas.
 
 
 Resources
 =========
 
-- PaaS info on HaskellWiki: http://www.haskell.org/haskellwiki/Web/Cloud
-- OpenShift Online: https://www.openshift.com/
-- Haskell on OpenShift blog post by Kate Miller: http://is.gd/7eRZDY
-- OpenShift cartridge development: https://github.com/accursoft/Haskell-Cloud
-- Heroku: https://www.heroku.com/
-- Heroku buildpack development: https://github.com/begriffs/heroku-buildpack-ghc
+  - PaaS info on HaskellWiki: http://www.haskell.org/haskellwiki/Web/Cloud
+  - OpenShift Online: https://www.openshift.com/
+  - Haskell on OpenShift blog post by Kate Miller: http://is.gd/7eRZDY
+  - OpenShift cartridge development: https://github.com/accursoft/Haskell-Cloud
+  - Heroku: https://www.heroku.com/
+  - Heroku buildpack development: https://github.com/begriffs/heroku-buildpack-ghc
+  - Keter: https://github.com/snoyberg/keter
 
 
 Thanks for listening
@@ -187,9 +190,9 @@ This work is licensed under the Creative Commons Attribution 4.0
 International License. To view a copy of this license, visit
 http://creativecommons.org/licenses/by/4.0/.
 
-Slides
-  https://github.com/frasertweedale/talks
-Email
-  ``frase@frase.id.au``
-Twitter
-  ``@hackuador``
+  Slides
+    https://github.com/frasertweedale/talks
+  Email
+    ``frase@frase.id.au``
+  Twitter
+    ``@hackuador``
