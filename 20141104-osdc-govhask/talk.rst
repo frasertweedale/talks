@@ -6,12 +6,9 @@
   http://creativecommons.org/licenses/by/4.0/.
 
 
-**********************************
-Rapid app development with Haskell
-**********************************
-
-Fraser Tweedale (@hackuador)
-****************************
+************
+Introduction
+************
 
 About me
 ========
@@ -30,8 +27,6 @@ This talk
 
 - Part experience report; part Haskell/functional programming
   advocacy; part open data advocacy.
-  - No prior Haskell experience necessary
-  - Monads!  (are just an abstraction, and not part of this talk)
 
 - What is Haskell?
 
@@ -42,8 +37,8 @@ This talk
 - Field guide to Haskell web technologies
 
 
-What is Haskell?
-================
+The Haskell Programming Language
+================================
 
 - Functional programming language
 
@@ -60,21 +55,20 @@ What is Haskell?
 ==============
 
 - Type system prevents many kinds of programmer errors.
-  - I make lots of mistakes.  We all do.  Admit it.
-  - Types are documentation.  Theorems for free.  *Parametricity*.
 
 - Purity → *referential transparency* → *equational reasoning*
-  - This is paramount; reasoning about code cannot scale in the
-    presence of side effects.
 
-- Powerful, beautiful abstractions.  Write *less* code that does
-  *more*.  Don't Repeat Yourself.
+- Powerful, beautiful abstractions.  Don't repeat yourself!
 
-- Lots of high-quality libraries and frameworks.
+- High-quality libraries and frameworks.
 
 - *Why Functional Programming Matters*; Hughes 1984.
   http://www.cse.chalmers.se/~rjmh/Papers/whyfp.pdf
 
+
+*******
+GovHack
+*******
 
 GovHack
 =======
@@ -87,10 +81,7 @@ GovHack
 - All levels of govt involved; awesome that they are doing this;
   get behind it!
 
-- Brisbane Functional Programming Group entered a team
-  - Ben, full-time Haskeller
-  - Sean, soon-to-be full-time Haskeller
-  - Myself, hobbyist Haskeller
+- Brisbane Functional Programming Group entered a team (3 people)
 
 
 GovHack - deciding the project
@@ -98,11 +89,10 @@ GovHack - deciding the project
 
 - Shortlisted a handful of datasets.
 
-- More in-depth investigation of data sanity, formats/syntax and
-  usefulness.
+- Assessed data sanity, formats/syntax and usefulness.
 
 - Considered writing libraries to parse/convert peculiar formats
-  used in various data sets (e.g. unusual date formats).
+  used in various data sets (unusual date formats, etc)
 
 - Eventually decided on...
 
@@ -134,6 +124,10 @@ GovHack - Brisbane Park Finder
 .. image:: screenshot02.png
 
 
+**************
+Implementation
+**************
+
 Implementation - importing data
 ===============================
 
@@ -152,14 +146,14 @@ Data type representing a *park facility* CSV record:
 .. code:: haskell
 
   data Facility = Facility
-    { _facParkNumber :: CsvInt
+    { _facParkNumber :: Int
     , _facParkName   :: Text
-    , _nodeId        :: CsvInt
+    , _nodeId        :: Int
     , _nodeUse       :: Text
     , _nodeName      :: Text
     , _description   :: Text
-    , _easting       :: CsvDouble
-    , _northing      :: CsvDouble
+    , _easting       :: Double
+    , _northing      :: Double
     }
 
 
@@ -194,10 +188,9 @@ Implementation - importing data
     fileContents <- readFile "facilities.csv"
     case decodeByName fileContents of
       Left err ->
-        putStrLn $ "CSV parse error: " ++ err
+        putStrLn ("CSV parse error: " ++ err)
       Right facilities ->
-        void $
-          runReaderT (mapM_ insertFacility facilities) db
+        runWithDb (mapM_ insertFacility facilities) db
 
 
 Implementation - database
@@ -255,7 +248,7 @@ Implementation - database
        FROM park_facility f
        WHERE f.park_number = ?
      |]
-     (Only id)    -- 'Only' constructs single-value tuple
+     (Only id)    -- a single '?' param
 
 
 Implementation - Snap Framework
@@ -301,28 +294,28 @@ Implementation - JavaScript
 Retrospective
 =============
 
-- "The worst thing about Haskell was... nothing.  All the pain
-  points were *other* things.  Haskell just got out of the way."
+- "Haskell just got out of the way; pain
+  points were *other* things."
 
-- "You could make changes at 3am; as long as the code is compiling
-  you can return in the morning and not be *too* afraid."
+- "You can make changes at 3am; as long as the code is compiling
+  you can come back and not be *too* afraid."
 
 - Loss of type safety at database interface bit us a few times.
-  - Some libraries do better than *postgresql-simple*.
 
-- PureScript lessons.
-  - Don't try to learn conceptually dense things *during*
-    a hackfest.
-  - Will probably make a comeback for GovHack 2015
+- PureScript: don't try to learn conceptually dense things *during*
+  a hackfest.
 
-- UX sucked; we needed someone with UX focus.  Our app looked
-  rubbish and *felt* rubbish.
+- UX *sucked*; we needed someone with UX focus.
 
 - Great fun.  Would Haskell again.  Bring on GovHack 2015.
 
 
+***************************************
 Field guide to Haskell web technologies
-=======================================
+***************************************
+
+Servers
+=======
 
 - WAI - Web Application Interface
   - à la Rack, WSGI et al.
@@ -342,8 +335,8 @@ http://www.aosabook.org/en/posa/warp.html
 .. image:: warp-benchmark.png
 
 
-Field guide to (other) Haskell web frameworks
-=============================================
+Frameworks
+==========
 
 - Yesod
   - Type-safe routes, URLs, templates.
@@ -356,7 +349,11 @@ Field guide to (other) Haskell web frameworks
 
 - HappStack
   - http://happstack.com/docs/crashcourse/index.html
-  - http://happstack.com/page/view-page-slug/9/happstack-lite-tutorial
+
+- Silk ``rest``
+  - Define REST APIs; generate client libs; auto docs
+  - Runs on Snap, HappStack or native WAI
+  - https://silkapp.github.io/rest/
 
 
 Deploying Haskell apps
@@ -365,17 +362,13 @@ Deploying Haskell apps
 - Platform as a Service (PaaS)
   - OpenShift community cartridge
   - Heroku buildpack
-  - FP Application Server
-    - The only Haskell-centris PaaS
-    - https://www.fpcomplete.com/
-
+  - FP Application Server (https://www.fpcomplete.com/)
   - http://www.haskell.org/haskellwiki/Web/Cloud
   - Lightning talk: http://is.gd/CNx0na
 
 - Docker
   - Haskell/GHC images: https://registry.hub.docker.com/
   - No official *Language Stack* for Haskell yet.
-    - But they have one for *Ruby*?!  Go figure...
 
 - DIY
 
@@ -384,28 +377,26 @@ Summary
 =======
 
 - Open data is important, and fun!
-  - You all have useful skills, so get involved.
-  - You might even win a prize.
+  - You have useful skills, so get involved.  You might win $$$
 
 - Functional programming matters.
 
 - Lots of lessons learned in taking on GovHack in Haskell.
-  - Haskell is great for rapid (web) app development.  FP + types +
-    good libraries and frameworks are a formiddable combo.
-  - Deployment options still bit immature.
+  - Haskell is great for rapid (web) app development.
+  - FP + types + good libraries/frameworks = powerful combo.
+  - Deployment options still a bit immature.
   - Don't neglect UX!
 
 
 Resources
 =========
 
-  - Learn Haskell: https://github.com/bitemyapp/learnhaskell
-  - Snap Quick Start Guide: http://snapframework.com/docs/quickstart
-  - PureScript by Example: https://leanpub.com/purescript/
-  - HaskellWiki: http://www.haskell.org/haskellwiki/Web
-  - GovHack: http://www.govhack.org/
-  - BFPG: http://bfpg.org ; #bfpg (Freenode)
-
+- Learn Haskell: https://github.com/bitemyapp/learnhaskell
+- Snap Quick Start Guide: http://snapframework.com/docs/quickstart
+- PureScript by Example: https://leanpub.com/purescript/
+- HaskellWiki: http://www.haskell.org/haskellwiki/Web
+- GovHack: http://www.govhack.org/
+- BFPG: http://bfpg.org ; #bfpg (Freenode)
 
 
 Thanks for listening
@@ -417,13 +408,14 @@ This work is licensed under the Creative Commons Attribution 4.0
 International License. To view a copy of this license, visit
 http://creativecommons.org/licenses/by/4.0/.
 
-  Slides
-    https://github.com/frasertweedale/talks/
-  Email
-    ``frase@frase.id.au``
-  Twitter
-    ``@hackuador``
+Slides
+  https://github.com/frasertweedale/talks/
+Email
+  ``frase@frase.id.au``
+Twitter
+  ``@hackuador``
 
 
+*********
 Questions
-=========
+*********
