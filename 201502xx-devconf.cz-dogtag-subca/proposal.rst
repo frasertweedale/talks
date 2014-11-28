@@ -19,8 +19,8 @@ SSL/TLS has been securing Internet traffic for two decades and the
 X.509 public key infrastructure (PKI) on which it is based has been
 with us even longer.  Over the years the protocols and certificate
 formats have evolved incrementally, but emerging use cases are
-driving significant change in one PKI implementation: the Dogtag
-Certificate System.
+driving significant change in Dogtag Certificate System, an
+open-source PKI implementation.
 
 This talk will introduce fundamental PKI concepts including public
 key cryptography, certificate authorities, certificate chains and
