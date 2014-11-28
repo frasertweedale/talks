@@ -9,32 +9,31 @@
 Topic
 =====
 
-**Lightweight sub-CAs in Dogtag Certificate System**
+**Public Key Infrastructure: common and emerging use cases**
 
 
 Abstract
 ========
 
-Dogtag Certificate System currently supports one CA per instance,
-but this is changing.  This talk will cover the motivation, design
-and implementation of support for sub-CAs in Dogtag, with a view to
-multi-tenancy of unrelated CA heirarchies in the future.
+SSL/TLS has been securing Internet traffic for two decades and the
+X.509 public key infrastructure (PKI) on which it is based has been
+with us even longer.  Over the years the protocols and certificate
+formats have evolved incrementally, but emerging use cases are
+driving significant change in one PKI implementation: the Dogtag
+Certificate System.
 
-We will examine use cases from FreeIPA and the OpenStack Barbican
-project that highlight some limitations of Dogtag's current
-deployment model and justify a lightweight mechanism for creating
-sub-CAs within an existing Dogtag instance.
+This talk will introduce fundamental PKI concepts including public
+key cryptography, certificate authorities, certificate chains and
+revocation.  We will discuss today's common PKI use cases, how these
+concepts are applied to solve them, and the current architecture of
+the Dogtag Certificate System in relation to these.
 
-Details of internal changes needed to support multiple CAs will be
-given, including the CRL and OCSP systems, structure of the
-certificate database and distribution of signing private keys among
-replicas.
-
-The API for creating and administering sub-CAs will be detailed,
-along with other changes to external interfaces.  The upcoming
-FreeIPA integration work will be discussed in brief, and the talk
-will conclude with look at what remains to be done, and possible
-future directions and use cases for multiple CAs in Dogtag.
+An examination of recent developments in traditional PKI use cases
+and emerging use cases from other domains including identity
+management and cloud infrastructure highlight the need to teach the
+old Dogtag some new tricks.  The talk will conclude with an overview
+of upcoming and possible future changes in Dogtag to meet the PKI
+needs of tomorrow.
 
 Project URL: http://pki.fedoraproject.org/
 
