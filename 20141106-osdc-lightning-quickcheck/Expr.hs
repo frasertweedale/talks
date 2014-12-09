@@ -34,12 +34,15 @@ instance Arbitrary Expr where
       , Add <$> gen n' <*> gen n'
       , Mul <$> gen n' <*> gen n'
       ]
+  shrink (Add a b) = [a, b] ++ (Add <$> shrink a <*> shrink b)
+  shrink (Mul a b) = [a, b] ++ (Mul <$> shrink a <*> shrink b)
+  shrink _ = []
 
-prop_elimMul1Equiv :: Expr -> Property
-prop_elimMul1Equiv e = property $ eval e == eval (elimMul1 e)
+prop_elimMul1Equiv :: Expr -> Bool
+prop_elimMul1Equiv e = eval e == eval (elimMul1 e)
 
-prop_elimMul1Elim :: Expr -> Property
-prop_elimMul1Elim expr = property $ f (elimMul1 expr) where
+prop_elimMul1Elim :: Expr -> Bool
+prop_elimMul1Elim expr = f (elimMul1 expr) where
   f (Mul _ (Lit 1)) = False
   f (Mul (Lit 1) _) = False
   f (Mul a b) = f a && f b
