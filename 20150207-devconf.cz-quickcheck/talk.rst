@@ -364,6 +364,10 @@ Resources
   https://github.com/bitemyapp/learnhaskell
 
 
+**********
+Questions?
+**********
+
 Thanks for listening
 ====================
 
@@ -373,14 +377,11 @@ This work is licensed under the Creative Commons Attribution 4.0
 International License. To view a copy of this license, visit
 http://creativecommons.org/licenses/by/4.0/.
 
+Feedback
+  http://devconf.cz/f/72
 Slides
   https://github.com/frasertweedale/talks/
 Email
   ``ftweedal@redhat.com``
 Twitter
   ``@hackuador``
-
-
-*********
-Questions
-*********
