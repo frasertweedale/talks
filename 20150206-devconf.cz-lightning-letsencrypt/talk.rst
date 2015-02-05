@@ -6,8 +6,8 @@
   http://creativecommons.org/licenses/by/4.0/.
 
 
-Deploying TLS (today)
-=====================
+Deploying TLS today
+===================
 
 #. Pay $$$ to a *certificate authority*
 #. Prove control of domain (ad-hoc process)
@@ -35,21 +35,57 @@ ACME protocol
 
 - *Automated Certificate Management Environment*
 - Domain validation
-- Certificate request and renewal
-- Server configuration
+- Certificate request, renewal, revocation
+- Client configures web server
 
 
-Deploying TLS (tomorrow)
-========================
+ACME domain validation challenges
+=================================
+
+- Host token at HTTPS resource (self-signed cert)
+  - ``GET /.well-known/acme-challenge/...``
+
+- SNI
+  - Present self-signed cert for ``<computed>.acme.invalid``
+
+- DNS
+  - ``_acme-challenge.example.com. IN TXT "<token>"``
+
+- Proof of possession of prior key
+
+
+Deploying TLS with ACME
+=======================
 
 .. demo
 
 
-Links
-=====
+Status
+======
+
+- Under heavy development
+- Protocol still evolving
+- Nginx configurator in the works
+- Mid-2015 launch
+
+
+Future
+======
+
+- More validation challenges (DNSSEC?)
+- Other applications (S/MIME for email?)
+- Support from other CAs?  Hopefully!
+
+
+Get involved
+============
 
 - https://letsencrypt.org/
-- https://github.com/letsencrypt/acme-spec
+- https://github.com/letsencrypt/
+- #letsencrypt on Freenode
+- https://www.ietf.org/mailman/listinfo/acme
+- client-dev+subscribe@letsencrypt.org
+- ca-dev+subscribe@letsencrypt.org
 
 
 Fin
