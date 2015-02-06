@@ -346,6 +346,8 @@ Proof
 
 - Completeness proofs
 
+  - ``rev`` example: http://is.gd/EhanO1
+
 
 Resources
 =========
