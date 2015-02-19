@@ -31,7 +31,7 @@ This talk
 
 - Demo
 
-- Discussion and future directions
+- Discussion; future directions
 
 
 *************
@@ -41,10 +41,10 @@ Deploying TLS
 Deploying TLS
 =============
 
-#. Pay $$$ to a *certificate authority*
-#. Prove control of domain (ad-hoc process)
-#. Certificate request (various protocols)
-#. Configure network server (non-trivial)
+0. Pay $$$ to a *certificate authority*
+1. Prove control of domain (ad-hoc process)
+2. Certificate request (various protocols)
+3. Configure network server (non-trivial)
 
 Domain validation
 =================
@@ -56,10 +56,6 @@ Domain validation
 
 .. image:: dv-networksolutions.png
 
-Domain validation
-=================
-
-.. image:: dv-ssl.png
 
 Certificate request
 ===================
@@ -189,17 +185,17 @@ ACME key authorisation
 ACME domain validation challenges
 =================================
 
-- Provision HTTPS resource
+``simpleHttps``: deploy HTTPS resource
 
-- Provision SNI host
+``dvsni``: sign custom certificate for use with SNI
 
-- Provision DNS record
+``dns``: provision DNS TXT record
 
-- Proof of possession of prior key
+``proofOfPossession``: proof control of already-trusted key
 
-- Recovery contact
+``recoveryContact``: verify previously-authorized client using contact details
 
-- Recovery token
+``recoveryToken``: verify previously-authorized client by previously issued token
 
 
 ACME DV: ``simpleHttps``
@@ -213,11 +209,13 @@ ACME DV: ``simpleHttps``
   { "type": "simpleHttps",
     "path": "6tbIMBC5Anhl5bOlWT5ZFA" }
 
-- Provision a file with specified content
+- Provision a file with content of ``token``
 
   - ASCII, >= 128 bits of entropy
 
 - Host at ``.well-known/acme-challenge/<path>``
+
+  - ``text/plain``
 
 - Self-signed certificate (CN is hostname being validated)
 
@@ -282,20 +280,17 @@ ACME DV: ``proofOfPossession``
     "nonce": "vOxx8LyGzIaiAE8teU5TD7",
     "signature": { ... } }
 
+
 ACME DV: ``proofOfPossession``
 ==============================
 
-- Prove possession of some *trusted* key
-
-  - Not necessarily the key being authorised
-
-- ``jwk``: the key to prove possession of
-
-  - other ``hints`` fields are optional
-
-- ``signature``: custom construction, not JWS
+- ``signature``: custom construction (not JWS)
 
 - signing input: ``client-nonce || server-nonce``
+
+- Proves possession of a key *already-trusted* by ACME server
+
+- ``hints``: all fields are optional except ``jwk``
 
 
 ACME certificate issuance
@@ -311,7 +306,7 @@ ACME certificate issuance
 
 - CSR is PKCS #10 DER, base64-encoded
 
-- Can request certificate for *multiple* authorised identifiers
+- Can request certificate for *multiple* validated identifiers
   (``subjectAltName`` ``extensionRequest`` attributes)
 
 - If successful...
@@ -344,12 +339,12 @@ Demo
 ****
 
 
-Status
-======
+Let's Encrypt! Status
+=====================
 
-- Under heavy development
+- Client and server under heavy development
 
-- ACME is still evolving
+- ACME protocol still evolving
 
 - Nginx configurator in the works
 
@@ -370,40 +365,9 @@ Protocol evolution
 - Switch from custom signature construction to JWS
 
 
-..
-  ``
-  Servers SHOULD NOT respond to GET requests for registration
-  resources, since these requests not authenticated.
-  ''
-
-  Increase burden on ACME servers to ensure that information
-  about (existence of) validations in progress does not leak?
-
-  - Resource names must be random (unguessable)
-
-  - Signatures over request data must be validated before checking
-    whether resource exists to prevent timing attacks.
-
-  - If ACME takes off and multiple implementations emerge, mistakes
-    will be made.
-
-  original sig format was... not secure
-
-  TODO include reference to Adam Langley (agl) bug report
-
-
 ******
 Future
 ******
-
-More validation challenges
-==========================
-
-- DNSSEC
-
-- Email
-
-- WHOIS
 
 
 Adoption
@@ -411,11 +375,21 @@ Adoption
 
 I would like to see:
 
-- Support from multiple public CAs (even paid ones)
-
 - Support for all popular HTTP servers
 
+- Support from multiple public CAs (even paid ones)
+
 - Uptake by PaaS and IaaS providers / software
+
+
+Other validation challenges
+===========================
+
+- DNSSEC
+
+- Email (for MTAs?)
+
+- WHOIS
 
 
 Other applications
@@ -429,9 +403,7 @@ Other applications
 Side-effects
 ============
 
-- Better server configuration mechanisms / APIs
-
-  - Automatic cipher suite update?
+- Better server configuration mechanisms / APIs (yay!)
 
 - CA cartel probably won't like it!
 
