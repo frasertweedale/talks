@@ -191,11 +191,11 @@ ACME domain validation challenges
 
 ``dns``: provision DNS TXT record
 
-``proofOfPossession``: proof control of already-trusted key
+``proofOfPossession``: prove control of *already-trusted* key
 
-``recoveryContact``: verify previously-authorized client using contact details
+``recoveryContact``: verify previously-authorised client using contact details
 
-``recoveryToken``: verify previously-authorized client by previously issued token
+``recoveryToken``: verify previously-authorised client by previously issued token
 
 
 ACME DV: ``simpleHttps``
@@ -258,39 +258,6 @@ ACME DV: ``dns``
 - Provision TXT record for domain being validated
 
   - ``_acme-challenge.<domain>. IN TXT "<token>"``
-
-
-ACME DV: ``proofOfPossession``
-==============================
-
-::
-
-  { "type": "proofOfPossession",
-    "alg": "RS256",
-    "nonce": "eET5udtV7aoX8Xl8gYiZIA",
-    "hints": {
-      "jwk": { ... },
-      "certFingerprints": [ ... ],
-      "subjectKeyIdentifiers": [ ... ],
-      "serialNumbers": [ ... ],
-      "issuers": ["O=Trusted LLC,CN=Trustworthy Public CA"]
-      "authorizedFor": ["example.com", "example.net"] } }
-
-  { "type": "proofOfPossession",
-    "nonce": "vOxx8LyGzIaiAE8teU5TD7",
-    "signature": { ... } }
-
-
-ACME DV: ``proofOfPossession``
-==============================
-
-- ``signature``: custom construction (not JWS)
-
-- signing input: ``client-nonce || server-nonce``
-
-- Proves possession of a key *already-trusted* by ACME server
-
-- ``hints``: all fields are optional except ``jwk``
 
 
 ACME certificate issuance
