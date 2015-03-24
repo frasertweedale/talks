@@ -14,7 +14,7 @@ Intro
 This talk
 =========
 
-- What am FFI?
+- What's an FFI?
 
 - Haskell C FFI
 
@@ -26,7 +26,7 @@ This talk
 What is an FFI?
 ===============
 
-- Mechanism to call code written in one langauge
+- Mechanism to call code written in one language
   from code written in another language
 
 - Often used to *bind* or *wrap* an entire library (usually C)
@@ -68,12 +68,31 @@ Haskell FFI
     c_rand :: IO CUInt
 
 
-Haskell FFI
-===========
+Haskell FFI - ``safe`` and ``unsafe``
+=====================================
 
-- *Your* responsibility to use ``IO`` where appropriate
+- ``safe`` is *required* when foreign function can call back into
+  Haskell runtime
 
-- ``safe`` vs ``unsafe``
+- ``safe`` is *recommended* when foreign function could block
+
+- ``safe`` has performance penalties
+
+- ``safe`` is the default
+
+
+Haskell FFI - pointers
+======================
+
+.. code:: c
+
+  int thing_get_version(thing_t *thing);
+
+  char *thing_get_name(thing_t *thing);
+
+  int thing_new(char *name, thing_t **p);
+
+  void thing_free(thing_t *thing);
 
 
 Haskell FFI - pointers
@@ -84,10 +103,10 @@ Haskell FFI - pointers
   #include <thing.h>
 
   foreign import ccall "thing_get_version"
-    thing_get_version :: Ptr Thing -> IO CUInt
+    thing_get_version :: Ptr Thing -> CUInt
 
   foreign import ccall "thing_get_name"
-    thing_get_name :: Ptr Thing -> IO (Ptr CChar)
+    thing_get_name :: Ptr Thing -> Ptr CChar
 
   foreign import ccall "thing_new"
     thing_new :: Ptr CChar -> Ptr (Ptr Thing) -> IO CUInt
@@ -105,7 +124,6 @@ Haskell FFI - pointers
   alloca :: Storable a => (Ptr a -> IO b) -> IO b
 
 
-
 Haskell FFI - pointers
 ======================
 
@@ -116,11 +134,25 @@ Haskell FFI - pointers
   makeThing :: String -> IO (Maybe Thing)
   makeThing s =
     withCString s $ \name ->
-      alloca $ \ptr ->
+      alloca $ \ptr -> do
         result <- thing_new name ptr
         if result == 0
           then Just . Thing <$> peek ptr
           else return Nothing
+
+
+Haskell FFI - garbage collection
+================================
+
+.. code:: haskell
+
+  type FinalizerPtr a = FunPtr (Ptr a -> IO ())
+
+  newForeignPtr :: FinalizerPtr a -> Ptr a -> IO (ForeignPtr a)
+
+  addForeignPtrFinalizer :: FinalizerPtr a -> ForeignPtr a -> IO ()
+
+  withForeignPtr :: ForeignPtr a -> (Ptr a -> IO b) -> IO b
 
 
 Haskell FFI - garbage collection
@@ -136,12 +168,24 @@ Haskell FFI - garbage collection
   makeThing :: String -> IO (Maybe Thing)
   makeThing s =
     withCString s $ \name ->
-      alloca $ \ptr ->
+      alloca $ \ptr -> do
         result <- thing_new name ptr
         if result == 0
           then Just . Thing . newForeignPtr thing_free
             <$> peek ptr
           else return Nothing
+
+
+Haskell FFI - ``Storable``
+==========================
+
+.. code:: haskell
+
+  class Storable a where
+    sizeOf :: a -> Int
+    alignment :: a -> Int
+    peek :: Ptr a -> IO a
+    poke :: Ptr a -> a -> IO ()
 
 
 ********
@@ -192,10 +236,10 @@ Detour: ``notmuch``
 
   -- TURNS INTO --
 
-  data Sort = SortOldestFirst
-            | SortNewestFirst
-            | SortMessageId
-            | SortUnsorted
+  data Sort = NotmuchSortOldestFirst
+            | NotmuchSortNewestFirst
+            | NotmuchSortMessageId
+            | NotmuchSortUnsorted
             deriving (Enum)
 
 
@@ -259,7 +303,7 @@ Detour: ``notmuch``
 
 - ``{#context prefix = "notmuch" #}``
 
-- Finalisers must be manually attached (``addForeignPtrFinalizer``)
+- Finalisers must be manually attached (use ``addForeignPtrFinalizer``)
 
 - ``pointer`` directive without ``newtype`` makes type synonym
 
@@ -287,7 +331,9 @@ Other tools
 
 - Can bind to ``#define``, e.g. macros, constants
 
-- Better ``Storable`` instance automation
+- Better ``Storable`` boilerplate automation
+
+- Otherwise, ``c2hs`` is more powerful
 
 - Discussion of differences (Stack Overflow): http://is.gd/weyuYN
 
@@ -300,6 +346,10 @@ More tools
 
 - ``bindings-DSL``
   - CPP macros to help write bindings
+
+- ``language-c-inline``
+  - Inline C and Objective C via TH
+  - https://github.com/mchakravarty/language-c-inline/
 
 
 **********
@@ -315,7 +365,7 @@ What we covered
 
 - ``c2hs`` examples
 
-- Role call of other tools
+- Overview of other tools
 
 - You can write a binding now!
 
@@ -338,9 +388,9 @@ What we didn't cover
 Resources
 =========
 
-- Haskell 98 FFI Report: http://is.gd/ObI8Gn
+- Haskell 2010 Report, FFI chapter: http://is.gd/qF20e9
 - https://en.wikibooks.org/wiki/Haskell/FFI
-- *Real World Haskell* chapter: http://is.gd/Rov6w5
+- https://wiki.haskell.org/FFI_cook_book
 - ``c2hs`` documentation: http://is.gd/JpX0Ku
 - https://github.com/frasertweedale/hs-notmuch
 
