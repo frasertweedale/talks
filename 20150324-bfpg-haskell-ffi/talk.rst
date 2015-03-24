@@ -148,11 +148,14 @@ Haskell FFI - garbage collection
 
   type FinalizerPtr a = FunPtr (Ptr a -> IO ())
 
-  newForeignPtr :: FinalizerPtr a -> Ptr a -> IO (ForeignPtr a)
+  newForeignPtr
+    :: FinalizerPtr a -> Ptr a -> IO (ForeignPtr a)
 
-  addForeignPtrFinalizer :: FinalizerPtr a -> ForeignPtr a -> IO ()
+  addForeignPtrFinalizer
+    :: FinalizerPtr a -> ForeignPtr a -> IO ()
 
-  withForeignPtr :: ForeignPtr a -> (Ptr a -> IO b) -> IO b
+  withForeignPtr
+    :: ForeignPtr a -> (Ptr a -> IO b) -> IO b
 
 
 Haskell FFI - garbage collection
@@ -376,7 +379,6 @@ What we didn't cover
 - Calling Haskell from C (``foreign export``)
 
 - Dealing with external GCs, "special" allocators
-  - I have war stories
 
 - ``Storable`` typeclass
 
