@@ -27,13 +27,14 @@ used inside companies and large organisations are different:
   policies that are defined outside the application.
 
 - Users may be expected or required to use a *single sign-on*
-  technology like Kerberos to authenticate to applications.
+  technology such as Kerberos or SAML to authenticate to
+  applications.
 
-This talk will familiarise the audience with these requirements and
-environment and demonstrate how Django applications can be
-integrated with an identity management system to meet business
-requirements while providing a positive user experience.  Particular
-technologies covered will include:
+This talk will familiarise the audience with these technologies and
+demonstrate how Django applications can be integrated with an
+identity management system to meet business requirements while
+providing a positive user experience.  Particular technologies
+covered will include:
 
 - FreeIPA: an open-source identity management solution, for defining
   users, groups and authorisation policies
@@ -45,7 +46,8 @@ technologies covered will include:
   from a directory
 
 The talk will conclude with discussion about upcoming Kerberos
-features and progress in making identity management integration
+features, techniques for dealing with multiple authentication
+methods, and progress in making identity management integration
 easier for Django developers.
 
 People developing or deploying Django applications in business
