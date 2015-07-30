@@ -119,27 +119,44 @@ Fernet
 
 - Implements the Fernet_ specification
   - https://github.com/fernet/spec/blob/master/Spec.md
-
-- AES-128-CBC, HMAC-SHA256
+  - AES-128-CBC with HMAC-SHA256
 
 - Simple key rotation (``MultiFernet``)
 
 .. _Fernet: https://github.com/fernet/spec/blob/master/Spec.md
 
 
-Fernet
-======
+Fernet - encryption
+===================
 
 .. code:: python
 
     from cryptography.fernet import Fernet
 
-    plaintext = b"for your eyes only"
-    key = Fernet.generate_key()
-    f = Fernet(key)
-    ciphertext = f.encrypt(plaintext)
+    message = b"for your eyes only"
 
-    decrypted_plaintext = f.decrypt(ciphertext)
+    # 32-byte base64url-encoded string
+    key = Fernet.generate_key()
+
+    f = Fernet(key)
+
+    # base64url-encoded token
+    token = f.encrypt(message)
+
+
+Fernet - decryption
+===================
+
+.. code:: python
+
+    # key storage/distribution is out of scope
+    f = Fernet(key)
+
+    try:
+        message = f.decrypt(ciphertext)
+
+    except cryptography.fernet.InvalidToken:
+        print "decryption failed"
 
 
 X.509
@@ -157,8 +174,8 @@ X.509
 .. _RFC 2986: https://tools.ietf.org/html/rfc2986
 
 
-X.509
-=====
+X.509 - certificate request
+===========================
 
 .. code:: python
 
@@ -178,35 +195,42 @@ X.509
 Hazmat layer
 ============
 
-- Safety off
+- ``cryptography.hazmat``
 
-- Up to developer to use correctly
+- Cryptographic primitives
+
+- Safety off; up to you to use correctly
 
 
 Primitives
 ==========
 
-- SHA-1, SHA-2, ...
+- Digests: SHA-1, SHA-2, ...
 
-- HMAC
+- MACs: HMAC
 
-- HOTP, TOTP
+- One-time pads: HOTP, TOTP
 
-- PBKDF2, HKDF
+- Key-stretching: PBKDF2, HKDF
 
-- AES, 3DES, ...
+- Block ciphers: AES, 3DES, ...
 
-- DSA, RSA, ECDSA, DH
+- Public-key algorithms: DSA, RSA, ECDSA, DH
 
-- DER, PEM, OpenSSH
+- Serialisation: DER, PEM, OpenSSH
 
 
 Backends
 ========
 
-- Support for multiple backends
+- Implementations of primitives are provided by *backends*
 
-- Backends can be composed (``MultiBackend``)
+- Backends implement *interfaces*
+  - ``CipherBackend``, ``HashBackend``, ...
+
+- Backends available: OpenSSL, CommonCrypto (OS X, iOS)
+
+- Use ``MultiBackend`` to compose backends
 
 
 ************
@@ -222,6 +246,9 @@ FreeIPA Vault
 
 - Symmetric or asymmetric encryption
 
+- http://www.freeipa.org/
+
+
 FreeIPA Vault
 =============
 
@@ -234,16 +261,9 @@ FreeIPA Vault
             return Fernet(symmetric_key).encrypt(data)
 
         elif public_key:
-            rsa_public_key = load_pem_public_key(
-                data=public_key, backend=default_backend())
-            return rsa_public_key.encrypt(
-                data,
-                padding.OAEP(
-                    mgf=padding.MGF1(algorithm=hashes.SHA1()),
-                    algorithm=hashes.SHA1(),
-                    label=None
-                )
-            )
+            return public_key.encrypt(
+                data, padding.PKCS1v15())
+
 
 FreeIPA Vault
 =============
@@ -257,19 +277,26 @@ FreeIPA Vault
                 return Fernet(symmetric_key).decrypt(data)
 
             elif private_key:
-                rsa_private_key = load_pem_private_key(...)
-                return rsa_private_key.decrypt(
-                    data,
-                    padding.OAEP(...)
-                )
+                return private_key.decrypt(
+                    data, padding.PKCS1v15())
 
-          except (InvalidToken, AssertionError):
+        except (InvalidToken, ValueError):
               raise errors.AuthenticationError(
                   message=_('Invalid credentials'))
 
 
 jwcrypto
 ========
+
+- Python implementation of JWS / JWE / JWT
+
+- https://github.com/simo5/jwcrypto
+
+- Used by *Custodia*, a secure key distribution service
+
+
+jwcrypto - imports
+==================
 
 .. code:: python
 
@@ -281,41 +308,41 @@ jwcrypto
     padfn = padding.PKCS1v15()
     hashfn = hashes.SHA256()
 
-jwcrypto
-========
+jwcrypto - read public key
+==========================
 
 .. code:: python
 
-    def _rsa_pub(k):
+    def _rsa_pub(jwk):
         return rsa.RSAPublicNumbers(
-            _decode_int(k['e']),
-            _decode_int(k['n'])
+            _decode_int(jwk['e']),
+            _decode_int(jwk['n'])
         )
 
-jwcrypto
-========
+jwcrypto - read private key
+===========================
 
 .. code:: python
 
-    def _rsa_pri(k):
+    def _rsa_pri(jwk):
         return rsa.RSAPrivateNumbers(
-            _decode_int(k['p']),
-            _decode_int(k['q']),
-            _decode_int(k['d']),
-            _decode_int(k['dp']),
-            _decode_int(k['dq']),
-            _decode_int(k['qi']),
-            _rsa_pub(k)
+            _decode_int(jwk['p']),
+            _decode_int(jwk['q']),
+            _decode_int(jwk['d']),
+            _decode_int(jwk['dp']),
+            _decode_int(jwk['dq']),
+            _decode_int(jwk['qi']),
+            _rsa_pub(jwk)
         )
 
 
-jwcrypto
-========
+jwcrypto - sign
+===============
 
 .. code:: python
 
-    def sign(key, payload):
-        private_key = _rsa_pri(key)
+    def sign(jwk, payload):
+        private_key = _rsa_pri(jwk)
 
         # get an AsymmetricSignatureContext
         signer = private_key.signer(padfn, hashfn)
@@ -325,23 +352,28 @@ jwcrypto
         return signature
 
 
-jwcrypto
-========
+jwcrypto - verify
+=================
 
 .. code:: python
 
-    def verify(key, payload, signature):
-        public_key = _rsa_pub(key)
+    def verify(jwk, payload, signature):
+        public_key = _rsa_pub(jwk)
 
         # get an AsymmetricVerificationContext
-        verifier = public_key.verifier(signature, padfn, hashfn)
+        verifier = \
+            public_key.verifier(signature, padfn, hashfn)
         verifier.update(payload)
 
-        # in invalid, raises
-        # cryptography.exceptions.InvalidSignature
-        #
-        verifier.verify()
+        try:
+            verifier.verify()
+        except cryptography.exception.InvalidSignature:
+            # ruh roh
 
+
+***********
+Wrapping up
+***********
 
 Security
 ========
