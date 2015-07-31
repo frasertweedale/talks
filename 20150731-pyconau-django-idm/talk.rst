@@ -10,24 +10,14 @@
 Introduction
 ************
 
-About me
-========
-
-- Identity Management developer at Red Hat
-
-- *Dogtag Certificate System* and *FreeIPA*
-
-- Mostly Python and Java at work
-
-- Never used Django until I wrote this talk :)
-
-
 30,000' view
 ============
 
-- Stop building your apps as identity silos
-- *python-social-auth* solving it for the open web
-- Not all apps are for public consumption...
+- Don't build your apps as identity silos
+
+- *python-social-auth* and *allauth* solve this for the open web
+
+- Not all apps are (deployed) for public consumption...
 
 
 Identity management
