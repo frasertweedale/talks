@@ -6,22 +6,6 @@
   http://creativecommons.org/licenses/by/4.0/.
 
 
-************
-Introduction
-************
-
-About me
-========
-
-- Identity Management developer at Red Hat
-
-- *Dogtag Certificate System* and *FreeIPA*
-
-- Mostly Python and Java at work
-
-- Mostly Haskell for other projects
-
-
 *************
 Cryptography!
 *************
@@ -59,13 +43,15 @@ Background
 
 - Existing libraries: M2Crypto, PyCrypto, PyOpenSSL
 
-- Lack of PyPy, Python 3 support
+- Lagging in Python 3, PyPy support
 
 - Insecure implementations, bad APIs, poor defaults
 
 - Missing some modern primitives, cipher modes
 
 - Lack of high-level APIs for common use cases
+
+- GIL issues
 
 
 Enter *Cryptography*
