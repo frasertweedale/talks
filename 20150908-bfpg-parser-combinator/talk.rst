@@ -37,7 +37,7 @@ Parser API
 
   -- want to define parser thusly
   parseThing :: Parser Thing
-  parseThing = Thing  $  parseInt `magic` parseBool
+  parseThing = Thing `glue` parseInt `glue` parseBool
 
 
 Parser API
@@ -52,7 +52,24 @@ Parser API
 
   -- actual API
   parseThing :: Parser Thing
-  parseThing = Thing <$> parseInt   <*>   parseBool
+  parseThing = Thing   <$>  parseInt   <*>  parseBool
+
+
+Parser API
+==========
+
+.. code:: haskell
+
+  class Functor (f :: * -> *) where
+    fmap :: (a -> b) -> f a -> f b
+
+  class Functor f => Applicative (f :: * -> *) where
+    pure :: a -> f a
+    (<*>) :: f (a -> b) -> f a -> f b
+
+  class Applicative f => Alternative (f :: * -> *) where
+    empty :: f a
+    (<|>) :: f a -> f a -> f a
 
 
 Parser API
@@ -102,10 +119,6 @@ Better Parser API - enter ``Cons``
 
 .. code:: haskell
 
-  class Cons s t a b | s -> a, t -> b, s b -> t, t a -> s
-    where
-    _Cons :: Prism s t (a, s) (b, t)
-
   uncons :: Cons s s a a => s -> Maybe (a, s)
 
   instance Cons ByteString ByteString Word8 Word8
@@ -125,9 +138,7 @@ Better Parser API
   newtype Parser s a = Parser
     { runParser :: s -> Maybe (a, s) }
 
-  satisfy
-    :: (Cons s s a a, Eq a)
-    => (a -> Bool) -> Parser s a
+  satisfy :: Cons s s a a => (a -> Bool) -> Parser s a
 
 
 Let's refactor some code!
@@ -174,6 +185,7 @@ Resources and related topics
 
 - Invertible Syntax Descriptions
   - Paper: `www.informatik.uni-marburg.de/~rendel/unparse/ <http://www.informatik.uni-marburg.de/~rendel/unparse/>`_
+  - Libraries: *boomerang*, *roundtrip*, *invertible-syntax*
 
 - Prisms, lenses and other optics
 
