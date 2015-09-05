@@ -10,8 +10,8 @@
 Introduction
 ************
 
-30,000' view
-============
+Identity silos
+==============
 
 - Don't build your apps as identity silos
 
@@ -30,10 +30,6 @@ Identity management
 - Define users, groups, role-based access policies
 
 - Authentication and authorisation services
-
-  - *Identity Provider* (IdP)
-
-  - *Single sign-on* (SSO)
 
 
 Single sign-on
@@ -70,7 +66,7 @@ FreeIPA and SSSD
 
   - Users, groups, services
 
-  - Kerberos KDC
+  - Kerberos *Key Distribution Centre* (KDC)
 
   - *Host-based Access Control* (HBAC)
 
@@ -87,13 +83,35 @@ FreeIPA and SSSD
 Demo
 ****
 
+Demo
+====
 
-***********************
-External auth in Django
-***********************
+- Manage identities with FreeIPA
+- Kerberos SSO
+- Only *django* group can access app (HBAC)
+- Load additional user attributes
+- Map external groups to app groups
+- Let's onboard *Alice*
 
-Server (Apache)
+
+*************************
+Consuming external authnz
+*************************
+
+``REMOTE_USER``
 ===============
+
+- Standard request environment variable to identify remote users
+
+- Web server sets it
+
+- Many apps observe it (yours should, too!)
+
+- In practice ``REMOTE_USER`` is not enough
+
+
+Server modules (Apache)
+=======================
 
 ``mod_auth_kerb``
   Kerberos Negotiate support
@@ -107,63 +125,44 @@ Server (Apache)
 ``mod_intercept_form_submit``
   Intercept credentials and authenticate via PAM
 
-
-App - configuration
-===================
-
-In ``settings.py``:
-
-.. code:: python
-
-  MIDDLEWARE_CLASSES = (
-   ...
-   'django.contrib.auth.middleware.AuthenticationMiddleware',
-   'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
-   'identity.external.RemoteUserAttrMiddleware',
-   ...
-  )
-
-  AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.RemoteUserBackend',
-    'django.contrib.auth.backends.ModelBackend',
-  )
+``mod_auth_mellon``
+  Handle SAML assertions
 
 
-App - login form
-================
+Middleware and backend (Django)
+===============================
 
-- ``login`` view does not observe ``REMOTE_USER``
-
-  - https://code.djangoproject.com/ticket/25164 (wontfix!)
-
-- Workaround needed
-
-  - Wrap ``django.contrib.auth.views.login``
-
-  - Redirect if ``request.user.is_authenticated()``
-
-  - Update ``urls.py`` to use wrapped view
-
-
-User creation
-=============
-
-- ``RemoteUserBackend`` adds users to database by default
-
-- To disable, subclass and set ``create_unknown_user = False``
-
-
-User attributes and groups
-==========================
+- ``RemoteUserMiddleware`` observes ``REMOTE_USER`` and logs in
+  - ``PersistentRemoteUserMiddleware`` for persistent sessions
 
 - ``RemoteUserAttrMiddleware`` reads ``mod_lookup_identity``
   variables and updates user object
+  - Not accepted by Django upstream -> 3rd party package
 
-- Proposed, but was rejected wontfix (ticket `#25042`_)
+- ``RemoteUserBackend`` creates users by default
 
-.. _#25042: https://code.djangoproject.com/ticket/25042
 
-- Planning to distribute as 3rd-party package
+Not using Django?
+=================
+
+- Use middleware(s) to interpret request environment
+
+- Implement system to map remote groups to app groups / roles
+
+- Users: transient or persisted to app's database?
+
+- Tweak views as needed
+
+
+Why Apache / why not Python?
+============================
+
+- Python makes sense if you *only* deal with Python and need to be
+  server-agnostic.
+
+- In heterogeneous environments Apache modules mean:
+  - don't have to implement authnz logic in *N* languages
+  - apps have less configuration and do less I/O
 
 
 Resources
@@ -176,6 +175,15 @@ Resources
 - FreeIPA *Web App Authentication* wiki page: http://is.gd/w9qZj0
 
 - ``freeipa-users@redhat.com``, ``#freeipa`` on Freenode
+
+
+Conclusion
+==========
+
+- Identity silos -> duplicate data and effort, password fatigue
+- If your org has centralised IdM, use it!
+- If it doesn't, start planning! Evaluate FreeIPA
+- Web server can do the heavy lifting
 
 
 Fin
