@@ -271,10 +271,10 @@ Theorems for Free!
 Parametricity
 =============
 
-*Write down the definition of a polymorphic function on a piece
+*“Write down the definition of a polymorphic function on a piece
 of paper.  Tell me its type, but be careful not to let me see
 the function's definition.  I will tell you a theorem that the
-function satisfies.*
+function satisfies.”*
 
 - `*Theorems for Free!*`_ Wadler 1989
 
@@ -387,6 +387,16 @@ Theorem proving
 - can prove correctness, equivalence, complexity, ...
 - *program extraction* to other languages
 - Idris talk/demo: https://youtu.be/4i7KrG1Afbk
+
+
+Theorem proving
+===============
+
+*“We are waiting for you to catch up, so we can employ you.”*
+
+- anonymous, NICTA (data61)
+
+.. image:: proof-engineers.png
 
 
 ***********
