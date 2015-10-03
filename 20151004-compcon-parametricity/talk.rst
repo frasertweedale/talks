@@ -13,7 +13,7 @@ Intro
 Target audience
 ===============
 
-Programmers whose goals are:
+Software developers whose goals are:
 
 - Correct software
 
@@ -23,6 +23,18 @@ Programmers whose goals are:
 
 - *Move fast and* ***don't*** *break things*
 
+
+Move fast and break things?
+===========================
+
+*“When you build something that you don't have to fix 10 times,
+you can move forward on top of what you've built.*
+
+*It may not be quite as catchy as 'move fast and break things'
+but it's how we operate now.”*
+
+- Mark Zuckerberg
+- http://is.gd/vx3tgj
 
 
 Outline
@@ -152,6 +164,15 @@ Warm, fuzzy feelings
 .. image:: pythonic.png
 
 ..  https://www.reddit.com/r/programming/comments/1kq173/guido_van_rossum_explains_twisteds_deferreds/cbrnqn4
+
+
+Type safety
+===========
+
+*“People first need to feel the pain of runtime errors to understand
+why a type system is useful.”*
+
+- Python aficionado
 
 
 ***************************
@@ -302,7 +323,9 @@ What does this function do?
 
   - reverse a list?
 
-  - return an empty list?
+  - drop the first element?
+
+  - ignore its argument return an empty list?
 
   - **Theorem:** every element in the output appears in the input
 
@@ -392,6 +415,15 @@ Theorem proving
 Theorem proving
 ===============
 
+*“Beware of bugs in the above code; I have only proved it correct,
+not tried it.”*
+
+- Donald Knuth
+
+
+Theorem proving
+===============
+
 *“We are waiting for you to catch up, so we can employ you.”*
 
 - anonymous, NICTA (data61)
@@ -444,17 +476,6 @@ Libraries
 .. _xsharpx: https://github.com/NICTA/xsharpx/
 
 
-Conclusion
-==========
-
-- Responsible modelling of data is paramount
-- Types are your friend
-- Avoid traps and use *fast and loose reasoning*
-- Parametric polymorphism gives you theorems for free
-- Algebraic properties → better tests with less effort
-- *Use the right tools*
-
-
 Resources
 =========
 
@@ -468,6 +489,17 @@ Resources
 - Software Foundations
   - Course on mathematical underpinnings of reliable software
   - http://www.cis.upenn.edu/~bcpierce/sf
+
+
+Conclusion
+==========
+
+- Responsible modelling of data is paramount
+- Types are your friend
+- Avoid traps and use *fast and loose reasoning*
+- Parametric polymorphism gives you theorems for free
+- Algebraic properties → more thorough tests with less effort
+- *Use the right tools*
 
 
 Fin
