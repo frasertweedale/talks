@@ -15,5 +15,7 @@ data Amino = G | A | T | C
 -- >>> runParser parseHackerGene [A,A,C,C,G]
 -- Just (A :| [A,C,C],[G])
 --
-parseHackerGene :: Cons s s Amino Amino => Parser s (NonEmpty Amino)
+parseHackerGene
+  :: Cons s s Amino Amino
+  => Parser s (NonEmpty Amino)
 parseHackerGene = many1 (symbol A <|> symbol C)

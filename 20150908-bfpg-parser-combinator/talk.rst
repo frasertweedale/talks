@@ -1,5 +1,5 @@
 ..
-  Copyright 2015  Red Hat, Inc.
+  Copyright 2015  Fraser Tweedale, Inc.
 
   This work is licensed under the Creative Commons Attribution 4.0
   International License. To view a copy of this license, visit
@@ -35,7 +35,11 @@ Parser API
   -- serialised repr: "555t", "7f"
   -- not valid:       "t555", "7 f"
 
-  -- want to define parser thusly
+  -- assumed
+  parseInt :: Parser Int
+  parseBool :: Parser Bool
+
+  -- we want to define parser thusly
   parseThing :: Parser Thing
   parseThing = Thing `glue` parseInt `glue` parseBool
 
@@ -50,7 +54,11 @@ Parser API
   -- serialised repr: "555t", "7f"
   -- not valid:       "t555", "7 f"
 
-  -- actual API
+  -- assumed
+  parseInt :: Parser Int
+  parseBool :: Parser Bool
+
+  -- we shall define parser thusly
   parseThing :: Parser Thing
   parseThing = Thing   <$>  parseInt   <*>  parseBool
 
@@ -66,6 +74,8 @@ Parser API
   class Functor f => Applicative (f :: * -> *) where
     pure :: a -> f a
     (<*>) :: f (a -> b) -> f a -> f b
+    (*>) :: f a -> f b -> f b   -- has default definition
+    (<*) :: f a -> f b -> f a   -- has default definition
 
   class Applicative f => Alternative (f :: * -> *) where
     empty :: f a
@@ -83,7 +93,7 @@ Parser API
 
   many1   :: Parser a -> Parser (NonEmpty a)
 
-  sepBy   :: Parser a -> Parser b -> Parser [a]
+  sepBy   :: Parser sep -> Parser a -> Parser [a]
 
   between :: Parser l -> Parser r -> Parser a -> Parser a
 
@@ -148,7 +158,7 @@ Let's refactor some code!
 Haskell parsing libs
 ====================
 
-- Parsec
+- Parsec (also: Megaparsec)
 
 - Attoparsec
 
@@ -188,9 +198,6 @@ Resources and related topics
   - Libraries: *boomerang*, *roundtrip*, *invertible-syntax*
 
 - Prisms, lenses and other optics
-
-- Zippers
-  - George's Argonaut talk next month!
 
 
 Fin
