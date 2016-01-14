@@ -14,8 +14,8 @@ X.509 certificates for services.
 Curriculum overview
 -------------------
 
-- Module 1: Install the FreeIPA server
-- Module 2: Enrol a client machine in the FreeIPA domain
+- Module 1: Installing the FreeIPA server
+- Module 2: Enrolling a client machine in the FreeIPA domain
 - Module 3: User creation and administration, Kerberos authentication
 - Module 4: Host-Based Access Control (HBAC)
 - Module 5: Authorisation and authentication for web applications
@@ -25,19 +25,19 @@ Curriculum overview
 Editing files on VMs
 --------------------
 
-Parts of the workshop involves editing files on the virtual
+Parts of the workshop involve editing files on virtual
 machines.  The ``vi`` and GNU ``nano`` editors are available on the
-VMs.  If you are not familiar with ``vi`` or unsure what to use, you
+VMs.  If you are not familiar with ``vi`` or you are unsure of what to use, you
 should choose ``nano``.
 
 
 Example commands
 ----------------
 
-This guide contains many command examples.  Some fo the commands are
-to be exected on your host, others on either the ``server`` or the
+This guide contains many examples of commands.  Some of the commands
+should be executed on your host, others on either the ``server`` or the
 ``client`` guest VM.  For clarity, commands are annotated with the
-host on which they are meant to be executed::
+host on which they are meant to be executed, as in these examples::
 
   $ echo "Run it on virtualisation host (no annotation)"
 
@@ -49,7 +49,7 @@ host on which they are meant to be executed::
 Workshop feedback
 -----------------
 
-After the workshop please consider leaving feedback at
+After you have completed the workshop, consider leaving feedback at
 https://goo.gl/forms/P11DtfJiNq.
 
 
@@ -57,7 +57,7 @@ Preparation
 ===========
 
 Some preparation is needed prior to the workshop.  The workshop is
-designed to be carried out in Vagrant_ environment consisting of
+designed to be carried out in a Vagrant_ environment that consists of
 several VMs.  **The goal of the preparation** is to be able to
 successfully ``vagrant up`` the VMs as the first step of the
 workshop.
@@ -91,19 +91,19 @@ Install Vagrant and VirtualBox
 Fedora
 ^^^^^^
 
-If you intend to use the ``libvirt`` provider (recommended) install
+If you intend to use the ``libvirt`` provider (recommended), install
 ``vagrant-libvirt``::
 
   $ sudo dnf install -y vagrant-libvirt
 
 
 Otherwise, you will use VirtualBox and the ``virtualbox`` provider.
-VirtualBox needs to build kernel modules so first install kernel
-headers and the Dynamic Kernel Module Support::
+VirtualBox needs to build kernel modules, and that means that you must
+first install kernel headers and Dynamic Kernel Module Support::
 
   $ sudo dnf install -y vagrant kernel-devel dkms
 
-Next install VirtualBox from their official package repository.
+Next, install VirtualBox from the official VirtualBox package repository.
 Before using the repo, check that its contents match what appears
 in the transcript below (to make sure it wasn't tampered with)::
 
@@ -121,7 +121,7 @@ in the transcript below (to make sure it wasn't tampered with)::
 
   $ sudo dnf install -y VirtualBox-4.3
 
-Finally load the kernel modules::
+Finally, load the kernel modules::
 
   $ sudo modprobe vboxdrv vboxnetadp
 
@@ -208,7 +208,7 @@ Add hosts file entries
 ----------------------
 
 *This step is necessary if you want to access the FreeIPA Web UI in
-the VM from a browser on your host, but otherwise optional; all
+the VM from a browser on your host, but otherwise this step is optional. All
 workshop modules can be completed using the CLI.*
 
 Add the following entries to your hosts file::
@@ -216,7 +216,7 @@ Add the following entries to your hosts file::
   192.168.33.10   server.ipademo.local
   192.168.33.20   client.ipademo.local
 
-On Unix systems including Mac OS X, the hosts file is ``/etc/hosts``
+On Unix systems (including Mac OS X), the hosts file is ``/etc/hosts``
 (you need elevated permissions to edit it.)
 
 On Windows, edit ``C:\system32\system\drivers\etc\hosts`` as
@@ -226,7 +226,7 @@ On Windows, edit ``C:\system32\system\drivers\etc\hosts`` as
 Module 1: FreeIPA server installation
 =====================================
 
-In this module you will install the FreeIPA server which you will
+In this module you will install the FreeIPA server, which you will
 use for the rest of the workshop.
 
 First ``cd`` into the directory where the ``Vagrantfile`` was
@@ -237,7 +237,7 @@ checked out, then bring up the Vagrant environment::
 
 The Vagrant environment contains two hosts: ``server.ipademo.local``
 and ``client.ipademo.local``.  From the directory containing the
-``Vagrantfile`` SSH into the ``server`` machine::
+``Vagrantfile``, SSH into the ``server`` machine::
 
   $ vagrant ssh server
 
@@ -247,11 +247,11 @@ On ``server``, start the FreeIPA server installation program::
   [server]$ sudo ipa-server-install --no-host-dns
 
 The ``--no-host-dns`` argument is needed because there is no DNS PTR
-resolution for the Vagrant environment.  For production deployment
+resolution for the Vagrant environment.  For production deployment,
 this important sanity check should not be skipped.
 
 You will be asked a series of questions.
-Accept defaults for most questions, except as outlined
+Accept the defaults for most of the questions, except as outlined
 below.
 
 Configure FreeIPA's DNS server::
@@ -260,7 +260,7 @@ Configure FreeIPA's DNS server::
 
   Existing BIND configuration detected, overwrite? [no]: yes
 
-Accept default values for server hostname, domain name and realm::
+Accept default values for the server hostname, domain name and realm::
 
   Enter the fully qualified domain name of the computer
   on which you're setting up server software. Using the form
@@ -307,9 +307,9 @@ forget during the workshop!
   Password (confirm): 
 
 
-Do not configure a DNS forwarder (it is likely you will want to do
-so for a real world deployment but it is not needed today) and
-accept defaults for configuring the reverse zone::
+Do not configure a DNS forwarder (it is likely that you will want to configure
+a DNS forwarder for a real-world deployment but it is not needed today) and
+accept the defaults for configuring the reverse zone::
 
   Do you want to configure DNS forwarders? [yes]: no
   Do you want to configure the reverse zone? [yes]: 
@@ -318,7 +318,7 @@ accept defaults for configuring the reverse zone::
 
 
 Next, you will be presented with a summary of the server
-configuration and asked for final confirmation.  Affirm to begin the
+configuration and asked for final confirmation.  Give confirmation to begin the
 server installation::
 
   The IPA Master Server will be configured with:
@@ -353,7 +353,7 @@ Run ``klist`` to view your current Kerberos tickets::
   10/15/15 01:48:59  10/16/15 01:48:57  krbtgt/IPADEMO.LOCAL@IPADEMO.LOCAL
 
 The FreeIPA server is now set up and you are ready to begin
-enrolling client machines, creating users, managing services and
+enrolling client machines, creating users, managing services, and
 more!
 
 
@@ -363,11 +363,11 @@ Module 2: Client enrolment
 In this module, you will enrol a *host* as a client of your FreeIPA
 domain.  This means that *users* in your FreeIPA realm (or Active
 Directory realms for which there is a trust with FreeIPA) can log
-into the client machine (subject to access policies) and *services*
+into the client machine (subject to access policies) and that *services*
 on the client can leverage FreeIPA's authentication and
 authorisation services.
 
-From the directory containing the ``Vagrantfile`` SSH into the
+From the directory that contains the ``Vagrantfile``, SSH into the
 ``client`` machine::
 
   $ vagrant ssh client
@@ -414,7 +414,7 @@ The enrolment now proceeds; no further input is required.  You will
 see output detailing the operations being completed.  Unlike
 ``ipa-server-install``, client enrolment only takes a few seconds.
 
-Users in your FreeIPA domain can now log onto FreeIPA-enrolled
+Users in your FreeIPA domain can now log into FreeIPA-enrolled
 hosts, subject to *Host-based access control* (HBAC) rules.  Users
 logged onto the host can also acquire Kerberos tickets for accessing
 *services* in your domain.
@@ -431,8 +431,8 @@ Web UI
 ------
 
 Visit ``https://server.ipademo.local/``.  You'll get a TLS
-*untrusted issuer* warning which you can dismiss (add a temporary
-exception).  Login as ``admin``.
+*untrusted issuer* warning which you can dismiss (by adding a temporary
+exception).  Log in as ``admin``.
 
 Welcome to the FreeIPA web UI.  Most management activities can be
 performed here, or via the ``ipa`` CLI program.  See if you can work
@@ -458,7 +458,7 @@ Most FreeIPA adminstrative actions can be carried out using the
   automember-default-group-show     Display information about the default (fallback) automember groups.
   ...
 
-Whoa!  There's almost 300 of them!  We'll only be using a handful of
+Whoa!  There's almost 300 of them!  We'll be using only a handful of
 these today.
 
 You'll notice that commands are grouped by *plugin*.  You can get a
@@ -508,16 +508,16 @@ the next ``kinit`` will prompt them to enter a new password::
 
 
 Now ``bob`` has a TGT (run ``klist`` to confirm) which can use to
-log into other hosts and services.  Try logging into
+log in to other hosts and services.  Try logging into
 ``client.ipademo.local``::
 
   [server]$ ssh bob@client.ipademo.local
   [bob@client]$ 
 
-You are now logged into the client, as ``bob``.  Hit ``^D`` or type
+You are now logged into the client as ``bob``.  Type ``^D`` or
 ``exit`` to log out and return to the ``server`` shell.  If you run
-``klist`` again you will see not only the TGT but a *service ticket*
-which was automatically acquired to log into
+``klist`` again, you will see not only the TGT but a *service ticket*
+that was automatically acquired to log in to
 ``client.ipademo.local`` without prompting for a password.  Kerberos
 is a true *single sign-on* protocol!
 
@@ -538,11 +538,11 @@ Module 4: Host-based access control
 
 FreeIPA's *host-based access control* (HBAC) feature allows you to
 define policies that restrict access to hosts or services based on
-the user attempting to log in and that user's groups, the host which
+the user attempting to log in and that user's groups, the host that
 they are trying to access (or its *host groups*), and (optionally)
 the service being accessed.
 
-In this module we will define an HBAC policy that will restrict
+In this module, we will define an HBAC policy that restricts
 access to ``client.ipademo.local`` to members of the
 ``sysadmin`` user group.
 
@@ -560,7 +560,7 @@ provides the host group functionality).
 
 **Hint:** if you use the CLI will need to run two commands - one to
 create the host group, and one to add ``client.ipademo.local`` as a
-member.
+member of the host group.
 
 
 Disabling the ``allow_all`` HBAC rule
@@ -588,7 +588,7 @@ List the existing HBAC rules::
   ----------------------------
 
 The FreeIPA server is installed with a single default ``allow_all``
-rule.  It needs to be disabled for other HBAC rules to have any
+rule.  This rule must be disabled for other HBAC rules to take
 effect.  Look for a command that can do this, and run it.
 
 
@@ -633,7 +633,7 @@ the rule.  The following transcript details the process::
     User Groups: sysadmin
     Host Groups: webservers
 
-The ``--servicecat=all`` option applies this rule all services on
+The ``--servicecat=all`` option applies this rule for all services on
 matching hosts.  It could have been set during the ``hbacrule-add``
 command instead.
 
@@ -653,7 +653,7 @@ command::
 Poor ``bob``.  He won't be allowed in because he is not a member of
 the ``sysadmin`` group.  What about ``alice``?
 
-``kinit`` as ``bob`` and try to log into the client::
+``kinit`` as ``bob`` and try to log in to the client::
 
   [server]$ kinit bob
   Password for bob@IPADEMO.LOCAL: 
@@ -675,7 +675,7 @@ Module 5: Web App External Authentication
 You can configure many kinds of applications to rely on FreeIPA's
 centralised authentication, including web applications.  In this
 module you will configure the Apache web server to use Kerberos
-authentication to authenticate user, PAM to enforce HBAC rules and
+authentication to authenticate users, PAM to enforce HBAC rules, and
 ``mod_lookup_identity`` to populate the request environment with
 user attributes.
 
@@ -759,7 +759,7 @@ The Apache configuration for the demo application lives in the file
   </VirtualHost>
 
 
-Once the configuration is in place, restart Apache::
+When the configuration is in place, restart Apache::
 
   [client]$ sudo systemctl restart httpd
 
@@ -780,26 +780,26 @@ and make a request using ``curl``::
     REMOTE_PORT: 42499
 
 The ``REMOTE_USER`` variable in the request environment indicates
-that there is a logged in user, and who that user is.
+that there is a logged-in user and identifies that user.
 
 
 Populating request environment with user attributes
 ----------------------------------------------------
 
-Applications need to know more than just the username of a logged in
-user.  They want to know the user's name, send mail to their email
-address and perhaps know their group memberships or other
-attributes.  In this section we will use mod_lookup_identity_ to
+Applications need to know more than just the username of a logged-in
+user.  They want to know the user's name, to send mail to their email
+address and perhaps to know their group memberships or other
+attributes.  In this section, we will use mod_lookup_identity_ to
 populate the HTTP request environment with variables providing
 information about the authenticated user.
 
 .. _mod_lookup_identity: http://www.adelton.com/apache/mod_lookup_identity/
 
 
-mod_lookup_identity retrieves user attributes from SSSD (via D-Bus).
+``mod_lookup_identity`` retrieves user attributes from SSSD (via D-Bus).
 Edit ``/etc/sssd/sssd.conf``; enable the SSSD ``ifp`` *InfoPipe*
 responder, permit the ``apache`` user to query it, and configure the
-attributes to expose.  Add the following configuration to
+attributes that you want to expose.  Add the following configuration to
 ``sssd.conf``::
 
   [domain/ipademo.local]
@@ -876,8 +876,8 @@ Restart Apache::
   [client]$ sudo systemctl restart httpd
 
 Now make another request to the application and observe that user
-information that was inject into the request environment by
-mod_lookup_identity is reflected in the response::
+information that was injected into the request environment by
+``mod_lookup_identity`` is reflected in the response::
 
   [client]$ curl -u : --negotiate http://client.ipademo.local/
   LOGGED IN AS: alice@IPADEMO.LOCAL
@@ -899,8 +899,8 @@ mod_lookup_identity is reflected in the response::
 HBAC for web services
 ---------------------
 
-The final task for this module is to configure to use FreeIPA's HBAC
-rules for access control.  We will use mod_authnz_pam_ in
+The final task for this module is to configure Apache to use FreeIPA's HBAC
+rules for access control.  We will use ``mod_authnz_pam_`` in
 conjunction with SSSD's PAM responder to achieve this.
 
 .. _mod_authnz_pam: http://www.adelton.com/apache/mod_authnz_pam/
@@ -958,8 +958,8 @@ Also add the ``LoadModule`` directive to the top of the file::
 
   LoadModule authnz_pam_module modules/mod_authnz_pam.so
 
-Once again, a special SELinux boolean needs to set to allow
-mod_authnz_pam to work::
+Once again, we must set a special SELinux boolean to allow
+``mod_authnz_pam`` to work::
 
   [client]$ sudo setsebool -P allow_httpd_mod_auth_pam 1
 
@@ -978,12 +978,12 @@ module, we will issue an X.509 certificate for the web service via
 the *certmonger* program.
 
 Certmonger supports multiple CAs including FreeIPA's CA, and can
-generate keys, issue certifiate requests, track certificates and
+generate keys, issue certifiate requests, track certificates, and
 renew tracked certificates when the expiration time approaches.
-Certmonger works with NSS so we will also use ``mod_nss`` with
+Certmonger works with NSS, so we will also use ``mod_nss`` with
 Apache, rather than ``mod_ssl``.
 
-Let's start by observing that the HTTP service does not yet have a
+Let's start by confirming that the HTTP service does not yet have a
 certificate::
 
   [client]$ ipa service-show HTTP/client.ipademo.local
@@ -998,7 +998,7 @@ Enable and start certmonger::
   [client]$ sudo systemctl start certmonger
 
 Now let's request a certificate.  ``mod_nss`` is already configured
-to use the certificate database at ``/etc/httpd/alias`` so we tell
+to use the certificate database at ``/etc/httpd/alias``, so we tell
 certmonger to generate the key and add the certificate in that
 database::
 
@@ -1021,7 +1021,7 @@ Let's break down some of those command arguments.
   asserting that the certificate is for TLS WWW authentication.
 
 Another important argument is ``-N <subject-name>`` but this
-defaults to the system hostname which in our case
+defaults to the system hostname, which in our case
 (``client.ipademo.local``) was appropriate.
 
 Let's check the status of our certificate request using the tracking
@@ -1046,9 +1046,9 @@ identifier given in the ``ipa-getcert request`` output::
           track: yes
           auto-renew: yes
 
-Observe that the certificate was issued and that certmonger is now
+Confirm that the certificate was issued and that certmonger is now
 ``MONITORING`` the certificate and will ``auto-renew`` it when it is
-close to expiration.  Now if you run ``ipa service-show`` you will
+close to expiration.  Now if you run ``ipa service-show``, you will
 see a number of attributes related to the certificate, including the
 certificate itself.  Can you work out how to save the PEM-encoded
 certificate to a file?
