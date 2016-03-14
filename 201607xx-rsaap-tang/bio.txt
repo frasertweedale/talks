@@ -1,0 +1,5 @@
+Fraser is a software engineer at Red Hat where he works on FreeIPA
+(identity management), Dogtag (X.509 PKI) and related security
+projects.  By night he programs in Haskell and is exploring theorem
+proving, dependent types, category theory and other exciting
+intersections of mathematics and computer science.
