@@ -54,14 +54,22 @@ Prism primer
   ghci> :t _Right
   _Right :: Prism (Either c a) (Either c b) a b
 
+.. code:: haskell
+
   ghci> preview _Right (Right 42)
   Just 42
+
+.. code:: haskell
 
   ghci> preview _Right (Left "error")
   Nothing
 
+.. code:: haskell
+
   ghci> review _Right 42
   Right 42
+
+.. code:: haskell
 
   ghci> preview (_Left . _Right) (Left (Right 42))
   Just 42
@@ -170,7 +178,7 @@ Redefining the parser
 
 .. code:: haskell
 
-  type  Parser s a = Prism s s (a, s) (a, s)  -- Prism' s (a, s)
+  type  Parser s a = Prism s s (a, s) (a, s)
 
   char    :: (Cons s s a a) =>  Parser s a
   char    = _Cons
@@ -221,11 +229,11 @@ Convenience functions
 
 .. code:: haskell
 
-  parse :: Grammar s b -> s -> Maybe b
+  parse :: Grammar s a -> s -> Maybe a
   parse g s = fmap fst (preview g s)
 
-  print :: (Monoid s) => Grammar s b -> b -> s
-  print g b = review g (b, mempty)
+  print :: (Monoid s) => Grammar s a -> a -> s
+  print g a = review g (a, mempty)
 
 
 Grammar - map
@@ -233,7 +241,7 @@ Grammar - map
 
 .. code:: haskell
 
-  (<<$>>) :: Prism' a b -> Grammar s a -> Grammar s b
+  (<<$>>) :: Prism a a b b -> Grammar s a -> Grammar s b
   p <<$>> g = g . swapped . aside p . swapped
 
   swapped :: Iso (a, b) (c, d) (b, a) (d, c)
