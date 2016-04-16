@@ -61,7 +61,7 @@ Prism primer
 
 .. code:: haskell
 
-  ghci> preview _Right (Left "error")
+  ghci> preview _Right (Left "nope")
   Nothing
 
 .. code:: haskell
@@ -124,20 +124,8 @@ Parser
 
   char :: Parser Char
   char = Parser $ \s -> case s of
-    ""      -> Nothing
-    (c : s) -> Just (c, s)
-
-..
-
-  Parser - example
-  ================
-
-  .. code:: haskell
-
-    data Thing = Thing Int Bool
-
-    parseThing :: Parser Thing
-    parseThing = Thing <$> parseInt <*> parseBool
+    ""        -> Nothing
+    (c : s')  -> Just (c, s')
 
 
 What if...
@@ -148,8 +136,8 @@ What if...
 - *element* type is not :haskell:`Char`?
 
 
-``Cons``
-========
+:haskell:`Control.Lens.Cons`
+============================
 
 .. code:: haskell
 
@@ -158,8 +146,8 @@ What if...
     => s -> Maybe (a, s)  -- look familiar?
 
 
-``Cons``
-========
+:haskell:`Control.Lens.Cons`
+============================
 
 .. code:: haskell
 
@@ -190,8 +178,8 @@ Redefining the parser
    
 
 
-But if the parser is a ``Prism``...
-===================================
+But if the parser is a :haskell:`Prism`...
+==========================================
 
 .. code:: haskell
 
@@ -268,11 +256,9 @@ Grammar - sum
 
   (<<+>>) :: Grammar s a -> Grammar s b -> Grammar s (Either a b)
   p1 <<+>> p2 = prism'
-
+    (\x ->      first Left  <$> preview p1 x
+            <|> first Right <$> preview p2 x)
     (\(x, s) -> either (review p1 . (,s)) (review p2 . (,s)) x)
-
-    (\x ->     first Left  <$> preview p1 x
-           <|> first Right <$> preview p2 x)
 
 
 Grammar - list
@@ -286,6 +272,7 @@ Grammar - list
   isoList :: Iso' (Either (a, [a]) ()) [a]
   isoList = ...
 
+  -- like pure :: Applicative f => a -> f a
   success :: a -> Grammar s a
   success a = prism' snd (Just . (a,))
 
@@ -307,8 +294,8 @@ Grammar - basic grammars
     (\s -> maybe (Just ((), s)) (const Nothing) (uncons s))
 
 
-Grammar - delimiters, etc
-=========================
+Grammar - delimiters
+====================
 
 .. code:: haskell
 
@@ -434,28 +421,7 @@ ASN.1 grammar - example
     <<*>> opt (natural <<$>> integer)  )
 
   _BasicConstraints :: Iso' (Bool, Maybe Natural) BasicConstraints
-  _BasicConstraints = iso f g  where
-    f (b, x)  = if b then CA x else NotCA
-    g (CA x)  = (True, x)
-    g _       = (False, Nothing)
-
-
-..
-
-  ASN.1 grammar - example
-  =======================
-
-  .. code:: haskell
-
-    data AdvReqBody
-      = AdvReqBodyGroups (Set OID)
-      | AdvReqBodyKey TangKey
-    makeIso ''AdvReqBody
-
-    advReqBodyG :: (Cons s s ASN1 ASN1) => Grammar s AdvReqBody
-    advReqBodyG = _AdvReqBody <<$>>
-      (     tag 0 (setOf oid)
-      <<+>> tag 1 tangKeyG        )
+  _BasicConstraints = ...
 
 
 ***********
@@ -516,9 +482,9 @@ Limitations and caveats
 What's next?
 ============
 
-- Publish on Hackage
+- Hackage
 
-- Kerberos, X.509, other DER-py applications
+- Kerberos, X.509
 
 - Implement binary DER decoding?
 
@@ -529,7 +495,11 @@ Resources and related topics
 - Invertible Syntax Descriptions
   - Paper: `www.informatik.uni-marburg.de/~rendel/unparse/ <http://www.informatik.uni-marburg.de/~rendel/unparse/>`_
   - Libraries: *boomerang*, *roundtrip*, *invertible-syntax*
-  - Christian's YLJ2015 talk
+  - Christian Marie's YLJ2015 talk
+
+- Experiment in combining :haskell:`Applicative` and
+  :haskell:`Divisible`
+  - https://github.com/charleso/portmanteau
 
 - *lens*
 
