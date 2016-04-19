@@ -242,7 +242,7 @@ Grammar - product
 .. code:: haskell
 
   (<<*>>) :: Grammar s a -> Grammar s b -> Grammar s (a, b)
-  p1 <<*>> p2 = p1 . aside p2 . productIso
+  g1 <<*>> g2 = g1 . aside g2 . productIso
     where
     productIso = iso
       (\(a, (b, s)) -> ((a, b), s))
@@ -255,10 +255,10 @@ Grammar - sum
 .. code:: haskell
 
   (<<+>>) :: Grammar s a -> Grammar s b -> Grammar s (Either a b)
-  p1 <<+>> p2 = prism'
-    (\x ->      first Left  <$> preview p1 x
-            <|> first Right <$> preview p2 x)
-    (\(x, s) -> either (review p1 . (,s)) (review p2 . (,s)) x)
+  g1 <<+>> g2 = prism'
+    (\(x, s) -> either (review g1 . (,s)) (review g2 . (,s)) x)
+    (\s ->      first Left  <$> preview g1 s
+            <|> first Right <$> preview g2 s)
 
 
 Grammar - list
@@ -267,7 +267,7 @@ Grammar - list
 .. code:: haskell
 
   many :: Grammar s a -> Grammar s [a]
-  many p = isoList <<$>> (p <<*>> many p) <<+>> success ()
+  many g = isoList <<$>> (g <<*>> many g) <<+>> success ()
 
   isoList :: Iso' (Either (a, [a]) ()) [a]
   isoList = ...
@@ -283,8 +283,7 @@ Grammar - basic grammars
 .. code:: haskell
 
   satisfy :: (Cons s s a a) => (a -> Bool) -> Grammar s a
-  satisfy f = prism id
-    (\a -> guard (f a) >> pure a) <<$>> element
+  satisfy f = prism id (\a -> guard (f a) >> pure a)  <<$>>  element
 
   symbol :: (Cons s s a a, Eq a) => a -> Grammar s a
   symbol a = satisfy (== a)
@@ -315,11 +314,38 @@ Grammar - combinators
 
   (*>>) :: Grammar s () -> Grammar s a -> Grammar s a
 
+  many1 :: Grammar s a -> Grammar s (NonEmpty a)
+
   replicate :: Natural -> Grammar s a -> Grammar s [a]
 
-  bind
-    :: Grammar s a -> (a -> Grammar s b) -> (b -> a)
-    -> Grammar s b
+
+Grammar - bind
+==============
+
+.. code:: haskell
+
+  bind :: Grammar s a -> (a -> Grammar s b) -> (b -> a) -> Grammar s b
+  bind p f g = prism'
+    (\(b, s) -> review p (g b, review (f (g b)) (b, s)))
+    (preview p >=> \(a, s') -> preview (f a) s')
+
+
+Grammar - bind
+==============
+
+.. code:: haskell
+
+  ghci> let g = bind integral (\n -> replicate n alpha)) length
+
+.. code:: haskell
+
+  ghci> parse (many g) "1a2ab3abc4bad!"
+  Just ["a","ab","abc"]
+
+.. code:: haskell
+
+  ghci> print (many g) ["hello", "world"] :: String
+  "5hello5world"
 
 
 Deriving ``Iso``s for custom types
