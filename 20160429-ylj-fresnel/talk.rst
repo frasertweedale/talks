@@ -441,13 +441,13 @@ ASN.1 grammar - example
 
   data BasicConstraints = NotCA | CA (Maybe Natural)
 
+  _BasicConstraints :: Iso' (Bool, Maybe Natural) BasicConstraints
+  _BasicConstraints = ...
+
   basicConstraints :: (Cons s s ASN1 ASN1) => Grammar s BasicConstraints
   basicConstraints = _BasicConstraints <<$>> sequence
     (     def False boolean
     <<*>> opt (natural <<$>> integer)  )
-
-  _BasicConstraints :: Iso' (Bool, Maybe Natural) BasicConstraints
-  _BasicConstraints = ...
 
 
 ***********
@@ -498,11 +498,21 @@ How did I get here?
 Limitations and caveats
 =======================
 
-  - Error reporting
+- Error reporting
 
-  - Performance
+- Performance
 
-  - I have no idea what I'm doing
+
+Advantages
+==========
+
+- One module; many stream and element types
+
+- Don't repeat yourself
+
+- Reuse existing optics
+
+- ASN.1 grammar corresponds to spec
 
 
 What's next?
