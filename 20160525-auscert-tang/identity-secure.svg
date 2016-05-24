@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16">
+  <style>
+    .icon-default {
+      fill: #4d9a26;
+    }
+  </style>
+
+  <path class="icon-default"
+    d="M4,6
+       a4,4 0 0,1 8,0
+       l0,2 l-2,0 l0,-2
+       a2,2 0 0,0 -4,0
+       l0,2 l-2,0 l0,-2" />
+  <rect class="icon-default" x="3" y="7" width="10" height="7" rx="1" ry="1"/>
+</svg>
