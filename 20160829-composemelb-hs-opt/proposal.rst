@@ -31,8 +31,8 @@ learn about GHC's *rewrite rules* feature, which can be used for
 substituting alternative, better performing implementations of
 polymorphic functions at particular (less polymorphic) types,
 without changing the type signature that users see, preserving reuse
-and parametricity.  We will also how to define transformation rules
-that employ theorems (free or otherwise) to optimise programs.
+and parametricity.  We will see also how to define transformation
+rules that employ theorems (free or otherwise) to optimise programs.
 
 We will also briefly examine how rules are applied by observing the
 firing of rules and changes effected in the produced Core (GHC's
