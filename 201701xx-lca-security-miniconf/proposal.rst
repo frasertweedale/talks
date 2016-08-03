@@ -1,21 +1,27 @@
-Security and Privacy Miniconf
-=============================
+Open Source Security and Privacy Miniconf
+=========================================
 
   Our digital world is in peril.  Schneier, the spirit of security,
   can no longer stand the terrible destruction plaguing our
-  Internet.  He sends five magic IoT Things** to five special
+  Internet.  He sends five magic IoT Things to five special
   whitehats...
 
 If only we really could summon Captain Security to defeat all the
 baddies, fix the broken protocols, clean up our insecure technology
-and save the day!  In reality, it is up to all of us, and the
-Security Miniconf is here to help.
+and save the day!  In reality, it is up to all of us.  The need for
+security in all levels of the software (and hardware) lifecycle and
+for *usable* privacy and anonymity tools in an age of surveillance
+is abundantly clear.  How can we achieve these goals?  The Security
+and Privacy Miniconf is here to help!
 
-The linux.conf.au 2017 Security Miniconf will feature a series of
-talks explaining and demonstrating important security and privacy
-concepts, techniques and initiatives.  Whether you are a developer,
-sysadmin, UX designer or anthropologist, there will be something at
-the Security Miniconf to help you or your users live a more secure
+The linux.conf.au 2017 Security and Privacy Miniconf will bring
+together users, researchers and practitioners involved in, or simply
+interested in, security topics in Open Source software and hardware.
+The program will feature a series of talks explaining and
+demonstrating important security and privacy concepts, techniques
+and initiatives.  Whether you are a researcher, developer, sysadmin,
+UX designer or anthropologist, there will be something at the
+Security Miniconf to help you or your users live a more secure
 digital life.
 
 
@@ -38,11 +44,12 @@ Possible topic areas include, but are not limited to:
 - How UX/UI design can influence application security
 - Security features in open source operating systems or programs,
   and how to use them
-- Authentication and authorisation technologies and standards
+- Authentication and authorisation technologies
 - Secure software development techniques/practices
 - Offensive techniques (including social engineering)
-- Security incident detection and response
-- Web or Cloud security
+- Security incident detection, forensics and response
+- Web, Cloud or IoT security
+- Hardware and physical security
 
 Presentations with live demos or interactive aspects are encouraged.
 Please include details of such in your proposal, *especially* if
@@ -52,17 +59,17 @@ the conference network will be used.
 Private abstract
 ----------------
 
-As a developer in Red Hat's Platform Security department (working on
-identity management and X.509 PKI), and with a keen personal
-interest in security and privacy, I am keen to see security Front
-and Centre at linux.conf.au 2017!
+Last year's conference lacked a dedicated security miniconf.
+Obviously, there are plenty of conferences dedicated to security,
+but I think there is enough interest among linux.conf.au attendees
+(based on the attendance at the security-related talks we've seen in
+the past) to support a full day miniconf program.
 
-Whilst propellor-twirling deep dives into particular security
-technologies are in scope for the miniconf, I hope to build a well
-rounded program that also promotes security tools and practices to
-everyday users of open source programs and the people building them,
-and looks at human factors to help people better understand the
-challenges and threats.
+Whilst deep dives into particular security technologies are in scope
+for the miniconf, we hope to build a well rounded program that also
+promotes security tools and practices to everyday users of open
+source programs and the people building them, and looks at human
+factors to help people better understand the challenges and threats.
 
 
 Special requirements
