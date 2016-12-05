@@ -1,0 +1,18 @@
+- WoSign / StartCom trust pulled
+
+- Symantec cert misissuance and CT requirement
+
+- Comodo trademark thing
+
+- impacts of Let's Encrypt
+
+  - https://letsencrypt.org/stats
+  - 93% of certs issued to domains that never previous had a cert
+  - 10M active (non-expired) certs
+  - 15M domains
+  - % FF page loads using HTTPS gone from 40% (Nov 2015) to 50% (Nov 2016)
+  - ISRG root now trusted in FF >= 50, macOS >= 10.12.1
+  - IDN support
+  - working on ECDSA signing
+
+- Certificate Transparency - it's happening
