@@ -1,8 +1,23 @@
 - WoSign / StartCom trust pulled
+  - https://docs.google.com/document/d/1C6BlmbeQfn4a9zydVi2UvjBGv6szuSB4sMYUcVrR8vQ/edit
+  - https://wiki.mozilla.org/CA:WoSign_Issues
 
 - Symantec cert misissuance and CT requirement
+  - http://arstechnica.com/security/2015/10/still-fuming-over-https-mishap-google-gives-symantec-an-offer-it-cant-refuse/
+  - https://security.googleblog.com/2015/10/sustaining-digital-certificate-security.html
 
-- Comodo trademark thing
+- LE
+  - Comodo trademark shenanigans
+    - https://tech.slashdot.org/story/16/06/23/1946249/comodo-attempting-to-register-lets-encrypt-trademarks-and-thats-not-right
+    - https://letsencrypt.org/2016/06/23/defending-our-brand.html
+    - CEO whine: https://forums.comodo.com/general-discussion-off-topic-anything-and-everything/shame-on-you-comodo-t115958.0.html
+  - StartSSL StartEncrypt
+    - https://xo.tc/startssl-launches-startencrypt.html
+    - https://community.letsencrypt.org/t/vulnerable-startencrypt-enabled-mis-issued-startssl-certs/17500/7
+    - https://www.computest.nl/blog/startencrypt-considered-harmful-today/
+    - http://126kr.com/article/7va63wbfv56
+  - http://www.commitstrip.com/en/2016/06/13/the-end-of-an-expensive-era/
+
 
 - impacts of Let's Encrypt
 
@@ -15,4 +30,5 @@
   - IDN support
   - working on ECDSA signing
 
-- Certificate Transparency - it's happening
+- Certificate Transparency
+  - https://www.certificate-transparency.org/
