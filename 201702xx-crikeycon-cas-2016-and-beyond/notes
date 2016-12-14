@@ -30,5 +30,13 @@
   - IDN support
   - working on ECDSA signing
 
+  - paper: "No domain left behind: is Let’s Encrypt democratizing
+    encryption?"
+    - https://arxiv.org/pdf/1612.03005.pdf
+    - https://www.schneier.com/blog/archives/2016/12/lets_encrypt_is.html
+    - 3 hosting providers responsible for 47% of LE certs.
+      - automattic/wordpress; shopify; OVH
+    - 3rd biggest CA by no of certs issued
+
 - Certificate Transparency
   - https://www.certificate-transparency.org/
