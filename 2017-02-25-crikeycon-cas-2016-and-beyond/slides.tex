@@ -34,7 +34,10 @@
 % Scale images if necessary, so that they will not overflow the page
 % margins by default, and it is still possible to overwrite the defaults
 % using explicit options in \includegraphics[width, height, ...]{}
-\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+%\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newcommand{\includegraphicsscaled}[1]{
+    \includegraphics[width=\maxwidth,height=\maxheight,keepaspectratio]{#1}
+}
 
 % Prevent slide breaks in the middle of a paragraph:
 \widowpenalties 1 10000
@@ -87,10 +90,10 @@
 \begin{document}
 \frame{\titlepage}
 
-\begin{frame}{~~}
+\begin{frame}[plain]
 
 \begin{center}
-\def\svgwidth{.5\paperheight}
+\def\svgwidth{.2\paperheight}
 \input{identity-secure-ARTIFACT.pdf_tex}
 \end{center}
 
@@ -99,7 +102,6 @@
 \begin{frame}{This talk}
 
 \begin{itemize}
-\tightlist
 \item
   Overview of CA industry
 \item
@@ -115,12 +117,10 @@
 \begin{frame}{Certificate Authorities and TLS}
 
 \begin{itemize}
-\tightlist
 \item
   CAs issue certificates that \textbf{bind public keys to domains}
 
   \begin{itemize}
-  \tightlist
   \item
     Usually for \$\$\$
   \end{itemize}
@@ -132,10 +132,10 @@
 
 \end{frame}
 
-\begin{frame}{~~}
+\begin{frame}[plain]
 
 \begin{center}
-\includegraphics{ff-cas.png}
+\includegraphicsscaled{ff-cas.png}
 \end{center}
 
 \end{frame}
@@ -143,7 +143,6 @@
 \begin{frame}{What's wrong with the CA industry?}
 
 \begin{itemize}
-\tightlist
 \item
   Literally hundreds of trusted CAs
 \item
@@ -156,10 +155,10 @@
 
 \end{frame}
 
-\begin{frame}{~~}
+\begin{frame}[plain]
 
 \begin{center}
-\includegraphics{Censign.jpg}
+\includegraphicsscaled{Censign.jpg}
 \end{center}
 
 \end{frame}
@@ -209,7 +208,7 @@
 
 \end{frame}
 
-\begin{frame}{~~}
+\begin{frame}[plain]
 
 \begin{center}
 \def\svgwidth{.7\textwidth}
@@ -221,7 +220,6 @@
 \begin{frame}{Let's Encrypt - overview}
 
 \begin{itemize}
-\tightlist
 \item
   free, automated, publicly trusted CA
 \item
@@ -237,7 +235,7 @@
 \begin{frame}{Let's Encrypt - impact}
 
 \begin{center}
-\includegraphics{le-growth.png}
+\includegraphicsscaled{le-growth.png}
 \end{center}
 
 \tiny
@@ -250,30 +248,36 @@
 
 \begin{itemize}
 
-\item 3rd biggest CA by certs issued
+\item 3rd biggest CA by certs
+    issued\footnote{\url{https://arxiv.org/pdf/1612.03005.pdf}}
 
-\item 93\% of domains never previously had a
-  cert\footnote{\url{https://arxiv.org/pdf/1612.03005.pdf}}
+\item 93\% of domains never previously had a cert
 
 \item 47\% LE certs issued to 3 hosting providers
   \begin{itemize}
   \item WordPress, Shopify, OVH
   \end{itemize}
 
-\item Firefox \% page loads HTTPS
-  \begin{itemize}
-  \item November 2015: 40\%
-  \item November 2016: {\bf 50\%}
-  \end{itemize}
-
 \end{itemize}
 
 \end{frame}
 
-\begin{frame}{~~}
+\begin{frame}{Let's Encrypt - impact}
 
 \begin{center}
-\includegraphics{comodo-lets-encrypt.png}
+\includegraphicsscaled{https-pageloads.png}
+\end{center}
+
+\tiny
+
+\url{https://letsencrypt.org/stats/}
+
+\end{frame}
+
+\begin{frame}[plain]
+
+\begin{center}
+\includegraphicsscaled{comodo-lets-encrypt.png}
 \end{center}
 
 \end{frame}
@@ -282,10 +286,10 @@
 
 \begin{itemize}
 
-\item Comodo filed 3 trademark applications, Oct 2015
+\item<+-> Comodo filed 3 trademark applications, Oct 2015
 
   \begin{itemize}
-  \item  ISRG had been using *Let's Encrypt* since Nov 2014
+  \item  ISRG had been using {\em Let's Encrypt} since Nov 2014
   \end{itemize}
 
 \item  Engaged Comodo privately from March 2016
@@ -321,14 +325,13 @@
 \begin{frame}{StartCom/WoSign vs Let's Encrypt}
 
 \begin{itemize}
-\tightlist
 \item
   \textbf{\emph{StartEncrypt}} announced 6 June 2016
 \item
-  full of security holes
+  full of security holes\footnote{
+    \url{https://www.computest.nl/blog/startencrypt-considered-harmful-today/}}
 
   \begin{itemize}
-  \tightlist
   \item
     attacker-controlled path for DV check
   \item
@@ -342,10 +345,10 @@
 
 \end{frame}
 
-\begin{frame}{~~}
+\begin{frame}[plain]
 
 \begin{center}
-\includegraphics{FF_Loeschuebung_mit_Mittelschaum.jpg}
+\includegraphicsscaled{FF_Loeschuebung_mit_Mittelschaum.jpg}
 \end{center}
 
 \tiny
@@ -358,7 +361,6 @@ CC BY-SA 3.0
 \begin{frame}{Certificate Transparency}
 
 \begin{itemize}
-\tightlist
 \item
   Append-only, immutable log of observed certificates
 \item
@@ -369,10 +371,10 @@ CC BY-SA 3.0
 
 \end{frame}
 
-\begin{frame}{~~}
+\begin{frame}[plain]
 
 \begin{center}
-\includegraphics{Canary.jpg}
+\includegraphicsscaled{Canary.jpg}
 \end{center}
 
 \tiny
@@ -381,10 +383,10 @@ CC BY-SA 3.0 \url{https://commons.wikimedia.org/wiki/File:Canary.jpg}
 
 \end{frame}
 
-\begin{frame}{~~}
+\begin{frame}[plain]
 
 \begin{center}
-\includegraphics{Great_Dane_(PSF).png}
+\includegraphicsscaled{Great_Dane_(PSF).png}
 \end{center}
 
 \tiny
@@ -396,7 +398,6 @@ CC BY-SA 3.0 \url{https://commons.wikimedia.org/wiki/File:Canary.jpg}
 \begin{frame}{DANE}
 
 \begin{itemize}
-\tightlist
 \item
   \emph{DNS-Based Authentication of Named Entities} (RFC 6698)
 \item
@@ -427,7 +428,6 @@ CC BY-SA 3.0 \url{https://commons.wikimedia.org/wiki/File:Canary.jpg}
 \begin{frame}{What can \emph{you} do about it?}
 
 \begin{itemize}
-\tightlist
 \item
   use, implement, support Let's Encrypt
 \item
@@ -444,7 +444,7 @@ CC BY-SA 3.0 \url{https://commons.wikimedia.org/wiki/File:Canary.jpg}
 
 \begin{frame}{Fin}
 
-\begin{columns}
+%\begin{columns}
 
   %\begin{column}{.4\textwidth}
   %  put something here? % \includegraphics[width=1.2\textwidth]{FILENAME}
@@ -467,17 +467,14 @@ CC BY-SA 3.0 \url{https://commons.wikimedia.org/wiki/File:Canary.jpg}
     \textbf{http://creativecommons.org/licenses/by/4.0/}
     }
 
-    }
-
-    \begin{description}
-    \item[Twitter]
+    \bigskip
+    \Large
     \texttt{@hackuador}
-    \item[Email]
-    \texttt{frase@frase.id.au}
-    \end{description}
+
+    }
   %\end{column}
 
-\end{columns}
+%\end{columns}
 
 \end{frame}
 
