@@ -99,21 +99,6 @@
 
 \end{frame}
 
-\begin{frame}{This talk}
-
-\begin{itemize}
-\item
-  Overview of CA industry
-\item
-  Explain some mishaps of last couple years
-\item
-  Overview of some efforts to make things less bad
-\item
-  Recommendations; what \emph{you} can do right now
-\end{itemize}
-
-\end{frame}
-
 \begin{frame}{Certificate Authorities and TLS}
 
 \begin{itemize}
@@ -168,13 +153,9 @@
 \begin{itemize}
 \item Background: SHA-1 certs prohibited from 1 Jan 2016\footnote[frame]{
   \url{https://cabforum.org/2014/10/16/ballot-118-sha-1-sunset/}}
-\item WoSign got caught "backdating" certs to get around this\footnote[frame]{
+\item WoSign got caught ``backdating'' certs to get around this\footnote[frame]{
   \url{https://wiki.mozilla.org/CA:WoSign_Issues}}
 \item Several other issues
-  \begin{itemize}
-  \item failed to disclose purchase of StartCom
-  \item unverified info in subject name
-  \end{itemize}
 \end{itemize}
 
 \end{frame}
@@ -189,20 +170,11 @@
 \item Further investigation turned up 1000s of misissued
   certs\footnote{\url{https://security.googleblog.com/2015/10/sustaining-digital-certificate-security.html}}
 
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{2017: Symantec}
-
-\begin{itemize}
-
-\item January 19: 108 more misissued certs
-  discovered\footnote{\url{https://www.mail-archive.com/dev-security-policy@lists.mozilla.org/msg05455.html}}
-
-\item After 2015 incidents, Symantic claimed to have implemented
-  controls to prevent future
+\item<+-> Response: implented controls to prevent future
   misissuance...\footnote{\url{https://www.symantec.com/page.jsp?id=test-certs-update}}
+
+\item<+-> {\bf January 19, 2017}: 108 more misissued certs
+  discovered\footnote{\url{https://www.mail-archive.com/dev-security-policy@lists.mozilla.org/msg05455.html}}
 
 \end{itemize}
 
@@ -223,7 +195,7 @@
 \item
   free, automated, publicly trusted CA
 \item
-  domain validation only (this is fine)
+  domain validation only
 \item
   ACME protocol
 \item
@@ -322,7 +294,7 @@
 
 \end{frame}
 
-\begin{frame}{StartCom/WoSign vs Let's Encrypt}
+\begin{frame}{StartCom vs Let's Encrypt}
 
 \begin{itemize}
 \item
