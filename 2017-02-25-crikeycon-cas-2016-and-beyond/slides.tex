@@ -255,7 +255,7 @@
 \item  ISRG went public
   June 23...\footnote{\url{https://letsencrypt.org/2016/06/23/defending-our-brand.html}}
 
-\item<+->  June 24: Comodo abandons applications
+\item<+-> {\bf June 24}: Comodo abandons applications
 
 \end{itemize}
 
@@ -264,12 +264,13 @@
 \begin{frame}{Comodo vs Let's Encrypt}
 \large
 \begin{quote}
-  Trying to piggy back on our business model and copying our model
-  of giving certificates for 90 days for free is not ethical. They
-  clearly wanted to leverage the market of Free SSL users we had
+  ``Trying to piggy back on our business model and copying our model
+  of giving certificates for 90 days for free is not ethical.
+  {\bf \em They
+  clearly wanted to leverage the market of Free SSL users} we had
   helped create and establish and that's why they created exactly
-  same 90 day free ssl offering.\\
-  ~~~~~~~~~~~~~~~~~~~~~~~~---Melih Abdulhayoglu, Comodo CEO
+  same 90 day free ssl offering.''\\
+  ~~~~~~~~~~~~~~~~~~~---Melih Abdulhayoglu, Comodo CEO
 \end{quote}
 
 \bigskip
@@ -350,7 +351,8 @@ Public domain \url{https://commons.wikimedia.org/wiki/File:Great_Dane_(PSF).png}
 
 \begin{itemize}
 \item
-  \emph{DNS-Based Authentication of Named Entities} (RFC 6698)
+    \emph{\textbf{D}NS-Based \textbf{A}uthentication of
+        \textbf{N}amed \textbf{E}ntities} (RFC 6698)
 \item
   end-run around the CA industry
 \item
@@ -371,6 +373,7 @@ Public domain \url{https://commons.wikimedia.org/wiki/File:Great_Dane_(PSF).png}
 \item Chrome to require CT for certs issued after Oct 2017\footnote[frame]{
   \url{https://groups.google.com/a/chromium.org/forum/\#!msg/ct-policy/78N3SMcqUGw/ykIwHXuqAQAJ}}
 \item Pushing to limit cert lifetimes to 13 months\footnote{
+  CA/B Forum, Ballot 185
   \url{https://cabforum.org/pipermail/public/2017-February/009530.html}}
 \end{itemize}
 
@@ -384,7 +387,7 @@ Public domain \url{https://commons.wikimedia.org/wiki/File:Great_Dane_(PSF).png}
 \item
   use Strict Transport Security (HSTS); consider preload
 \item
-  use key pinning (HPKP, minimal trust stores, etc)
+  use key pinning (HPKP, etc)
 \item
   monitor CT logs for your domains
 \item
@@ -408,8 +411,6 @@ Public domain \url{https://commons.wikimedia.org/wiki/File:Great_Dane_(PSF).png}
     { \centering
 
     \input{cc-by-ARTIFACT.pdf_tex}
-    \\
-    \copyright~2017  Fraser Tweedale
     \\
     { \scriptsize
     Except where otherwise noted this work is licensed under
