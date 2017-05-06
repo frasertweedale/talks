@@ -55,11 +55,12 @@ provider to the app.  The session will cover:
   consistent user experience across multiple applications.
 
 - How to use external identities in your applications with the help
-  of your web server, focusing on popular **Python web frameworks**.
+  of your web server, focusing in particlar on popular **Python web
+  frameworks** and Apache (though the principles are more widely
+  applicable).
 
-- **Security** characteristics, trade-offs, and a discussion of some
-  of challenging scenarios (e.g. verifying whether two identities
-  from different identity providers are the same person).
+- **Security** characteristics, and discussion of some challenging
+  scenarios including testing, account merging and single sign-out.
 
 
 
@@ -85,6 +86,12 @@ unique challenges in federated identity / SSO.
 
 Questions will be encouraged during the demonstrations and at the
 end of the session.
+
+The demo will focus on Apache, and hopefully a handful of Python web
+frameworks (but Django at the very least).  The principles and other
+technologies including Keycloak are applicable to web development
+and deployment more broadly, regardless of programming language,
+framework, or server software.
 
 
 Target audience
