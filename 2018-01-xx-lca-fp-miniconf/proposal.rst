@@ -81,5 +81,5 @@ I hope to get a couple of keynote speakers to "bookend" the
 miniconf.  At time of submission I do not have anyone lined up, but
 there are several groups doing cutting edge work with FP in Sydney
 (Data61's verified systems and Blockchain groups, and Ambiata's work
-with Haskell come to mine) so my search for outstanding keynote
+with Haskell come to mind) so my search for outstanding keynote
 speakers will hopefully not be in vain!
