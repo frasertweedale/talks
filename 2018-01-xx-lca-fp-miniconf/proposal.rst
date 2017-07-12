@@ -26,7 +26,7 @@ Programming Miniconf.  Come and see how companies and individuals
 are exploiting FP in real projects.  Implementation case studies,
 experience reports, and practicalities of releasing, deploying,
 maintaining or contributing to open source FP projects are some of
-the topics scope for this miniconf.
+the topics in scope for this miniconf.
 
 The miniconf will cater for newcomers to FP who want to learn not
 just the *why* of FP, but also the *how*.  With a focus on the
