@@ -102,6 +102,8 @@
 \DeclareUnicodeCharacter{2227}{$\wedge$}
 \DeclareUnicodeCharacter{00A0}{~}
 \usefonttheme[onlymath]{serif}
+\setbeamercolor{footnote mark}{fg=gray}
+\setbeamerfont{footnote}{size=\tiny}
 \hypersetup{colorlinks,linkcolor=,urlcolor=purple}
 \usepackage[normalem]{ulem}
 
@@ -223,6 +225,7 @@
     user agent ({\bf UA})
 \item
   assertions / attributes / claims
+\item {\em Web SSO}
 \end{itemize}
 
 \end{frame}
@@ -277,7 +280,8 @@
 \begin{itemize}
 \tightlist
 \item \emph{Security Assertion Markup Language}
-\item OASIS standard (2005)
+\item OASIS standard (2005)\footnote{
+        \url{http://saml.xml.org/saml-specifications}}
 \item XML
 \item \emph{single sign-out} capability
 \end{itemize}
@@ -288,11 +292,12 @@
 
 \begin{itemize}
 \tightlist
-\item OpenID Foundation standard (2014)
+\item OpenID Foundation standard (2014)\footnote{
+        \url{https://openid.net/connect/}}
 \item based on OAuth 2.0
 \item JSON + JWT
 \item less client configuration than SAML ({\bf discovery})
-\item can support non-web clients
+\item can support non-browser clients
 \end{itemize}
 
 \end{frame}
@@ -369,23 +374,23 @@
 
 \begin{itemize}
 \tightlist
-\item
-    {\bf Open Source} identity broker
-\item
-  Java
-\item
-  IDPs: social, SAML, OpenID Connect, LDAP, Kerberos
-\item
-  SPs: SAML, OpenID Connect
-\item
-  \url{http://www.keycloak.org/}
+\item {\bf Open Source} identity broker
+\item \url{http://www.keycloak.org/}
+\item IDPs: social, SAML, OpenID Connect, LDAP, Kerberos
+\item SPs: SAML, OpenID Connect
+\item {\em Red Hat Single Sign-On}
+\item {\bf Docker} images available\footnote{
+        \url{https://hub.docker.com/r/jboss/keycloak/}
+    }\textsuperscript{,}\footnote{
+        \url{https://github.com/jboss-dockerfiles/keycloak}
+    }
 \end{itemize}
-
 \end{frame}
 
 \section{Consuming identity assertions}
 
-\begin{frame}[fragile]{SAML SP - \texttt{mod\_auth\_mellon}}
+\begin{frame}[fragile]{SAML SP - \bf \tt
+    mod\_auth\_mellon\footnote{\url{https://github.com/UNINETT/mod_auth_mellon}}}
 
 \begin{verbatim}
 MellonEnable auth
@@ -402,7 +407,8 @@ AuthType Mellon
 
 \end{frame}
 
-\begin{frame}[fragile]{OpenID Connect SP - \texttt{mod\_auth\_openidc}}
+\begin{frame}[fragile]{OpenID Connect SP - \bf \tt
+    mod\_auth\_openidc\footnote{\url{https://github.com/pingidentity/mod_auth_openidc}}}
 
 \begin{verbatim}
 OIDCProviderMetadataURL {IDP_URL}/.well-known/openid-configuration
@@ -494,6 +500,9 @@ OIDCRemoteUserClaim preferred_username
 
 \item \url{https://docs.djangoproject.com/en/1.11/howto/auth-remote-user/}
 \item \url{http://www.adelton.com/django/external-authentication-for-django-projects}
+\item \url{https://djangopackages.org/grids/g/oidc/}
+\item \url{https://djangopackages.org/packages/p/djangosaml2/}
+\item \url{https://djangopackages.org/packages/p/python-social-auth/}
 
 \end{itemize}
 \end{frame}
@@ -501,47 +510,65 @@ OIDCRemoteUserClaim preferred_username
 \begin{frame}{General guidelines}
 \begin{itemize}
 \tightlist
-\item use middleware(s) to interpret request environment
-\item map remote roles to app roles
+\item use {\bf middleware(s)} to interpret request environment
+\item map remote {\bf roles} to app roles
 \item users: transient or persisted?
-\item tweak views as needed
+\item {\bf tweak login view} as needed
 \end{itemize}
 \end{frame}
 
 \section{Wrapping up}
 
-\begin{frame}{SAML or OpenID Connect?}
+\begin{frame}{Security}
 \begin{itemize}
 \tightlist
-\item if you're writing all new stuff, OpenID Connect
-\item if it's a {\bf mobile} app, OpenID Connect
-\item if you have stuff that only speaks one or the other, use it
-\item if you have SAML {\em and} OpenID Connect clients, use a {\bf broker}
+\item use {\bf TLS} everywhere
+\item how secure are the {\bf libraries}?
+\item how secure are the {\bf
+    protocols}?\footnote{
+        \href{https://arxiv.org/pdf/1601.01229v2.pdf}{
+            A Comprehensive Formal Security Analysis of OAuth 2.0
+        }
+    }\textsuperscript{,}\footnote{
+        \href{https://arxiv.org/pdf/1704.08539.pdf}{
+            The Web SSO Standard {\em OpenID Connect}:
+            In-Depth Formal Security Analysis and Security Guidelines
+        }
+    }\textsuperscript{,}\footnote{
+        \href{https://ai-lab.it/armando/pub/fmse9-armando.pdf}{
+            Formal Analysis of SAML 2.0 Web Browser Single Sign-On:
+            Breaking the SAML-based Single Sign-On for Google Apps
+        }
+    }
+\item preventing token / data interception at UA
 \end{itemize}
+% guidelines:
+% - include issues in authz endpoint response
+% - fresh state nonce for each login attempt
+% - use referrer policies to prevent code/token/state leakage
+%   (header 'Referrer-Policy: ...')
+% - all the usual stuff: TLS, SRI, secure, HttpOnly cookies,
+%   replace session cookie upon login (avert session fixation
+%   attack), etc.
 \end{frame}
 
-\begin{frame}{Hard questions}
+\begin{frame}[plain]
+\centering
+\includegraphics[height=\paperheight]{fedsso-proto-6-getuserinfo.pdf}
+\end{frame}
+
+\begin{frame}{Challenges}
 
 \begin{itemize}
 \tightlist
-\item
-  do you trust the email address asserted by IDP?
-\item
-  should you restrict future logins to first-used IDP?
-\item
-  what should you use as username / primary key in your app?
-\item
-  what to do if username / email matches existing account?
+\item testing
+\item email verification
+\item account linking\footnote{
+        \url{https://stackoverflow.com/questions/6666267/architecture-for-merging-multiple-user-accounts-together}
+    }\textsuperscript{,}\footnote{
+        \url{https://www.sitepoint.com/social-network-authentication-merging-accounts/}
+    }
 \end{itemize}
-
-Further reading:
-
-\begin{itemize}
-\tightlist
-\item \url{https://stackoverflow.com/questions/6666267/architecture-for-merging-multiple-user-accounts-together}
-\item \url{https://www.sitepoint.com/social-network-authentication-merging-accounts/}
-\end{itemize}
-
 % notes:
 %   - separate models for each IDP, and for the app.  "link" them
 %   - offer "link/connect account" option for logged-in users
@@ -550,7 +577,34 @@ Further reading:
 %   - post-facto account linking - what to do with content?
 %     that's up to you!
 %   - requirement: do not make your primary key the social username
+\end{frame}
 
+\begin{frame}{SAML or OpenID Connect?}
+\begin{itemize}
+\tightlist
+\item if you're implementing new services: OpenID Connect
+\item if it's a {\bf mobile} app: OpenID Connect
+\item if the SP only speaks one or the other: use that
+\item if you have SAML {\em and} OpenID Connect SPs: {\bf broker}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Single sign-out}
+\begin{itemize}
+\tightlist
+\item what happens when user signs out of IDP?
+\item supported by SAML; {\em draft spec} for OpenID Connect
+\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+\centering
+\includegraphics[height=\paperheight]{fedsso-logout-backchannel.pdf}
+\end{frame}
+
+\begin{frame}[plain]
+\centering
+\includegraphics[height=\paperheight]{fedsso-logout-frontchannel.pdf}
 \end{frame}
 
 \begin{frame}{Recap}
@@ -563,22 +617,6 @@ Further reading:
 \end{itemize}
 
 \end{frame}
-
-\begin{frame}{Resources}
-
-\begin{itemize}
-\tightlist
-\item \url{http://www.keycloak.org/docs/}
-\item \url{https://hub.docker.com/r/jboss/keycloak/}
-\item \url{https://github.com/jboss-dockerfiles/keycloak}
-\item \url{https://github.com/UNINETT/mod_auth_mellon}
-\item \url{https://github.com/pingidentity/mod_auth_openidc}
-\item \url{https://openid.net/connect/}
-\item \url{http://saml.xml.org/saml-specifications}
-\end{itemize}
-
-\end{frame}
-
 
 \begin{frame}[plain]
 
