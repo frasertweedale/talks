@@ -141,30 +141,61 @@
 
 \begin{itemize}
 \tightlist
-\item
-    authentication is {\bf hard}
-\item
-    authentication is {\bf burdensome}
-\item
-    authentication is {\bf solved}
-\item
-  \textbf{outsource} your app's authentication
+\item authentication is {\bf hard} to get right
+\item {\bf data silos} are bad
+\item authentication is {\bf burdensome} for users
+\item user often is {\bf already authenticated} by {\em someone}
+\item therefore \textbf{outsource} your authentication
 \end{itemize}
 
+\end{frame}
+
+\begin{frame}{What - terminology}
+\begin{itemize}
+\tightlist
+\item identity provider ({\bf IDP})
+\item service provider ({\bf SP})
+\item relying party (RP)
+\item identity broker
+\item user agent ({\bf UA})
+\item assertions / attributes / claims
+\item {\em Web SSO}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+\centering
+\includegraphics[height=\paperheight]{fedsso-basic.pdf}
+\end{frame}
+
+\begin{frame}{Who?}
+\begin{itemize}
+
+\tightlist
+\item Social login providers
+\begin{itemize}
+\tightlist
+\item Google, Facebook, Twitter, Linked.in, GitHub, Microsoft, \ldots
+\end{itemize}
+
+\item{The enterprise}
+\begin{itemize}
+\tightlist
+\item Active Directory, FreeIPA, \ldots
+\item LDAP
+\item Kerberos, X.509
+\end{itemize}
+
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Why - service providers}
 
 \begin{itemize}
 \tightlist
-\item
-    don't have to deal with {\bf passwords}
-\item
-    avoid {\bf duplication} of account info
-\item
-  someone else has done most of the work!
-\item
-  \bf single sign-on
+\item don't have to handle {\bf passwords}
+\item someone else has done most of the work!
+\item \bf single sign-on
 \end{itemize}
 
 \end{frame}
@@ -173,66 +204,42 @@
 
 \begin{itemize}
 \tightlist
-\item
-  avoid identity proliferation
-\item
-    avoid {\bf password fatigue}
-\item
-  social login: integration opportunities
+\item avoid identity proliferation
+\item avoid {\bf password fatigue}
+\item social login: integration opportunities
+\item \bf single sign-on
 \end{itemize}
 
+\end{frame}
+
+\begin{frame}{Why - IDP (enterprise)}
+
+\begin{itemize}
+\tightlist
+\item centralised identity and policy
+\item avoid duplicate administrative effort
+\item auditability and {\bf revocation}
+\item \bf single sign-on
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Why - IDP (social login)}
+\begin{itemize}
+\tightlist
+\item provide integration opportunities
+\item brand exposure?
+\item find out everything the user (product) does\ldots
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Why not?}
-
 \begin{itemize}
 \tightlist
-\item
-    {\bf not everyone} uses Facebook, GitHub, \ldots{}
-\item
-  if they do, might not want to use it for your service
-\item
-    more {\bf moving parts}
+\item {\bf not everyone} uses Facebook, GitHub, \ldots
+\item might not want to use social login
+\item more {\bf moving parts}
 \end{itemize}
-
-\end{frame}
-
-\begin{frame}{Password auth?}
-
-\begin{itemize}
-\tightlist
-\item
-    in enterprise, user \textbf{definitely} has account
-\item
-  for social login, \textbf{trade-offs}
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{Terminology}
-
-\begin{itemize}
-\tightlist
-\item
-    identity provider ({\bf IDP})
-\item
-    service provider ({\bf SP})
-\item
-    relying party (RP)
-\item
-  identity broker
-\item
-    user agent ({\bf UA})
-\item
-  assertions / attributes / claims
-\item {\em Web SSO}
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}[plain]
-\centering
-\includegraphics[height=\paperheight]{fedsso-basic.pdf}
 \end{frame}
 
 \begin{frame}[plain]
@@ -276,7 +283,6 @@
 \end{frame}
 
 \begin{frame}{Protocols - SAML 2.0}
-
 \begin{itemize}
 \tightlist
 \item \emph{Security Assertion Markup Language}
@@ -285,11 +291,9 @@
 \item XML
 \item \emph{single sign-out} capability
 \end{itemize}
-
 \end{frame}
 
 \begin{frame}{Protocols - OpenID Connect}
-
 \begin{itemize}
 \tightlist
 \item OpenID Foundation standard (2014)\footnote{
@@ -299,55 +303,16 @@
 \item less client configuration than SAML ({\bf discovery})
 \item can support non-browser clients
 \end{itemize}
-
 \end{frame}
 
-\begin{frame}{Social login}
-
+\begin{frame}{SAML or OpenID Connect?}
 \begin{itemize}
 \tightlist
-\item
-  Google, Facebook, Twitter, Linked.in, GitHub, Microsoft, \ldots{}
-\item
-  typically uses just \textbf{OAuth 2.0}
-\item
-  integration, account linking
+\item if you're implementing new services: OpenID Connect
+\item if it's a {\bf mobile} app: OpenID Connect
+\item if the SP only speaks one or the other: use that
+\item if you have SAML {\em and} OpenID Connect SPs: {\bf broker}
 \end{itemize}
-
-\end{frame}
-
-\begin{frame}{Social login - how}
-
-\begin{itemize}
-\tightlist
-\item
-  create an ``app'' with the IDP
-\item
-  configure SP to request access to user resources
-\item
-  IDP authenticates user
-\item
-  user grants access
-\item
-  IDP redirects back to SP, conveying \emph{token}
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{Enterprise login}
-
-\begin{itemize}
-\tightlist
-\item
-  users already have accounts
-\item
-  SP requests identity assertions from IDP
-\item
-  IDP authenticates user (LDAP, Kerberos, \ldots{})
-\item
-  IDP redirects back to SP, conveying \textbf{assertions}
-\end{itemize}
-
 \end{frame}
 
 \begin{frame}{Identity brokers}
@@ -577,16 +542,6 @@ OIDCRemoteUserClaim preferred_username
 %   - post-facto account linking - what to do with content?
 %     that's up to you!
 %   - requirement: do not make your primary key the social username
-\end{frame}
-
-\begin{frame}{SAML or OpenID Connect?}
-\begin{itemize}
-\tightlist
-\item if you're implementing new services: OpenID Connect
-\item if it's a {\bf mobile} app: OpenID Connect
-\item if the SP only speaks one or the other: use that
-\item if you have SAML {\em and} OpenID Connect SPs: {\bf broker}
-\end{itemize}
 \end{frame}
 
 \begin{frame}{Single sign-out}
