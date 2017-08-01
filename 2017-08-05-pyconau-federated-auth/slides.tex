@@ -149,19 +149,6 @@
 
 \end{frame}
 
-\begin{frame}{What - terminology}
-\begin{itemize}
-\tightlist
-\item identity provider ({\bf IDP})
-\item service provider ({\bf SP})
-\item relying party (RP)
-\item identity broker
-\item user agent ({\bf UA})
-\item assertions / attributes / claims
-\item {\em Web SSO}
-\end{itemize}
-\end{frame}
-
 \begin{frame}[plain]
 \centering
 \includegraphics[height=\paperheight]{fedsso-basic.pdf}
@@ -281,36 +268,23 @@
 \includegraphics[height=\paperheight]{fedsso-proto-7.pdf}
 \end{frame}
 
-\begin{frame}{Protocols - SAML 2.0}
+\begin{frame}{Protocols}
 \begin{itemize}
-\tightlist
-\item \emph{Security Assertion Markup Language}
-\item OASIS standard (2005)\footnote{
-        \url{http://saml.xml.org/saml-specifications}}
-\item XML
-\item \emph{single sign-out} capability
-\end{itemize}
-\end{frame}
 
-\begin{frame}{Protocols - OpenID Connect}
-\begin{itemize}
-\tightlist
-\item OpenID Foundation standard (2014)\footnote{
-        \url{https://openid.net/connect/}}
-\item based on OAuth 2.0
-\item JSON + JWT
-\item less client configuration than SAML ({\bf discovery})
-\item can support non-browser clients
-\end{itemize}
-\end{frame}
+\item \textbf{SAML 2.0}\footnote{\url{http://saml.xml.org/saml-specifications}}
+    \begin{itemize}
+    \tightlist
+    \item \emph{Security Assertion Markup Language}
+    \item 2005, XML
+    \end{itemize}
 
-\begin{frame}{SAML or OpenID Connect?}
-\begin{itemize}
-\tightlist
-\item if you're implementing new services: OpenID Connect
-\item if it's a {\bf mobile} app: OpenID Connect
-\item if the SP only speaks one or the other: use that
-\item if you have SAML {\em and} OpenID Connect SPs: {\bf broker}
+\item \textbf{OpenID Connect}\footnote{\url{https://openid.net/connect/}}
+    \begin{itemize}
+    \tightlist
+    \item 2014, JSON + JWT
+    \item based on OAuth 2.0
+    \end{itemize}
+
 \end{itemize}
 \end{frame}
 
@@ -365,6 +339,18 @@
     \end{itemize}
 \item {\tt REMOTE\_USER}
 \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+\centering
+\makebox[\textwidth][c]{
+    \includegraphics[height=\paperheight]{fedsso-demo-github.pdf}}
+\end{frame}
+
+\begin{frame}[plain]
+\centering
+\makebox[\textwidth][c]{
+    \includegraphics[height=\paperheight]{fedsso-demo-ldap.pdf}}
 \end{frame}
 
 \begin{frame}[fragile]{NGINX}
@@ -539,6 +525,16 @@ def login(
 %   - post-facto account linking - what to do with content?
 %     that's up to you!
 %   - requirement: do not make your primary key the social username
+\end{frame}
+
+\begin{frame}{SAML or OpenID Connect?}
+\begin{itemize}
+\tightlist
+\item if you're implementing new services: OpenID Connect
+\item if it's a {\bf mobile} app: OpenID Connect
+\item if the SP only speaks one or the other: use that
+\item if you have SAML {\em and} OpenID Connect SPs: {\bf broker}
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Single sign-out}
