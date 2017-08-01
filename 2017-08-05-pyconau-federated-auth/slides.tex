@@ -30,6 +30,7 @@
             pdfborder={0 0 0},
             breaklinks=true}
 
+\usepackage{alltt}
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
@@ -106,33 +107,31 @@
 \setbeamerfont{footnote}{size=\tiny}
 \hypersetup{colorlinks,linkcolor=,urlcolor=purple}
 \usepackage[normalem]{ulem}
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries
+}
 
 \title{\textbf{Identity 2.0}}
 \subtitle{The {\bf what}, {\bf why} and {\bf how} of social and federated auth}
-\author{
-    Fraser Tweedale\\
-    \texttt{@hackuador}\\
-    \bigskip
-    \def\svgwidth{2cm}
-    \input{Logo_RH_RGB_Default-ARTIFACT.pdf_tex}
-}
-\date{August 5, 2017\\ {\tt \#pyconau}}
+\author{Fraser Tweedale\\\texttt{@hackuador}}
+\date{August 5, 2017\\{\tt \#pyconau}}
+\institute{\input{Logo_RH_RGB_Default-ARTIFACT.pdf_tex}}
+
+\logo{\def\svgwidth{1.2cm} \input{Logo_RH_RGB_Default-ARTIFACT.pdf_tex}}
 
 \begin{document}
-\frame{\titlepage}
+
+\frame[plain]{\titlepage}
 
 \begin{frame}{This talk}
 
 \begin{itemize}
 \tightlist
-\item
-  \textbf{What} is federated / social authentication?
-\item
-  \textbf{Why} should you care?
-\item
-  \textbf{How} can you deploy it?
-\item
-  \textbf{How} can I use it for Python web applications?
+\item \textbf{What} is federated / social authentication?
+\item \textbf{Why} should I care?
+\item \textbf{How} do I use it?
 \end{itemize}
 
 \end{frame}
@@ -352,13 +351,25 @@
 \end{itemize}
 \end{frame}
 
-\section{Consuming identity assertions}
+\section{Demo}
 
-\begin{frame}[fragile]{SAML SP - \bf \tt
-    mod\_auth\_mellon\footnote{\url{https://github.com/UNINETT/mod_auth_mellon}}}
+\begin{frame}{Demo}
+\begin{itemize}
+\item GitHub social login
+\item LDAP-based IDP
+\item Keycloak
+\item Apache modules
+    \begin{itemize}
+    \item {\tt mod\_auth\_mellon}\footnote{\url{https://github.com/UNINETT/mod_auth_mellon}}
+    \item {\tt mod\_auth\_openidc}\footnote{\url{https://github.com/pingidentity/mod_auth_openidc}}
+    \end{itemize}
+\item {\tt REMOTE\_USER}
+\end{itemize}
+\end{frame}
 
-\begin{verbatim}
-MellonEnable auth
+\begin{frame}[fragile]{SAML SP - \tt mod\_auth\_mellon}
+\alltt{
+\textbf{\uline{MellonEnable}} auth
 MellonSPMetadataFile /etc/httpd/saml2/sp-metadata.xml
 MellonSPPrivateKeyFile /etc/httpd/saml2/client-private-key.pem
 MellonSPCertFile /etc/httpd/saml2/client-cert.pem
@@ -368,26 +379,97 @@ MellonSetEnvNoPrefix REMOTE_USER_EMAIL email
 
 Require valid-user
 AuthType Mellon
-\end{verbatim}
-
+}
 \end{frame}
 
-\begin{frame}[fragile]{OpenID Connect SP - \bf \tt
-    mod\_auth\_openidc\footnote{\url{https://github.com/pingidentity/mod_auth_openidc}}}
+\begin{frame}[fragile]{SAML SP - \tt mod\_auth\_mellon}
+\alltt{
+MellonEnable auth
+\textbf{\uline{MellonSPMetadataFile}} /etc/httpd/saml2/sp-metadata.xml
+\textbf{\uline{MellonSPPrivateKeyFile}} /etc/httpd/saml2/client-private-key.pem
+\textbf{\uline{MellonSPCertFile}} /etc/httpd/saml2/client-cert.pem
+\textbf{\uline{MellonIdPMetadataFile}} /etc/httpd/saml2/idp-metadata.xml
 
-\begin{verbatim}
-OIDCProviderMetadataURL {IDP_URL}/.well-known/openid-configuration
+MellonSetEnvNoPrefix REMOTE_USER_EMAIL email
+
+Require valid-user
+AuthType Mellon
+}
+\end{frame}
+
+\begin{frame}[fragile]{SAML SP - \tt mod\_auth\_mellon}
+\alltt{
+MellonEnable auth
+MellonSPMetadataFile /etc/httpd/saml2/sp-metadata.xml
+MellonSPPrivateKeyFile /etc/httpd/saml2/client-private-key.pem
+MellonSPCertFile /etc/httpd/saml2/client-cert.pem
+MellonIdPMetadataFile /etc/httpd/saml2/idp-metadata.xml
+
+\textbf{\uline{MellonSetEnvNoPrefix}} REMOTE_USER_EMAIL email
+
+Require valid-user
+AuthType Mellon
+}
+\end{frame}
+
+\begin{frame}[fragile]{SAML SP - \tt mod\_auth\_mellon}
+\alltt{
+MellonEnable auth
+MellonSPMetadataFile /etc/httpd/saml2/sp-metadata.xml
+MellonSPPrivateKeyFile /etc/httpd/saml2/client-private-key.pem
+MellonSPCertFile /etc/httpd/saml2/client-cert.pem
+MellonIdPMetadataFile /etc/httpd/saml2/idp-metadata.xml
+
+MellonSetEnvNoPrefix REMOTE_USER_EMAIL email
+
+\textbf{\uline{Require}} valid-user
+\textbf{\uline{AuthType}} Mellon
+}
+\end{frame}
+
+\begin{frame}[fragile]{OpenID Connect SP - \tt mod\_auth\_openidc}
+\alltt{
+\textbf{\uline{OIDCProviderMetadataURL}} \{IDP_URL\}/.well-known/openid-configuration
 OIDCRedirectURI http://f26-pyconau.ipa.local/oidc/redirect_uri
 OIDCClientID master-oidc
 OIDCCryptoPassphrase secret123
 OIDCRemoteUserClaim preferred_username
 
 <Location /oidc>
-  Require valid-user
-  AuthType openid-connect
+    Require valid-user
+    AuthType openid-connect
 </Location>
-\end{verbatim}
+}
+\end{frame}
 
+\begin{frame}[fragile]{OpenID Connect SP - \tt mod\_auth\_openidc}
+\alltt{
+OIDCProviderMetadataURL \{IDP_URL\}/.well-known/openid-configuration
+\textbf{\uline{OIDCRedirectURI}} http://f26-pyconau.ipa.local/oidc/redirect_uri
+OIDCClientID master-oidc
+OIDCCryptoPassphrase secret123
+OIDCRemoteUserClaim preferred_username
+
+<Location /oidc>
+    Require valid-user
+    AuthType openid-connect
+</Location>
+}
+\end{frame}
+
+\begin{frame}[fragile]{OpenID Connect SP - \tt mod\_auth\_openidc}
+\alltt{
+OIDCProviderMetadataURL \{IDP_URL\}/.well-known/openid-configuration
+OIDCRedirectURI http://f26-pyconau.ipa.local/oidc/redirect_uri
+OIDCClientID master-oidc
+OIDCCryptoPassphrase secret123
+\textbf{\uline{OIDCRemoteUserClaim}} preferred_username
+
+<Location /oidc>
+    Require valid-user
+    AuthType openid-connect
+</Location>
+}
 \end{frame}
 
 \begin{frame}[fragile]{NGINX}
@@ -398,18 +480,7 @@ OIDCRemoteUserClaim preferred_username
 \end{itemize}
 \end{frame}
 
-\section{Demo}
-
 \section{Python web frameworks}
-
-\begin{frame}{\tt REMOTE\_USER}
-\begin{itemize}
-\tightlist
-\item Standard request variable to identify authenticated user
-\item Many apps / frameworks observe it
-\item In practice {\tt REMOTE\_USER} is not enough
-\end{itemize}
-\end{frame}
 
 \begin{frame}{Django - middlewares}
 \begin{itemize}
@@ -446,7 +517,7 @@ OIDCRemoteUserClaim preferred_username
 \begin{itemize}
 \tightlist
 
-\item {\tt login} view does not observe {\tt REMOTE\_USER}
+\item default {\tt \textbf{login}} view does not observe {\tt REMOTE\_USER}
 
 \item workaround: wrap {\tt django.contrib.auth.views.login}
 
@@ -457,6 +528,27 @@ OIDCRemoteUserClaim preferred_username
     \end{itemize}
 
 \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Django - login form}
+\begin{lstlisting}[language=Python]
+def login(
+    request, template_name='activity/login.html',
+    redirect_field_name=REDIRECT_FIELD_NAME):
+
+  if hasattr(request, 'user') and request.user.is_authenticated():
+    redirect_to = request.POST.get(
+      redirect_field_name,
+      request.GET.get(redirect_field_name, ''))
+    if not is_safe_url(url=redirect_to, host=request.get_host()):
+      redirect_to = resolve_url(settings.LOGIN_REDIRECT_URL)
+    return HttpResponseRedirect(redirect_to)
+
+  return django.contrib.auth.views.login(
+    request,
+    template_name=template_name,
+    redirect_field_name=redirect_field_name)
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}{Django - resources}
@@ -472,7 +564,7 @@ OIDCRemoteUserClaim preferred_username
 \end{itemize}
 \end{frame}
 
-\begin{frame}{General guidelines}
+\begin{frame}{Web frameworks - general guidelines}
 \begin{itemize}
 \tightlist
 \item use {\bf middleware(s)} to interpret request environment
@@ -520,6 +612,16 @@ OIDCRemoteUserClaim preferred_username
 \begin{frame}[plain]
 \centering
 \includegraphics[height=\paperheight]{fedsso-proto-6-getuserinfo.pdf}
+\end{frame}
+
+\begin{frame}[plain]
+\centering
+\includegraphics[height=\paperheight]{fedsso-security-oidc.pdf}
+\end{frame}
+
+\begin{frame}[plain]
+\centering
+\includegraphics[height=\paperheight]{fedsso-security-saml.pdf}
 \end{frame}
 
 \begin{frame}{Challenges}
