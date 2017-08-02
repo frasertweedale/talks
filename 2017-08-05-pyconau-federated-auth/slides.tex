@@ -175,48 +175,24 @@
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Why - service providers}
-
-\begin{itemize}
-\tightlist
-\item don't have to handle {\bf passwords}
-\item someone else has done most of the work!
-\item \bf single sign-on
-\end{itemize}
-
+\begin{frame}[plain]
+\centering
+\makebox[\textwidth][c]{\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{breach.png}}
 \end{frame}
 
-\begin{frame}{Why - users}
-
-\begin{itemize}
-\tightlist
-\item avoid identity proliferation
-\item avoid {\bf password fatigue}
-\item social login: integration opportunities
-\item \bf single sign-on
-\end{itemize}
-
+\begin{frame}[plain]
+\centering
+\makebox[\textwidth][c]{\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{hibp.png}}
 \end{frame}
 
-\begin{frame}{Why - IDP (enterprise)}
-
-\begin{itemize}
-\tightlist
-\item centralised identity and policy
-\item avoid duplicate administrative effort
-\item auditability and {\bf revocation}
-\item \bf single sign-on
-\end{itemize}
-
+\begin{frame}[plain]
+\centering
+\makebox[\textwidth][c]{\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{login-forms.png}}
 \end{frame}
 
-\begin{frame}{Why - IDP (social login)}
-\begin{itemize}
-\tightlist
-\item provide integration opportunities
-\item brand exposure?
-\item find out everything the user (product) does\ldots
-\end{itemize}
+\begin{frame}[plain]
+\centering
+\makebox[\textwidth][c]{\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{social-login.png}}
 \end{frame}
 
 \begin{frame}{Why not?}
@@ -357,95 +333,49 @@
 \begin{itemize}
 \tightlist
 \item {\em NGINX Plus} (OpenID Connect; paid)
-\item \url{https://github.com/pingidentity/lua-resty-openidc}
+\item \href{https://github.com/pingidentity/lua-resty-openidc}{
+    \ttfamily https://github.com/pingidentity/{\large \bfseries \em lua-resty-openidc}}
 \end{itemize}
 \end{frame}
 
-\section{Python web frameworks}
+\section{Web frameworks}
 
-\begin{frame}{Django - middlewares}
+\begin{frame}{Django}
 \begin{itemize}
-\tightlist
 
-\item {\tt RemoteUserMiddleware}
-\item {\tt PersistentRemoteUserMiddleware}
-\item {\tt RemoteUserBackend}
-%\item {\tt RemoteUserAttrMiddleware} reads attributes and updates user object
-
-\end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Django - configuration}
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{MIDDLEWARE_CLASSES }\OperatorTok{=} \NormalTok{(}
- \NormalTok{...}
- \StringTok{'django.contrib.auth.middleware.AuthenticationMiddleware'}\NormalTok{,}
- \StringTok{'django.contrib.auth.middleware.PersistentRemoteUserMiddleware'}\NormalTok{,}
- \StringTok{'identity.external.RemoteUserAttrMiddleware'}\NormalTok{,}
- \NormalTok{...}
-\NormalTok{)}
-
-\NormalTok{AUTHENTICATION_BACKENDS }\OperatorTok{=} \NormalTok{(}
-  \StringTok{'django.contrib.auth.backends.RemoteUserBackend'}\NormalTok{,}
-  \StringTok{'django.contrib.auth.backends.ModelBackend'}\NormalTok{,}
-\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-\end{frame}
-
-\begin{frame}{Django - login form}
-\begin{itemize}
-\tightlist
-
-\item default {\tt \textbf{login}} view does not observe {\tt REMOTE\_USER}
-
-\item workaround: wrap {\tt django.contrib.auth.views.login}
-
+\item Packages
     \begin{itemize}
     \tightlist
-    \item redirect if {\tt request.user.is\_authenticated()}
-    \item update {\tt urls.py} to use wrapped view
+    \item \href{https://python-social-auth.readthedocs.io/}{
+            \ttfamily https://{\large \bfseries \em python-social-auth}.readthedocs.io/}
+    \item \href{https://djangopackages.org/grids/g/oidc/}{
+            \ttfamily https://djangopackages.org/grids/g/{\large \bfseries \em oidc}/}
+    \item \href{https://djangopackages.org/packages/p/djangosaml2/}{
+            \ttfamily https://djangopackages.org/packages/p/\hspace{0px}{\large \bfseries \em djangosaml2}/}
+    \end{itemize}
+
+\item {\tt REMOTE\_USER}
+    \begin{itemize}
+    \tightlist
+    \item \href{https://docs.djangoproject.com/en/1.11/howto/auth-remote-user/}{
+            \ttfamily https://docs.djangoproject.com/en/1.11/howto/\hspace{0px}{\large \bfseries \em auth-remote-user}/}
+    \item \href{http://www.adelton.com/django/external-authentication-for-django-projects}{
+            \ttfamily http://www.adelton.com/django/\hspace{0px}{\large \bfseries \em external-authentication-for-django-projects}}
     \end{itemize}
 
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Django - login form}
-\begin{lstlisting}[language=Python]
-def login(
-    request, template_name='activity/login.html',
-    redirect_field_name=REDIRECT_FIELD_NAME):
-
-  if hasattr(request, 'user') and request.user.is_authenticated():
-    redirect_to = request.POST.get(
-      redirect_field_name,
-      request.GET.get(redirect_field_name, ''))
-    if not is_safe_url(url=redirect_to, host=request.get_host()):
-      redirect_to = resolve_url(settings.LOGIN_REDIRECT_URL)
-    return HttpResponseRedirect(redirect_to)
-
-  return django.contrib.auth.views.login(
-    request,
-    template_name=template_name,
-    redirect_field_name=redirect_field_name)
-\end{lstlisting}
-\end{frame}
-
-\begin{frame}{Django - resources}
+\begin{frame}{Other Python frameworks}
 \begin{itemize}
-\tightlist
-
-\item \url{https://docs.djangoproject.com/en/1.11/howto/auth-remote-user/}
-\item \url{http://www.adelton.com/django/external-authentication-for-django-projects}
-\item \url{https://djangopackages.org/grids/g/oidc/}
-\item \url{https://djangopackages.org/packages/p/djangosaml2/}
-\item \url{https://djangopackages.org/packages/p/python-social-auth/}
-
+\item \href{https://python-social-auth.readthedocs.io/}{
+        \ttfamily https://{\large \bfseries \em python-social-auth}.readthedocs.io/}
+\item \href{https://pypi.python.org/pypi/pysaml2}{
+        \ttfamily https://pypi.python.org/pypi/{\large \bfseries \em pysaml2}}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Web frameworks - general guidelines}
+\begin{frame}{{\tt REMOTE\_USER} - general guidelines}
 \begin{itemize}
 \tightlist
 \item use {\bf middleware(s)} to interpret request environment
