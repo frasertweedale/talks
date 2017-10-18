@@ -1,6 +1,5 @@
 module Expr where
 
-import Control.Applicative
 import Test.QuickCheck
 
 data Expr
@@ -19,11 +18,13 @@ eval (Mul a b) = eval a * eval b
 -- prop> prop_elimMul1Elim
 --
 elimMul1 :: Expr -> Expr
-elimMul1 (Lit x)         = Lit x
-elimMul1 (Add a b)       = Add (elimMul1 a) (elimMul1 b)
-elimMul1 (Mul a (Lit 1)) = elimMul1 a
-elimMul1 (Mul (Lit 1) a) = elimMul1 a
-elimMul1 (Mul a b)       = Mul (elimMul1 a) (elimMul1 b)
+elimMul1 (Lit x)   = Lit x
+elimMul1 (Add a b) = Add (elimMul1 a) (elimMul1 b)
+elimMul1 (Mul a b) =
+  case (a, b) of
+    (Lit 1, y) -> elimMul1 y
+    (x, Lit 1) -> elimMul1 x
+    (x, y)     -> Mul (elimMul1 x) (elimMul1 y)
 
 prop_elimMul1Elim :: Expr -> Bool
 prop_elimMul1Elim expr = f (elimMul1 expr) where

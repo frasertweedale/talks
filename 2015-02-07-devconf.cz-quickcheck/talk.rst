@@ -10,18 +10,6 @@
 Introduction
 ************
 
-About me
-========
-
-- Developer at Red Hat
-
-- FreeIPA identity management and Dogtag PKI
-
-- Mostly Python and Java at work
-
-- Mostly Haskell for other projects
-
-
 This talk
 =========
 
@@ -41,13 +29,10 @@ This talk
 Property-based testing
 ======================
 
-A property-based testing framework:
-
-#. Gives you a way to state properties of functions
-#. Gives you a way to declare how to generate arbitrary values of
-   your types
-#. Provides generators for standard types (usually)
-#. Attempts to falsify your properties and reports counterexamples.
+#. state **properties** of functions
+#. declare how to **generate** arbitrary values
+#. framework attempts to **falsify** properties
+#. report **counterexamples**
 
 
 Applications
@@ -129,37 +114,10 @@ Property-based testing implementations
 
 - Most languages have at least one implementation
 
-- Incomplete list: https://en.wikipedia.org/wiki/QuickCheck
-
-- Some decent or popular implementations are missing
-  - Python: pyqcy_
-  - Java: `Functional Java`_ (``fj.test``)
+- List: https://en.wikipedia.org/wiki/QuickCheck
 
 .. _pyqcy: https://pypi.python.org/pypi/pyqcy
 .. _Functional Java: http://www.functionaljava.org/
-
-
-Python example
-==============
-
-.. code:: python
-
-  from pyqcy import *
-
-  def rev(l):
-      return list(reversed(l))
-
-  @qc
-  def prop_rev_unit(x=int_()):
-      assert rev([x]) == [x]
-
-  @qc
-  def prop_rev_app(xs=list_(of=int), ys=list_(of=int)):
-      assert rev(xs + ys) == rev(ys) + rev(xs)
-
-  if __name__ == '__main__':
-      main()
-
 
 Java example
 ============
@@ -207,6 +165,12 @@ Java example
       app(rev(ys), rev(xs))
     );
   }
+
+
+Python example
+==============
+
+- *Hypothesis*
 
 
 
@@ -373,16 +337,12 @@ Questions?
 Thanks for listening
 ====================
 
-Copyright 2015  Fraser Tweedale
+Copyright 2015, 2017  Fraser Tweedale
 
 This work is licensed under the Creative Commons Attribution 4.0
 International License. To view a copy of this license, visit
 http://creativecommons.org/licenses/by/4.0/.
 
-Feedback
-  http://devconf.cz/f/72
-Slides
-  https://github.com/frasertweedale/talks/
 Email
   ``ftweedal@redhat.com``
 Twitter

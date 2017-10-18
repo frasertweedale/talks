@@ -1,7 +1,5 @@
 module List where
 
-import Test.QuickCheck
-
 rev :: [a] -> [a]
 rev [] = []
 rev (x:xs) = rev xs ++ [x]

@@ -1,6 +1,5 @@
 module Gotcha where
 
-import Control.Applicative
 import Test.QuickCheck
 
 ----------------
@@ -12,7 +11,7 @@ prop_EvenHalveThenDouble xs =
   all even xs ==>
     map ((*2) . (`div` 2)) xs == xs
 
-data EvenList a = EvenList [a]
+newtype EvenList a = EvenList [a]
   deriving (Show)
 
 instance (Arbitrary a, Num a) => Arbitrary (EvenList a) where
@@ -37,7 +36,7 @@ prop_EvenListAllEven (EvenList xs) =
 
 prop_EvenListAllEven' :: EvenList Int -> Property
 prop_EvenListAllEven' (EvenList xs) =
-  cover (length xs > 1) 75 "non-trivial" $
+  cover (length xs > 1) 75 "non-empty" $
     all even xs
 
 
