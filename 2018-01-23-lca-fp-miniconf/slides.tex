@@ -1,0 +1,263 @@
+\documentclass[ignorenonframetext,aspectratio=169]{beamer}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\newif\ifbibliography
+\hypersetup{
+            pdfborder={0 0 0},
+            breaklinks=true}
+
+%\DeclareUnicodeCharacter{2200}{$\forall$}
+%\DeclareUnicodeCharacter{2228}{$\vee$}
+%\DeclareUnicodeCharacter{2227}{$\wedge$}
+%\DeclareUnicodeCharacter{00A0}{~}
+
+\usepackage{alltt}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+
+\AtBeginPart{
+  \let\insertpartnumber\relax
+  \let\partname\relax
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \let\insertsectionnumber\relax
+    \let\sectionname\relax
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \let\insertsubsectionnumber\relax
+  \let\subsectionname\relax
+  \frame{\subsectionpage}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+\usefonttheme[onlymath]{serif}
+\setbeamercolor{footnote mark}{fg=gray}
+\setbeamerfont{footnote}{size=\tiny}
+\hypersetup{colorlinks,linkcolor=,urlcolor=purple}
+\usepackage[normalem]{ulem}
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\large,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color[rgb]{0,0.5,0}\bfseries\em
+}
+
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+%\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newcommand{\includegraphicsscaled}[1]{
+    \includegraphics[width=.8\textwidth,height=.8\textheight,keepaspectratio]{#1}
+}
+
+\title{\textbf{Real World Functional Programming}}
+\author{\Huge $\lambda$}
+\date{{\Large \tt \#lca2018 \#FPminiconf}}
+
+\begin{document}
+
+\frame[plain]{\titlepage}
+
+\begin{frame}{Important}
+\begin{itemize}
+    \item code of conduct applies:\\\url{https://linux.conf.au/attend/code-of-conduct/}
+    \item official hashtags: {\bf \tt \#lca2018 \#FPminiconf}
+    \item please ask actual questions
+\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+    \begin{center}
+    \includegraphicsscaled{diversity.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Today - this session}
+
+{\Large \tt 10:55 UTC+11}\\
+{\bf \em ReasonReact: Functional Programming for React Developers}\\
+Keira Hodgkison
+
+\bigskip
+
+{\Large \tt 11:35 UTC+11}\\
+{\bf \em Functional Programming in Aviation}\\
+Tony Morris
+
+\end{frame}
+
+\begin{frame}{Today - after lunch}
+
+{\Large \tt 13:40 UTC+11}\\
+{\bf \em How to Tame a Data Format}\\
+George Wilson
+
+\bigskip
+
+{\Large \tt 14:35 UTC+11}\\
+{\bf \em Functional DevOps in a Dysfunctional World}\\
+Vaibhav Sagar
+
+\end{frame}
+
+\begin{frame}{Today - final session}
+
+{\Large \tt 15:50 UTC+11}\\
+{\bf \em Jumanji: A beginner's FP journey:
+    How I learnt to code functionally through programming games}\\
+Meera Vasudevan
+
+\smallskip
+
+{\Large \tt 16:25 UTC+11}\\
+{\bf \em Cargo Culting Lenses for Fun \& Profit}\\
+Sean Chalmers
+
+\smallskip
+
+{\Large \tt 17:00 UTC+11}\\
+{\bf \em How Expert360 addressed its scaling problems
+    with 30 year old telco technology}\\
+Dan Draper
+
+\end{frame}
+
+
+\begin{frame}{Main program - Wednesday}
+
+{\Large \tt 11:40 UTC+11}\\
+{\bf \em (re)implementing (Google) maglev in Rust}\\
+Robert Collins
+
+\bigskip
+
+{\Large \tt 14:35 UTC+11}\\
+{\bf \em Should you rewrite in Rust?}\\
+E. Dunham
+
+\end{frame}
+
+
+\begin{frame}{Main program - Thursday}
+
+{\Large \tt 15:50 UTC+11}\\
+{\bf \em Elm by Example - Make beautiful map displays with Elm and
+    Leaflet}\\
+Christopher Biggs
+
+\end{frame}
+
+
+\begin{frame}{Main program - Friday}
+
+{\Large \tt 10:45 UTC+11}\\
+{\bf \em Flying autonomous aircraft: Mixed-criticality support in seL4}\\
+Gernot Heiser
+
+\end{frame}
+
+
+\begin{frame}{User groups}
+
+\centering
+\begin{tabular}{r l}
+{\bf BNE} & BFPG \\
+{\bf CAN} & CanFP \\
+{\bf MEL} & MFUG, Scala, Haskell, clj-melb \\
+{\bf  NZ} & Functional Christchurch, FP Auckland, Wellington FP \\
+{\bf SYD} & FP-Syd, ScalaSyd, Haskell, Elixir, clj-syd, ElmSyd \\
+\end{tabular}
+
+\end{frame}
+
+\begin{frame}{Other conferences}
+
+\centering
+\begin{tabular}{l l l l}
+{\bf YOW! Lambda Jam} & SYD & May 21--23  & @YOWLambdaJam  \\
+                      &     &             & lambdajam.yowconference.com.au \\
+\\
+{\bf C$\circ$mp$\circ$se Melbourne} & MEL & early Spring & @ComposeMelb \\
+    & & & composeconference.org \\
+\\
+{\bf ICFP/CUFP} & STL & Sep 23--29 & @icfp\_conference \\
+    & & & icfp18.sigplan.org \\
+\end{tabular}
+
+\end{frame}
+
+\end{document}
