@@ -1,0 +1,62 @@
+Type of Submission*
+Lab
+
+Track*
+Linux Systems
+
+Audience Experience Level *
+Intermediate
+
+Abstract Title*
+FreeIPA: Open Source Identity Management
+
+Abstract *
+
+Provide an abstract that briefly summarizes your proposal.
+
+FreeIPA is an integrated identity management solution providing user, host and
+service management, authentication and authorization in Linux/UNIX networked
+environments, with a focus on ease of deployment and management. It is built on
+top of well-known Open Source technologies and standards including 389
+Directory Server, MIT Kerberos and Dogtag Certificate System.
+
+This practical lab provides a comprehensive introduction to FreeIPA deployment
+and operation. Participants will:
+
+* Install a FreeIPA server and replica and enroll a client machine
+* Create and administer users
+* Manage host-based access control (HBAC) policies
+* Issue X.509 certificates for network services
+* Configure Apache to use FreeIPA for authentication and access control
+* Choose from elective modules based on progress or specific use cases
+
+Audience *
+
+This lab is intended for systems administrators. Participants will learn how to
+deploy FreeIPA and use it to improve security and streamline identity
+management in their organization.
+
+Participants are urged to complete the preparation steps outlined at
+https://github.com/freeipa/freeipa-workshop#preparation, prior to the lab
+session.
+
+Benefits to the Ecosystem*
+
+As an organization scales, managing users, hosts, services and access policies
+becomes complex. Centralized identity management becomes essential to meeting
+security objectives while reducing administrator workload. Integration with
+other prominent identity management systems (e.g. Active Directory) is
+essential for the success of an identity management system for Linux/UNIX
+environments. Integration with web technologies is also important, because many
+business applications are now accessed via the web.
+
+FreeIPA either solves or is part of the solution for all of these problems.
+Identity management solutions like FreeIPA are not merely a benefit to the
+ecosystem; they are an essential part of the ecosystem.
+
+
+Speaker bio
+
+Fraser works at Red Hat on the FreeIPA identity management system and Dogtag
+Certificate System. He's interested in security, cryptography, functional
+programming, type theory and theorem proving. Jalapeño aficionado.
