@@ -1,0 +1,35 @@
+\begin{frame}[fragile]{API safety - read-only mode}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{class} \DataTypeTok{Mode} \NormalTok{a }\KeywordTok{where}
+\OtherTok{  getMode ::} \DataTypeTok{Proxy} \NormalTok{a }\OtherTok{->} \DataTypeTok{DatabaseMode}
+
+\KeywordTok{instance} \DataTypeTok{Mode} \CharTok{'DatabaseModeReadOnly where}
+  \NormalTok{getMode _ }\FunctionTok{=} \DataTypeTok{DatabaseModeReadOnly}
+
+\KeywordTok{instance} \DataTypeTok{Mode} \CharTok{'DatabaseModeReadWrite where}
+  \NormalTok{getMode _ }\FunctionTok{=} \DataTypeTok{DatabaseModeReadWrite}
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}
+
+\begin{frame}[fragile]{API safety - read-only mode}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\OtherTok{\{-# LANGUAGE ScopedTypeVariables #-\}}
+
+\NormalTok{databaseOpen}
+\OtherTok{  ::} \NormalTok{forall a}\FunctionTok{.} \DataTypeTok{Mode} \NormalTok{a}
+  \OtherTok{=>} \DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \NormalTok{(}\DataTypeTok{Either} \DataTypeTok{Status} \NormalTok{(}\DataTypeTok{Database} \NormalTok{a))}
+\NormalTok{databaseOpen path }\FunctionTok{=}
+  \KeywordTok{let}
+    \NormalTok{mode }\FunctionTok{=} \NormalTok{getMode (}\DataTypeTok{Proxy}\OtherTok{ ::} \DataTypeTok{Proxy} \NormalTok{a)}
+  \KeywordTok{in}
+    \FunctionTok{...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}

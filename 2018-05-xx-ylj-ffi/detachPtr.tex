@@ -1,0 +1,14 @@
+\begin{frame}[fragile]{external object lifecycles (dealing with {\em talloc})}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\OtherTok{detachPtr ::} \DataTypeTok{Ptr} \NormalTok{a }\OtherTok{->} \DataTypeTok{IO} \NormalTok{(}\DataTypeTok{Ptr} \NormalTok{a)}
+\NormalTok{detachPtr ptr }\FunctionTok{=} \NormalTok{castPtr }\FunctionTok{<$>}
+  \StringTok{\{#}\KeywordTok{call}\StringTok{ _talloc_steal_loc #\}}
+    \NormalTok{nullPtr           }\CommentTok{-- new context (no parent)}
+    \NormalTok{(castPtr ptr)}
+    \NormalTok{nullPtr}
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}

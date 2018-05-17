@@ -1,0 +1,53 @@
+\begin{frame}[fragile]{avoiding string copies}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{data} \DataTypeTok{Tag} \FunctionTok{=} \DataTypeTok{Tag} \DataTypeTok{ByteString}
+
+\OtherTok{tagFromCString ::} \DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \DataTypeTok{Tag}
+\NormalTok{tagFromCString ptr }\FunctionTok{=} \DataTypeTok{Tag} \FunctionTok{<$>} \KeywordTok{do}
+  \NormalTok{n }\OtherTok{<-} \NormalTok{c_strlen ptr}
+  \NormalTok{packCStringLen (ptr, fromIntegral n }\FunctionTok{+} \DecValTok{1}\NormalTok{)}
+
+\OtherTok{tagUseAsCString ::} \DataTypeTok{Tag} \OtherTok{->} \NormalTok{(}\DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \NormalTok{a) }\OtherTok{->} \DataTypeTok{IO} \NormalTok{a}
+\NormalTok{tagUseAsCString (}\DataTypeTok{Tag} \NormalTok{bs) }\FunctionTok{=}
+  \NormalTok{unsafeUseAsCString bs}
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}
+
+\begin{frame}[fragile]{avoiding string copies}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{data} \DataTypeTok{Tag} \FunctionTok{=} \DataTypeTok{Tag} \NormalTok{(}\DataTypeTok{ForeignPtr} \DataTypeTok{CChar}\NormalTok{)}
+
+\OtherTok{tagFromCString ::} \DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \DataTypeTok{Tag}
+\NormalTok{tagFromCString }\FunctionTok{=}
+  \NormalTok{detachPtr }\FunctionTok{>=>} \NormalTok{fmap }\DataTypeTok{Tag} \FunctionTok{.} \NormalTok{newForeignPtr talloc_free}
+
+
+\OtherTok{tagUseAsCString ::} \DataTypeTok{Tag} \OtherTok{->} \NormalTok{(}\DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \NormalTok{a) }\OtherTok{->} \DataTypeTok{IO} \NormalTok{a}
+\NormalTok{tagUseAsCString (}\DataTypeTok{Tag} \NormalTok{bs) }\FunctionTok{=}
+  \NormalTok{unsafeUseAsCString bs}
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}
+
+\begin{frame}[fragile]{avoiding string copies - interning}
+
+\begin{itemize}
+\tightlist
+\item
+  keep exactly one copy of each string
+\item
+  zero-copy \texttt{unsafeUseAsCString} if null-terminated
+\item
+  \emph{O(1)} equality
+\item
+  \emph{intern} package by Ed Kmett
+\end{itemize}
+
+\end{frame}
