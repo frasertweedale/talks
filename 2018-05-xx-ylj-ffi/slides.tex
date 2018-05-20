@@ -115,6 +115,9 @@
 \setbeamerfont{footnote}{size=\tiny}
 \usepackage[normalem]{ulem}
 
+\newcommand\greyuline{\bgroup\markoverwith
+    {\textcolor{lightgray}{\rule[-0.5ex]{2pt}{0.4pt}}}\ULon}
+
 \title{\bf Taming the C Monster}
 \subtitle{\bf Haskell FFI Techniques}
 \author{\bf Fraser Tweedale\\
@@ -187,31 +190,13 @@
 \begin{Highlighting}[]
 \OtherTok{\{-# LANGUAGE ForeignFunctionInterface #-\}}
 
-\KeywordTok{import }\DataTypeTok{Foreign.C.Types}
+\KeywordTok{import} \DataTypeTok{Foreign.C.Types}
 
-\NormalTok{foreign }\KeywordTok{import }\NormalTok{ccall "math.h sin"}
+\KeywordTok{foreign import} \NormalTok{ccall} \StringTok{"math.h sin"}
 \OtherTok{  c_sin ::} \DataTypeTok{CDouble} \OtherTok{->} \DataTypeTok{CDouble}
 
 \OtherTok{main ::} \DataTypeTok{IO} \NormalTok{()}
 \NormalTok{main }\FunctionTok{=} \NormalTok{print }\FunctionTok{$} \NormalTok{c_sin }\FloatTok{1.0}
-\end{Highlighting}
-\end{Shaded}
-
-\end{frame}
-
-\begin{frame}[fragile]{C FFI - linking}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-  \CommentTok{# command line}
-  ghc Foo.hs -l\emph{libname}
-
-
-  \CommentTok{-- Cabal}
-  library
-    ...
-    extra-libraries:
-      {\em libname}
 \end{Highlighting}
 \end{Shaded}
 
@@ -252,11 +237,39 @@ library
 
 \end{frame}
 
+\begin{frame}[fragile]{\texttt{c2hs} - example}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+...
+  \NormalTok{result }\OtherTok{<-} \StringTok{\{#}\KeywordTok{call} \StringTok{notmuch_database_open #\}} \NormalTok{path \DecValTok{1} ptr}
+  ...
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{c2hs} - example}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+...
+  \NormalTok{result }\OtherTok{<-} \NormalTok{notmuch_database_open} \NormalTok{path \DecValTok{1} ptr}
+  ...
+
+\KeywordTok{foreign import} \NormalTok{ccall} \StringTok{"Notmuch/Binding.chs.h notmuch_database_open"}
+  \NormalTok{notmuch_database_open}
+\OtherTok{    ::} \DataTypeTok{CString} \OtherTok{->} \DataTypeTok{CInt} \OtherTok{->} \DataTypeTok{Ptr} \NormalTok{(}\DataTypeTok{Ptr} \DataTypeTok{Database}\NormalTok{) }\OtherTok{->} \DataTypeTok{IO} \DataTypeTok{CInt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}
+
 \begin{frame}[fragile]{\texttt{Foreign.Ptr}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{data} \DataTypeTok{Ptr} \NormalTok{a      }\CommentTok{-- constructors hidden}
+\KeywordTok{data} \DataTypeTok{Ptr} \NormalTok{a}
 
 \OtherTok{nullPtr ::} \DataTypeTok{Ptr} \NormalTok{a}
 
@@ -293,20 +306,6 @@ library
 \OtherTok{peekCString ::} \DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \DataTypeTok{String}
 
 \OtherTok{withCString ::} \DataTypeTok{String} \OtherTok{->} \NormalTok{(}\DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \NormalTok{a) }\OtherTok{->} \DataTypeTok{IO} \NormalTok{a}
-\end{Highlighting}
-\end{Shaded}
-
-\end{frame}
-
-\begin{frame}[fragile]{\texttt{Data.ByteString}}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{data} \DataTypeTok{ByteString}
-
-\OtherTok{packCString ::} \DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \DataTypeTok{ByteString}
-
-\OtherTok{useAsCString ::} \DataTypeTok{ByteString} \OtherTok{->} \NormalTok{(}\DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \NormalTok{a) }\OtherTok{->} \DataTypeTok{IO} \NormalTok{a}
 \end{Highlighting}
 \end{Shaded}
 
@@ -428,27 +427,13 @@ library
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{..} \StringTok{\{#}\KeywordTok{call}\StringTok{ notmuch_database_open #\}} \FunctionTok{..}
-
-\NormalTok{foreign }\KeywordTok{import }\NormalTok{ccall "}\DataTypeTok{Notmuch}\NormalTok{/Binding.chs.h notmuch_database_open"}
-  \NormalTok{notmuch_database_open}
-\OtherTok{    ::} \DataTypeTok{CString} \OtherTok{->} \DataTypeTok{CInt} \OtherTok{->} \DataTypeTok{Ptr} \NormalTok{(}\DataTypeTok{Ptr} \DataTypeTok{Database}\NormalTok{) }\OtherTok{->} \DataTypeTok{IO} \DataTypeTok{CInt}
-\end{Highlighting}
-\end{Shaded}
-
-\end{frame}
-
-\begin{frame}[fragile]{double-pointer constructors}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \OtherTok{databaseOpen ::} \DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \NormalTok{(}\DataTypeTok{Either} \DataTypeTok{Status} \DataTypeTok{DatabaseHandle}\NormalTok{)}
 \NormalTok{databaseOpen path }\FunctionTok{=}
-  \NormalTok{alloca }\FunctionTok{$} \NormalTok{\textbackslash{}ptr }\OtherTok{->} \KeywordTok{do}
+  \NormalTok{\greyuline{alloca}} \FunctionTok{$} \NormalTok{\textbackslash{}ptr }\OtherTok{->} \KeywordTok{do}
     \NormalTok{result }\OtherTok{<-} \StringTok{\{#}\KeywordTok{call}\StringTok{ notmuch_database_open #\}} \NormalTok{path \DecValTok{1} ptr}
     \KeywordTok{case} \NormalTok{toEnum (fromIntegral result) }\KeywordTok{of}
       \DataTypeTok{StatusSuccess} \OtherTok{->}
-        \DataTypeTok{Right} \FunctionTok{.} \DataTypeTok{DatabaseHandle} \FunctionTok{<$>} \NormalTok{(peek ptr }\FunctionTok{>>=} \NormalTok{newForeignPtr_)}
+        \DataTypeTok{Right} \FunctionTok{.} \DataTypeTok{DatabaseHandle} \FunctionTok{<$>} \NormalTok{(\greyuline{peek} ptr} \FunctionTok{>>=} \NormalTok{newForeignPtr_)}
       \NormalTok{e }\OtherTok{->}
         \NormalTok{pure (}\DataTypeTok{Left} \NormalTok{e)}
 \end{Highlighting}
@@ -476,45 +461,11 @@ library
 
 \end{frame}
 
-\begin{frame}[fragile]{iterator - public types}
+\begin{frame}[fragile]{iterator}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{data} \DataTypeTok{Tag}
-
-\OtherTok{tags ::} \DataTypeTok{Message} \NormalTok{n a }\OtherTok{->} \DataTypeTok{IO} \NormalTok{[}\DataTypeTok{Tag}\NormalTok{]}
-\end{Highlighting}
-\end{Shaded}
-
-\end{frame}
-
-\begin{frame}[fragile]{iterator - internal types}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{newtype} \DataTypeTok{Tag} \FunctionTok{=} \DataTypeTok{Tag} \DataTypeTok{ByteString}
-
 \StringTok{\{#}\KeywordTok{pointer}\StringTok{ *notmuch_tags_t }\KeywordTok{as}\StringTok{ }\DataTypeTok{Tags}\StringTok{ }\KeywordTok{newtype}\StringTok{ #\}}
-
-\OtherTok{tagFromCString ::} \DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \DataTypeTok{Tag}
-
-\OtherTok{tagUseAsCString ::} \DataTypeTok{Tag} \OtherTok{->} \NormalTok{(}\DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \NormalTok{a) }\OtherTok{->} \DataTypeTok{IO} \NormalTok{a}
-\end{Highlighting}
-\end{Shaded}
-
-\end{frame}
-
-\begin{frame}[fragile]{iterator - internal types}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{newtype} \DataTypeTok{Tag} \FunctionTok{=} \DataTypeTok{Tag} \DataTypeTok{ByteString}
-
-\KeywordTok{newtype} \DataTypeTok{Tags} \FunctionTok{=} \DataTypeTok{Tags} \NormalTok{(}\DataTypeTok{Ptr} \DataTypeTok{Tags}\NormalTok{)}
-
-\OtherTok{tagFromCString ::} \DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \DataTypeTok{Tag}
-
-\OtherTok{tagUseAsCString ::} \DataTypeTok{Tag} \OtherTok{->} \NormalTok{(}\DataTypeTok{CString} \OtherTok{->} \DataTypeTok{IO} \NormalTok{a) }\OtherTok{->} \DataTypeTok{IO} \NormalTok{a}
 \end{Highlighting}
 \end{Shaded}
 
@@ -524,19 +475,29 @@ library
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\OtherTok{tagsToList ::} \DataTypeTok{Tags} \OtherTok{->} \DataTypeTok{IO} \NormalTok{[}\DataTypeTok{Tag}\NormalTok{]}
+\KeywordTok{newtype} \DataTypeTok{Tags} \FunctionTok{=} \DataTypeTok{Tags} \NormalTok{(}\DataTypeTok{Ptr} \DataTypeTok{Tags}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}
+
+\begin{frame}[fragile]{iterator}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\OtherTok{tagsToList ::} \DataTypeTok{Tags} \OtherTok{->} \DataTypeTok{IO} \NormalTok{[}\DataTypeTok{String}\NormalTok{]}
 \NormalTok{tagsToList (}\DataTypeTok{Tags} \NormalTok{ptr) }\FunctionTok{=} \NormalTok{go}
   \KeywordTok{where}
-  \NormalTok{go ptr }\FunctionTok{=} \NormalTok{test ptr }\FunctionTok{>>=} \NormalTok{\textbackslash{}valid }\OtherTok{->} \KeywordTok{case} \NormalTok{valid }\KeywordTok{of}
+  \NormalTok{go ptr }\FunctionTok{=} \NormalTok{\greyuline{test} ptr} \FunctionTok{>>=} \NormalTok{\textbackslash{}valid }\OtherTok{->} \KeywordTok{case} \NormalTok{valid }\KeywordTok{of}
     \DecValTok{0} \OtherTok{->} \NormalTok{pure []}
     \NormalTok{_ }\OtherTok{->} \NormalTok{(}\FunctionTok{:}\NormalTok{)}
-          \FunctionTok{<$>} \NormalTok{(get ptr }\FunctionTok{>>=} \NormalTok{mk }\FunctionTok{>>=} \NormalTok{\textbackslash{}x }\OtherTok{->} \NormalTok{next ptr }\FunctionTok{$>} \NormalTok{x)}
+          \FunctionTok{<$>} \NormalTok{(\greyuline{get} ptr} \FunctionTok{>>=} \NormalTok{\greyuline{mk}} \FunctionTok{>>=} \NormalTok{\textbackslash{}x} \OtherTok{->} \NormalTok{\greyuline{next} ptr} \FunctionTok{$>} \NormalTok{x)}
           \FunctionTok{<*>} \NormalTok{(go ptr)}
 
   \NormalTok{test }\FunctionTok{=} \StringTok{\{#}\KeywordTok{call}\StringTok{ notmuch_tags_valid #\}}
   \NormalTok{get }\FunctionTok{=} \StringTok{\{#}\KeywordTok{call}\StringTok{ notmuch_tags_get #\}}
   \NormalTok{next }\FunctionTok{=} \StringTok{\{#}\KeywordTok{call}\StringTok{ notmuch_tags_move_to_next #\}}
-  \NormalTok{mk }\FunctionTok{=} \NormalTok{tagFromCString}
+  \NormalTok{mk }\FunctionTok{=} \NormalTok{peekCString}
 \end{Highlighting}
 \end{Shaded}
 
@@ -583,7 +544,7 @@ Two options:
 \item
   bind to non-public API (e.g. \texttt{\_talloc\_steal\_loc})
 \item
-  write \emph{c bits}
+  write \emph{``c bits''}
 \end{itemize}
 
 \end{frame}
@@ -611,9 +572,9 @@ Two options:
 \NormalTok{query_create db s }\FunctionTok{=} \NormalTok{withCString s }\FunctionTok{$} \NormalTok{\textbackslash{}s' }\OtherTok{->}
   \NormalTok{withDatabaseHandle db }\FunctionTok{$} \NormalTok{\textbackslash{}db' }\OtherTok{->}
     \StringTok{\{#}\KeywordTok{call}\StringTok{ notmuch_query_create #\}} \NormalTok{db' s'}
-      \FunctionTok{>>=} \NormalTok{fmap }\DataTypeTok{QueryHandle} \FunctionTok{.} \NormalTok{newForeignPtr query_destroy}
+      \FunctionTok{>>=} \NormalTok{fmap }\DataTypeTok{QueryHandle} \FunctionTok{.} \NormalTok{\greyuline{newForeignPtr query_destroy}}
 
-\NormalTok{foreign }\KeywordTok{import }\NormalTok{ccall "&notmuch_query_destroy"}
+\KeywordTok{foreign import} \NormalTok{ccall} \StringTok{"\greyuline{&}notmuch_query_destroy"}
 \OtherTok{  query_destroy ::} \DataTypeTok{FinalizerPtr} \NormalTok{a}
 \end{Highlighting}
 \end{Shaded}
@@ -673,12 +634,12 @@ Two options:
 \begin{Highlighting}[]
 \OtherTok{\{-# LANGUAGE DataKinds #-\}}
 
-\KeywordTok{newtype} \DataTypeTok{Database} \NormalTok{(}\OtherTok{a ::} \DataTypeTok{DatabaseMode}\NormalTok{) }\FunctionTok{=} \DataTypeTok{Database} \DataTypeTok{DatabaseHandle}
+\KeywordTok{newtype} \DataTypeTok{Database} \NormalTok{(}\greyuline{\OtherTok{a ::} \DataTypeTok{DatabaseMode}}\NormalTok{) }\FunctionTok{=} \DataTypeTok{Database} \DataTypeTok{DatabaseHandle}
 
 \OtherTok{withDatabase ::} \DataTypeTok{Database} \NormalTok{a }\OtherTok{->} \NormalTok{(}\DataTypeTok{Ptr} \DataTypeTok{DatabaseHandle} \OtherTok{->} \DataTypeTok{IO} \NormalTok{b) }\OtherTok{->} \DataTypeTok{IO} \NormalTok{b}
 \NormalTok{withDatabase (}\DataTypeTok{Database} \NormalTok{dbh) }\FunctionTok{=} \NormalTok{withDatabaseHandle dbh}
 
-\KeywordTok{data} \DataTypeTok{Message} \NormalTok{(}\OtherTok{a ::} \DataTypeTok{DatabaseMode}\NormalTok{) }\FunctionTok{=} \DataTypeTok{Message} \DataTypeTok{MessageHandle}
+\KeywordTok{data} \DataTypeTok{Message} \NormalTok{(}\greyuline{\OtherTok{a ::} \DataTypeTok{DatabaseMode}}\NormalTok{)} \FunctionTok{=} \DataTypeTok{Message} \DataTypeTok{MessageHandle}
 \end{Highlighting}
 \end{Shaded}
 
@@ -690,8 +651,8 @@ Two options:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\OtherTok{messageAddTag ::} \DataTypeTok{Message} \DataTypeTok{'DatabaseModeReadWrite} \OtherTok{->} \DataTypeTok{Tag} \OtherTok{->} \DataTypeTok{IO} \NormalTok{()}
-\NormalTok{messageAddTag msg tag }\FunctionTok{=} \NormalTok{void }\FunctionTok{$} \NormalTok{withMessage msg }\FunctionTok{$}
+\OtherTok{messageAddTag ::} \greyuline{\DataTypeTok{Message} \DataTypeTok{'DatabaseModeReadWrite}} \OtherTok{->} \DataTypeTok{Tag} \OtherTok{->} \DataTypeTok{IO} \NormalTok{()}
+\NormalTok{messageAddTag msg tag }\FunctionTok{=} \NormalTok{\greyuline{void}} \FunctionTok{$} \NormalTok{withMessage msg }\FunctionTok{$}
   \NormalTok{tagUseAsCString tag }\FunctionTok{.} \StringTok{\{#}\KeywordTok{call}\StringTok{ notmuch_message_add_tag #\}}
 \end{Highlighting}
 \end{Shaded}
@@ -724,9 +685,9 @@ Two options:
 
 \KeywordTok{import }\DataTypeTok{GHC.TypeLits}
 
-\KeywordTok{data} \DataTypeTok{Message} \NormalTok{(}\OtherTok{n ::} \DataTypeTok{Nat}\NormalTok{) (}\OtherTok{a ::} \DataTypeTok{DatabaseMode}\NormalTok{) }\FunctionTok{=} \DataTypeTok{Message} \DataTypeTok{MessageHandle}
+\KeywordTok{data} \DataTypeTok{Message} \NormalTok{(}\greyuline{\OtherTok{n ::} \DataTypeTok{Nat}}\NormalTok{) (}\OtherTok{a ::} \DataTypeTok{DatabaseMode}\NormalTok{) }\FunctionTok{=} \DataTypeTok{Message} \DataTypeTok{MessageHandle}
 
-\OtherTok{messageAddTag ::} \DataTypeTok{Message} \NormalTok{n} \DataTypeTok{'DatabaseModeReadWrite} \OtherTok{->} \DataTypeTok{Tag} \OtherTok{->} \DataTypeTok{IO} \NormalTok{()}
+\OtherTok{messageAddTag ::} \DataTypeTok{Message} \NormalTok{\greyuline{n}} \DataTypeTok{'DatabaseModeReadWrite} \OtherTok{->} \DataTypeTok{Tag} \OtherTok{->} \DataTypeTok{IO} \NormalTok{()}
 \NormalTok{messageAddTag msg tag }\FunctionTok{=} \NormalTok{void }\FunctionTok{$} \NormalTok{withMessage msg }\FunctionTok{$}
   \NormalTok{tagUseAsCString tag }\FunctionTok{.} \StringTok{\{#}\KeywordTok{call}\StringTok{ notmuch_message_add_tag #\}}
 \end{Highlighting}
@@ -738,15 +699,15 @@ Two options:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\OtherTok{messageFreeze ::} \DataTypeTok{Message} \NormalTok{n }\DataTypeTok{RW} \OtherTok{->} \DataTypeTok{IO} \NormalTok{(}\DataTypeTok{Message} \NormalTok{(n }\FunctionTok{+} \DecValTok{1}\NormalTok{) }\DataTypeTok{RW}\NormalTok{)}
+\OtherTok{messageFreeze ::} \DataTypeTok{Message} \NormalTok{\greyuline{n}} \DataTypeTok{RW} \OtherTok{->} \DataTypeTok{IO} \NormalTok{(}\DataTypeTok{Message} \NormalTok{(}\greyuline{\NormalTok{n} \FunctionTok{+} \DecValTok{1}}\NormalTok{)} \DataTypeTok{RW}\NormalTok{)}
 \NormalTok{messageFreeze msg }\FunctionTok{=}
   \NormalTok{withMessage msg }\StringTok{\{#}\KeywordTok{call}\StringTok{ notmuch_message_freeze #\}} \FunctionTok{$>} \NormalTok{coerce msg}
 
-\OtherTok{messageThaw ::} \NormalTok{(}\DecValTok{1} \FunctionTok{<=} \NormalTok{n) }\OtherTok{=>} \DataTypeTok{Message} \NormalTok{n }\DataTypeTok{RW} \OtherTok{->} \DataTypeTok{IO} \NormalTok{(}\DataTypeTok{Message} \NormalTok{(n }\FunctionTok{-} \DecValTok{1}\NormalTok{) }\DataTypeTok{RW}\NormalTok{)}
+\OtherTok{messageThaw ::} \NormalTok{(}\greyuline{\DecValTok{1} \FunctionTok{<=} \NormalTok{n}}\NormalTok{)} \OtherTok{=>} \DataTypeTok{Message} \NormalTok{\greyuline{n}} \DataTypeTok{RW} \OtherTok{->} \DataTypeTok{IO} \NormalTok{(}\DataTypeTok{Message} \NormalTok{(}\greyuline{\NormalTok{n} \FunctionTok{-} \DecValTok{1}}\NormalTok{)} \DataTypeTok{RW}\NormalTok{)}
 \NormalTok{message_thaw msg }\FunctionTok{=}
   \NormalTok{withMessage msg }\StringTok{\{#}\KeywordTok{call}\StringTok{ notmuch_message_thaw #\}} \FunctionTok{$>} \NormalTok{coerce msg}
 
-\OtherTok{withFrozenMessage ::} \NormalTok{(}\DataTypeTok{Message} \DecValTok{1} \DataTypeTok{RW} \OtherTok{->} \DataTypeTok{IO} \NormalTok{a) }\OtherTok{->} \DataTypeTok{Message} \DecValTok{0} \DataTypeTok{RW} \OtherTok{->} \DataTypeTok{IO} \NormalTok{a}
+\OtherTok{withFrozenMessage ::} \NormalTok{(}\DataTypeTok{Message} \DecValTok{\greyuline{1}} \DataTypeTok{RW} \OtherTok{->} \DataTypeTok{IO} \NormalTok{a) }\OtherTok{->} \DataTypeTok{Message} \DecValTok{\greyuline{0}} \DataTypeTok{RW} \OtherTok{->} \DataTypeTok{IO} \NormalTok{a}
 \NormalTok{withFrozenMessage k msg }\FunctionTok{=} \NormalTok{bracket (message_freeze msg) message_thaw k}
 \end{Highlighting}
 \end{Shaded}
@@ -759,14 +720,8 @@ Two options:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{foreign }\KeywordTok{import }\NormalTok{ccall        "notmuch.h notmuch_messages_valid"}
+\KeywordTok{foreign import} \NormalTok{ccall}        \StringTok{"notmuch.h notmuch_messages_valid"}
 \OtherTok{  notmuch_messages_valid ::} \DataTypeTok{Messages} \OtherTok{->} \DataTypeTok{IO} \DataTypeTok{CInt}
-
-\NormalTok{foreign }\KeywordTok{import }\NormalTok{ccall        "notmuch.h notmuch_messages_get"}
-\OtherTok{  notmuch_messages_get ::} \DataTypeTok{Messages} \OtherTok{->} \DataTypeTok{IO} \DataTypeTok{CString}
-
-\NormalTok{foreign }\KeywordTok{import }\NormalTok{ccall        "notmuch.h notmuch_messages_move_to_next"}
-\OtherTok{  notmuch_messages_move_to_next ::} \DataTypeTok{Messages} \OtherTok{->} \DataTypeTok{IO} \NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
@@ -776,14 +731,8 @@ Two options:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{foreign }\KeywordTok{import }\NormalTok{ccall unsafe "notmuch.h notmuch_messages_valid"}
+\KeywordTok{foreign import} \NormalTok{ccall} \KeywordTok{\greyuline{unsafe}} \StringTok{"notmuch.h notmuch_messages_valid"}
 \OtherTok{  notmuch_messages_valid ::} \DataTypeTok{Messages} \OtherTok{->} \DataTypeTok{IO} \DataTypeTok{CInt}
-
-\NormalTok{foreign }\KeywordTok{import }\NormalTok{ccall unsafe "notmuch.h notmuch_messages_get"}
-\OtherTok{  notmuch_messages_get ::} \DataTypeTok{Messages} \OtherTok{->} \DataTypeTok{IO} \DataTypeTok{CString}
-
-\NormalTok{foreign }\KeywordTok{import }\NormalTok{ccall unsafe "notmuch.h notmuch_messages_move_to_next"}
-\OtherTok{  notmuch_messages_move_to_next ::} \DataTypeTok{Messages} \OtherTok{->} \DataTypeTok{IO} \NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
@@ -793,11 +742,7 @@ Two options:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\StringTok{\{#}\KeywordTok{call}\StringTok{        notmuch_messages_valid #\}}
-
-\StringTok{\{#}\KeywordTok{call}\StringTok{        notmuch_messages_get #\}}
-
-\StringTok{\{#}\KeywordTok{call}\StringTok{        notmuch_messages_move_to_next #\}}
+\StringTok{\{#}\KeywordTok{call}        \StringTok{notmuch_messages_valid #\}}
 \end{Highlighting}
 \end{Shaded}
 
@@ -807,11 +752,7 @@ Two options:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\StringTok{\{#}\KeywordTok{call}\StringTok{ }\KeywordTok{unsafe}\StringTok{ notmuch_messages_valid #\}}
-
-\StringTok{\{#}\KeywordTok{call}\StringTok{ }\KeywordTok{unsafe}\StringTok{ notmuch_messages_get #\}}
-
-\StringTok{\{#}\KeywordTok{call}\StringTok{ }\KeywordTok{unsafe}\StringTok{ notmuch_messages_move_to_next #\}}
+\StringTok{\{#}\KeywordTok{call} \KeywordTok{\greyuline{unsafe}} \StringTok{notmuch_messages_valid #\}}
 \end{Highlighting}
 \end{Shaded}
 
@@ -867,7 +808,7 @@ total alloc = 260,249,536 bytes  (excludes profiling overheads)
     \DecValTok{0} \OtherTok{->} \NormalTok{pure []}
     \NormalTok{_ }\OtherTok{->} \NormalTok{(}\FunctionTok{:}\NormalTok{)}
           \FunctionTok{<$>} \NormalTok{(get ptr }\FunctionTok{>>=} \NormalTok{mk }\FunctionTok{>>=} \NormalTok{\textbackslash{}x }\OtherTok{->} \NormalTok{next ptr }\FunctionTok{$>} \NormalTok{x)}
-          \FunctionTok{<*>} \NormalTok{unsafeInterleaveIO (go ptr)}
+          \FunctionTok{<*>} \NormalTok{\greyuline{unsafeInterleaveIO} (go ptr)}
 \end{Highlighting}
 \end{Shaded}
 

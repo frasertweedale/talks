@@ -1,0 +1,17 @@
+\begin{frame}[fragile]{C FFI - linking}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+  \CommentTok{# command line}
+  ghc Foo.hs -l\emph{libname}
+
+
+  \CommentTok{-- Cabal}
+  library
+    ...
+    extra-libraries:
+      {\em libname}
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}
