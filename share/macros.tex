@@ -1,0 +1,7 @@
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+%\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newcommand{\includegraphicsscaled}[1]{
+    \includegraphics[width=\maxwidth,height=\maxheight,keepaspectratio]{#1}
+}
