@@ -93,13 +93,55 @@
 %  \fi
 %}
 
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+
 \begin{document}
 
 \begin{frame}
 \titlepage
 \end{frame}
 
-\section{Introduction}\label{introduction}
+\begin{frame}[plain]
+\begin{center}
+\includegraphicsscaled{somme-fouilloy-kangaroo.jpg}
+\end{center}
+\end{frame}
 
 \begin{frame}
 \huge
@@ -133,10 +175,17 @@ A journey\ldots
 
 \section{Do you need a new standard?}
 
+\begin{frame}[plain]
+\begin{center}
+\includegraphicsscaled{standards.png}
+\end{center}
+\tiny CC BY-NC 2.5 \url{https://xkcd.com/927/}
+\end{frame}
+
 \begin{frame}{JOSE---rationale}
 \begin{quotation}
 \Large
-  With the increased usage of JSON in protocols in the IETF and
+  With the \textbf{increased usage of JSON} in protocols in the IETF and
   elsewhere, there is now a desire to offer security services, which use
   encryption, digital signatures, message authentication codes (MACs)
   algorithms, that carry their data in JSON format.\footnote[frame]{
@@ -159,13 +208,6 @@ A journey\ldots
   based on JSON.\footnote[frame]{
     \url{https://tools.ietf.org/html/rfc7165}}
 \end{quotation}
-\end{frame}
-
-\begin{frame}[plain]
-\begin{center}
-\includegraphicsscaled{standards.png}
-\end{center}
-\tiny CC BY-NC 2.5 \url{https://xkcd.com/927/}
 \end{frame}
 
 % fun fact: JOSE was originally "WOES": Web Object Encryption and Signing
@@ -293,15 +335,52 @@ CVE-2017-12635
 % https://cve.mitre.org/cgi-bin/cvename.cgi?name=2017-12635
 % https://www.exploit-db.com/exploits/44498/
 % python exploit snippet
-% cu_data_payload = '{"type": "user", "name": "'+user+'", "roles": ["_admin"], "roles": [], "password": "'+password+'"}'
+
+\begin{frame}[fragile]
+\Large
+\begin{Shaded}
+\begin{Highlighting}[]
+\{
+  "type": "user",
+  "name": "alice",
+  \textbf{"roles": ["_admin"]},
+  \textbf{"roles": []}
+\}
+\end{Highlighting}
+\end{Shaded}
+\end{frame}
 
 \begin{frame}{JSON---other problems}
 \begin{itemize}
 \tightlist
-\item ``number''
-\item binary data
-\item no canonical serialisation
+\item Numbers
+\item Binary data?
+\item No canonical serialisation
 \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\Large
+\begin{Shaded}
+\begin{Highlighting}[]
+\{"signature":"M3oVLXrbeFRT9Ef9d3WzR-D7dGtI
+eYoPBYmiCdtYqus","protected":"eyJhbGciOiJI
+UzI1NiIsImtpZCI6ImthcmF0ZSJ9","payload":"\underline{e}
+\underline{yJzdWJqZWN0IjoiZnJhc2VAZnJhc2UuaWQuYXUiLCJ}
+\underline{pc3MiOiJocy1qb3NlIiwiYXVkIjpbImFsaWNlIiwiY}
+\underline{m9iIl19Cg}"\}
+\end{Highlighting}
+\end{Shaded}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{Shaded}
+\begin{Highlighting}[]
+\{"subject":"frase@frase.id.au",
+  "iss":"hs-jose",
+  "aud":["alice","bob"]\}
+\end{Highlighting}
+\end{Shaded}
 \end{frame}
 
 \begin{frame}[plain]
@@ -320,7 +399,7 @@ CVE-2017-12635
 
 \begin{frame}[plain]
 \huge
-Takeaway: don't heedlessly reach for JSON
+Takeaway: don't automatically reach for JSON
 \end{frame}
 
 
@@ -337,15 +416,6 @@ Takeaway: don't heedlessly reach for JSON
 \item Weierstrass curves
 \item {\tt "none"} signature algorithm
 \item AES Key Wrap
-\end{itemize}
-\end{frame}
-
-\begin{frame}{JOSE cryptography---why so many choices}
-\begin{itemize}
-\tightlist
-\item design by committee
-\item wanted to be all things to all people
-\item NIST
 \end{itemize}
 \end{frame}
 
@@ -369,7 +439,7 @@ Takeaway: don't heedlessly reach for JSON
 
 \begin{frame}[plain]
 \huge
-Takeaway: use statically typed languages
+Takeaway: don't cut corners with crypto
 \end{frame}
 
 
@@ -427,15 +497,6 @@ Takeaway: use statically typed languages
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Design philosophies}
-\begin{itemize}
-\tightlist
-\item TIMTOWTDI (Perl)
-\item There should be one---and preferably own one---obvious way to do it (Python)
-\item There must be {\bf exactly one way to do it} (me)
-\end{itemize}
-\end{frame}
-
 % This is *not* the same as saying "there is only one way to use it"
 
 % The creation of user-friendly interfaces for common use cases is
@@ -455,11 +516,11 @@ Takeaway: use case ``optimisations'' belong in libraries, not standards.
 
 \begin{frame}[fragile]{hs-jose---dealing with ambiguity}
 \begin{lstlisting}[language=Haskell]
-data     List a  = Nil
-                 | a : (List a)
+data List a = Nil
+            | a : (List a)
 
 
-data Identity a  = Identity a
+data Identity a = Identity a
 \end{lstlisting}
 \end{frame}
 
@@ -508,13 +569,26 @@ verifyJWSWithPayload
 \end{lstlisting}
 \end{frame}
 
-%\begin{frame}[fragile]
-% TODO jose key type example
-%\end{frame}
+\begin{frame}{Static type systems---benefits}
+\begin{itemize}
+\tightlist
+\item abstraction
+\item avoid type confusion attacks
+\item readability \& maintainability
+\item enable advanced techniques for security\footnote[frame]{
+    \href{http://www.cse.chalmers.se/~russo/publications_files/pearl-russo.pdf}{
+        Two Can Keep a Secret, If One of Them Uses Haskell}}\textsuperscript{,}\footnote[frame]{
+    \href{https://cseweb.ucsd.edu/~dstefan/pubs/cauligi:2017:fact.pdf}{
+        FaCT: A Flexible, Constant-Time Programming Language}}\textsuperscript{,}\footnote[frame]{
+    \href{https://blog.janestreet.com/howto-static-access-control-using-phantom-types/}{
+        HOWTO: Static access control using phantom types}}
+
+\end{itemize}
+\end{frame}
 
 \begin{frame}[plain]
-\huge
-Takeaway: use static type systems to enforce correct behaviour
+\LARGE
+Takeaway: static type systems enable safe, ergonomic APIs
 \end{frame}
 
 
@@ -527,8 +601,9 @@ Takeaway: use static type systems to enforce correct behaviour
 \begin{itemize}
 \tightlist
 \item avoid ambiguity \& special cases
-\item write multiple implementations
 \item exclude esoteric use cases
+\item get cryptographers to review
+\item {\bf write multiple implementations}
 \end{itemize}
 \end{frame}
 
@@ -537,10 +612,12 @@ Takeaway: use static type systems to enforce correct behaviour
 \begin{itemize}
 \tightlist
 \item write libraries, not standards
-\item don't heedlessly reach for JSON
+\item don't automatically reach for JSON
+\item don't cut corners with crypto
 \item special cases belong in libraries
+\item abstract over ambiguities
 \item use statically typed languages
-\item implementation is essential to writing a good standard
+\item write multiple implementations
 \end{itemize}
 \end{frame}
 
