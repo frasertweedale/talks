@@ -1,26 +1,24 @@
-4 vulns: lessons for secure development
-=======================================
+Defect to doctrine: security bug case studies
+=============================================
 
-I am not a 1337 h4x0r bug bounty hunter.  Just a humble programmer
-who found and fixed some vulns (hopefully more than I have written,
-but there's no way to be sure!) I have profound admiration for the
-exploit author who can (ab)use tiny chinks in the armour to
-penetrate, pivot and profit.  But this is not that talk.
+I am not a security research or bug bounty hunter.  Just a humble
+programmer who has found and fixed some security bugs over the
+years.  I admire exploit authors who take advantage of programmers'
+mistakes to penetrate, pivot and profit.  But this is not that talk.
 
-What have I, as a programmer, learned from vulnerabilities I
-discovered or helped fix?  Every bug tells a story.  Every story has
-a beginning and (hopefully) an end.  Every tale has a moral, if you
-care to search for it.
+As an industry, we can (and must) improve the security of the the
+systems we write by learning from our mistakes.  Every bug tells a
+story.  Every story has a moral, if you care to look for it.
 
 In this talk I will describe four different vulnerabilities in
 programs I worked on, including FreeIPA, Dogtag PKI and Firefox.  I
-will explain what the technical problem was, it's impact, how it was
-discovered and how I resolved it.  From each case study I will
-derive one or two universal principles for secure programming.
+will explain what the bug was, it's impact, how it was discovered
+and how I resolved it.  From each case study I will develop one or
+two important principles for secure programming.
 
-Programmers and engineering managers will get the most out of this
-talk.  Other security folks who wonder "how come are there so many
-vulns?" are likely to enjoy it too.
+This presentation will be most useful for programmers, engineering
+managers, and security folk who want an engineer's perspective on
+how issues arise and how to avoid them.
 
 Why choose this presentation?
 -----------------------------
@@ -30,11 +28,10 @@ all bugs we've seen before, and neither are the takeaways novel.  On
 the other hand, I can't recall a general secure programming at a
 previous CrikeyCon (maybe I missed it).  And I think a "from the
 trenches" storytelling approach to describing these vulns and their
-implications will make for an engaging presentation.  Conservative
-use of (pseudo)code or diagrams, and maybe one or two live demos,
-will illustrate the stories.  I am not a humourous fellow but I'll
-bet you, the program committee, a round of beers that some of these
-stories get a laugh.
+implications will make an engaging presentation.  Conservative use
+of (pseudo)code or diagrams, and maybe one or two live demos, will
+illustrate the stories.  And I promise that one of the bugs, and the
+story of how it was discovered, is pretty hilarious :)
 
 For the program committee's awareness, the four vulns boil down to:
 (1) insufficient authorisation combined with lack of privilege
