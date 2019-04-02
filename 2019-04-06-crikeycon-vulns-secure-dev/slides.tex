@@ -1,4 +1,4 @@
-\documentclass[ignorenonframetext,aspectratio=169]{beamer}
+\documentclass[ignorenonframetext,aspectratio=169,dvipsnames]{beamer}
 \setbeamertemplate{caption}[numbered]
 \setbeamertemplate{caption label separator}{: }
 \setbeamercolor{caption name}{fg=normal text.fg}
@@ -118,7 +118,8 @@
 \lstset{
     basicstyle=\ttfamily\large,
     keywordstyle=\color{blue}\bfseries,
-    commentstyle=\color[rgb]{0,0.5,0}\bfseries\em
+    commentstyle=\color[rgb]{0,0.5,0}\bfseries\em,
+    stringstyle=\color{BrickRed}\bfseries\em
 }
 
 \newcommand\greyuline{\bgroup\markoverwith
@@ -138,24 +139,26 @@
 
 \section{Dogtag PKI}\label{dogtag}
 
-\begin{frame}{Access control - definition}
+\begin{frame}[fragile]{Access control - definition}
+\large
 \begin{verbatim}
 certServer.ca.authorities
   :create,modify
-  :allow (list,read) user="anybody"
-    ;allow (create,modify,delete) group="Administrators"
-    ;deny (create,modify,delete) user="mallory"
+  :allow (list,read) user="anybody";
+   allow (create,modify,delete) group="Administrators";
+   deny (create,modify,delete) user="mallory"
   :Administrators may create and modify lightweight authorities
 \end{verbatim}
 \end{frame}
 
-\begin{frame}{Access control - evaluation order}
+\begin{frame}[fragile]{Access control - evaluation order}
+\Large
 \begin{verbatim}
 authz.evaluateOrder=deny,allow
 \end{verbatim}
 \end{frame}
 
-\begin{frame}[fragile]{Access control - processing}
+\begin{frame}[fragile]{Access control - processing (1)}
 \begin{lstlisting}[language=Java]
 if (order.equals("deny,allow"))
     entries = getDenyEntries(acls, op);
@@ -166,19 +169,23 @@ for (ACLEntry entry : entries) {
     if (evaluate(token, entry.getExpressions()))
         throw new EACLsException("permission denied");
 }
+\end{lstlisting}
+\end{frame}
 
+\begin{frame}[fragile]{Access control - processing (2)}
+\begin{lstlisting}[language=Java]
 if (order.equals("deny,allow"))
     entries = getAllowEntries(acls, op);
 else
     entries = getDenyEntries(acls, op);
 
+boolean result = false;
 for (ACLEntry entry : entries) {
     if (evaluate(token, entry.getExpressions()))
         result = true;
 }
 if (!result)
     throw new EACLsException("permission denied");
-
 \end{lstlisting}
 \end{frame}
 
@@ -190,9 +197,21 @@ CVE-2018-1080
 
 
 \begin{frame}[plain]
-\huge
-Principle: avoid booleans; use custom types
+\huge Principle: avoid booleans; use custom types
+\pause
+
+\Large Corollary: use tools that support custom types
 \end{frame}
+
+\begin{frame}[plain]
+\Large
+\begin{itemize}
+    \item Enumeration types: Java, C\#, C++11, TypeScript, Python**
+    \item Algebraic data types: Rust, Haskell, Scala, Swift, F\#, C++17
+\end{itemize}
+\end{frame}
+
+
 
 \begin{frame}[fragile]{Access control - bools be gone!}
 \begin{lstlisting}[language=Java]
@@ -222,7 +241,27 @@ if (result != ACLResult.Allowed)
 
 \section{FreeIPA}\label{freeipa}
 
-%TODO show architecture diagram
+\begin{frame}[fragile,plain]
+\begin{verbatim}
+                      +-----------------+
+                      |      User       |
+                      | +-------------+ |
+                      | | krb5 ticket | |
+                      +-+------|------+-+
+                               |
+                               V
+           +----------------------------------------+
+           |                FreeIPA                 |
+           | +-----------------+  +---------------+ |
+           | |krb5 proxy ticket|  | RA agent cert | |
+           +-+-------|---------+--+------|--------+-+
+                     |                   |
+                     V                   V
+                 +--------+         +--------+
+                 | 389 DS |<--------+ Dogtag |
+                 +--------+         +--------+
+\end{verbatim}
+\end{frame}
 
 \begin{frame}[plain]
 \huge
@@ -252,6 +291,7 @@ CVE-2017-2590
 %DEMO?
 
 \begin{frame}{Object Identifier (OID)}
+\Large
   \begin{tabular}{l l}
     2.5.4.3 & {\tt commonName} \\
     2.5.29.14 & {\tt subjectKeyIdentifier} \\
@@ -260,7 +300,6 @@ CVE-2017-2590
 \end{frame}
 
 \begin{frame}{Object Identifier (OID)}
-  \Large
   1.3.6.1.4.1.311.21.8.8950086.10656446.2706058.12775672.480128.147.13466065.13029902
 \end{frame}
 
@@ -285,7 +324,7 @@ buf_len = 80
 buf = backend._ffi.new("char[]", buf_len)
 
 res = backend._lib.OBJ_obj2txt(buf, buf_len, obj, 1)
-if res > buf_len - 1:  # account for terminating null byte
+if res > buf_len - 1:  # account for null terminator
     buf_len = res + 1
     buf = backend._ffi.new("char[]", buf_len)
     res = backend._lib.OBJ_obj2txt(buf, buf_len, obj, 1)
@@ -294,9 +333,22 @@ return backend._ffi.buffer(buf, res)[:].decode()
 \end{lstlisting}
 \end{frame}
 
+\begin{frame}
+\Large
+\begin{quote}
+A buffer length of 80 should be more than enough to
+handle any OID encountered in practice.\\
+{\hfill --- \tt OBJ\_obj2txt(3)}
+\end{quote}
+\end{frame}
+
 \begin{frame}{Object Identifier (OID)}
-  \Large
-  0.8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.311.21.8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.311.21.8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.311.21.8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.311.21.8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.311.21.8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.3
+  0.8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.311.21
+   .8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.311.21
+   .8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.311.21
+   .8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.311.21
+   .8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.311.21
+   .8.8950086.10656446.2706058.12775672.480128.147.13466065.130299021.3.6.1.4.1.3
 \end{frame}
 
 \begin{frame}[plain]
@@ -307,20 +359,16 @@ CVE-2017-7792
 \begin{frame}[fragile]{Firefox (bug)}
 \begin{lstlisting}[language=C++]
 char buf[300];
-unsigned int i, len = 0;
-int written = 0;
-bool first = true;
-unsigned long val = 0;
+int i, n = 0, first = 1;
+unsigned long v = 0;
 
 for (i = 0; i < oid->len; ++i) {
-  val = oid->data[i];
-  if (first) {
-    written = snprintf(&buf[len], sizeof(buf) - len, "%lu", val);
-  } else {
-    written = snprintf(&buf[len], sizeof(buf) - len, ".%lu", val);
-  }
-  len += written;
-  first = false;
+  v = oid->data[i];
+  if (first)
+    n += snprintf(&buf[n], sizeof(buf) - n, "%lu", v);
+  else
+    n += snprintf(&buf[n], sizeof(buf) - n, ".%lu", v);
+  first = 0;
 }
 \end{lstlisting}
 \end{frame}
@@ -328,14 +376,19 @@ for (i = 0; i < oid->len; ++i) {
 \begin{frame}[plain]
 \huge
 Principle: don't rely on assumptions about input
+\pause
+
+\Large Corollary: validate everything
 \end{frame}
+
+% consider IFC, taint mode, etc
 
 \begin{frame}[plain]
 \huge
 Principle: use memory-safe languages
 \end{frame}
 
-
+% Rust, C++ smart pointers, GC'd languages
 
 
 
@@ -344,7 +397,7 @@ Principle: use memory-safe languages
 
 \begin{frame}[fragile]{authentication - library (v1)}
 \begin{lstlisting}[language=Python]
-def authenticate(user, pass):
+def authenticate(user, password):
     ... # talk to the database
     if all_good:
         return True
@@ -356,20 +409,21 @@ def authenticate(user, pass):
 \begin{frame}[fragile]{authentication - application}
 \begin{lstlisting}[language=Python]
 user = request['username']
-pass = request['password']
+password = request['password']
 
 try:
-    authenticate(user,pass)
+    authenticate(user, password)
 except AuthenticationError:
     respond_401_unauthorized()
 
+# user is logged in
 do_stuff()
 \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{authentication - library (v2)}
 \begin{lstlisting}[language=Python]
-def authenticate(user, pass):
+def authenticate(user, password):
     ... # talk to the database
     if all_good:
         return True
@@ -381,6 +435,31 @@ def authenticate(user, pass):
 \begin{frame}[plain]
 \huge
 Principle: avoid using exceptions
+\pause
+
+\Large Corollary: return types shall express failure cases
+\pause
+
+\Large Corollary: use tools that ensure failure cases are handled
+\end{frame}
+\end{frame}
+
+\begin{frame}[fragile]{Error handling in Rust}
+\begin{lstlisting}[language=]
+pub enum Result<T, E> { Ok(T), Err(E) }
+
+pub enum Error { AuthError(), ... }
+
+pub fn authenticate(user: &str, password: &str)
+                  -> Result<String, Error> {
+    ... // talk to the database
+    if all_good {
+        return Ok(String::from(user));
+    } else {
+        return Err(Error::AuthError());
+    }
+}
+\end{lstlisting}
 \end{frame}
 
 
@@ -393,6 +472,7 @@ Principle: avoid using exceptions
 \tightlist
 \item cryptography
 \item input validation {\em in general}
+\item information flow control
 \item web things (XSS, CSRF, etc)
 \item so much other stuff\ldots{}
 \end{itemize}
@@ -409,6 +489,19 @@ Principle: avoid using exceptions
 \end{itemize}
 \end{frame}
 
+\begin{frame}[plain]
+\huge
+Principle: learn from mistakes
+\end{frame}
+
+% don't just fix the bug
+% think about:
+% - how it could have been prevented (tooling)
+% - how it could have been detected earlier
+% - read others' results
+% - share your results
+% - train your programmers
+
 
 
 
@@ -420,7 +513,6 @@ Principle: avoid using exceptions
     {
         \Large Questions?\\
         \medskip
-        \includegraphicsscaled{sailor-victim.jpg}
     }
     \end{center}
 
@@ -467,7 +559,6 @@ Principle: avoid using exceptions
 
 \begin{frame}[fragile]{Access control - fixed}
 \begin{lstlisting}[language=Java]
-public enum ACLRuleType { Allow , Deny };
 public enum ACLResult { Allowed , Denied };
 
 List<ACLEntry> entries;
@@ -489,19 +580,21 @@ return ACLResult.Denied;
 
 \begin{frame}[fragile]{Access control - fixed}
 \begin{lstlisting}[language=Haskell]
-data ACLRuleOrder = AllowDeny | DenyAllow
-data ACLRuleType = Allow | Deny deriving (Eq)
-data ACLResult = Allowed | Denied
+data RuleOrder = AllowDeny | DenyAllow
+data RuleType = Allow | Deny deriving (Eq)
+data Result = Allowed | Denied
 
-evaluateACL :: ACLRuleOrder -> Token -> Operation -> [ACLRule] -> ACLResult
-evaluateACL order token op rules =
-  fromMaybe Denied (getFirst (foldMap (First . evaluateRule token) orderedRules))
-  where
-    opRules = filter (elem op . aclRulePermissions) rules
-    (allowRules, denyRules) = partition ((== Allow) . aclRuleType) opRules
-    orderedRules = case order of
-      DenyAllow -> denyRules <> allowRules
-      AllowDeny -> allowRules <> denyRules
+eval :: RuleOrder -> Token -> Op -> [Rule] -> Result
+eval order tok op rules =
+ fromMaybe Denied
+  (alaf First foldMap (evalRule tok) orderedRules)
+ where
+  opRules = filter (elem op . aclRulePermissions) rules
+  allowRules = filter ((== Allow) . aclRuleType) opRules
+  denyRules = filter ((/= Allow) . aclRuleType) opRules
+  orderedRules = case order of
+   DenyAllow -> denyRules <> allowRules
+   AllowDeny -> allowRules <> denyRules
 \end{lstlisting}
 \end{frame}
 

@@ -19,6 +19,13 @@
     https://pagure.io/freeipa/issue/6713
     can enable/disable/delete CA (including keys!)
 
+  Demo
+    f24-2
+    setenforce 0
+    user-add alice
+    role-add-member 'Certificate Auditor' --user alice
+    cert-revoke SERIAL
+
 
 - Firefox python-crypto big OID (input assumptions, asan etc)
   python-cryptography PR:
@@ -36,7 +43,11 @@
     https://www.mozilla.org/en-US/security/advisories/mfsa2017-18/
   Fixed in Thunderbird 52.3
     https://www.mozilla.org/en-US/security/advisories/mfsa2017-20/
-  Try f26 or older RHEL
+
+  Demo
+    on f24-2.ipa.local ; use X forwarding (ssh -X)
+    run `firefox -no-remote`
+    do the thing
 
 - login fail (exceptions are bad; negative tests)
    (no cve)
