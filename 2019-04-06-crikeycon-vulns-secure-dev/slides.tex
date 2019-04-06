@@ -192,7 +192,8 @@ if (!result)
 
 \begin{frame}[plain]
 \huge
-CVE-2018-1080
+  CVE-2018-1080\footnote[frame]{
+    \url{https://access.redhat.com/security/cve/cve-2018-1080}}
 \end{frame}
 
 
@@ -212,17 +213,13 @@ CVE-2018-1080
 \end{frame}
 
 
-
-\begin{frame}[fragile]{Access control - bools be gone!}
+\begin{frame}[fragile]{Access control - fixed\footnote[frame]{
+    \url{https://frasertweedale.github.io/blog-redhat/posts/2018-03-26-old-dogtag-new-tricks.html}}}
 \begin{lstlisting}[language=Java]
 public enum ACLOrder { DenyAllow , AllowDeny };
 public enum ACLEntryType { Allow , Deny };
 public enum ACLResult { Allowed , Denied };
-\end{lstlisting}
-\end{frame}
 
-\begin{frame}[fragile]{Access control - fixed}
-\begin{lstlisting}[language=Java]
 if (order == EvaluationOrder.DenyAllow) {
     checkDenyEntries(token, acls, op);  // throws
     result = checkAllowEntries(token, acls, op);
@@ -265,7 +262,8 @@ if (result != ACLResult.Allowed)
 
 \begin{frame}[plain]
 \huge
-CVE-2016-5404
+  CVE-2016-5404\footnote[frame]{
+    \url{https://access.redhat.com/security/cve/cve-2016-5404}}
 \end{frame}
 
 \begin{frame}[plain]
@@ -277,7 +275,8 @@ Principle: never cut corners on privilege separation
 
 \begin{frame}[plain]
 \huge
-CVE-2017-2590
+  CVE-2017-2590\footnote[frame]{
+    \url{https://access.redhat.com/security/cve/cve-2017-2590}}
 \end{frame}
 
 
@@ -303,7 +302,13 @@ CVE-2017-2590
   1.3.6.1.4.1.311.21.8.8950086.10656446.2706058.12775672.480128.147.13466065.13029902
 \end{frame}
 
-\begin{frame}[fragile]{python-cryptography (bug)}
+\begin{frame}[fragile]{python-cryptography (bug)
+  \footnote[frame]{
+    \url{https://github.com/pyca/cryptography/pull/3612}
+  }\textsuperscript{,}\footnote[frame]{
+    \url{https://bugs.python.org/issue30502}
+  }
+}
 \begin{lstlisting}[language=Python]
 buf_len = 80
 buf = backend._ffi.new("char[]", buf_len)
@@ -318,7 +323,13 @@ return backend._ffi.buffer(buf, res)[:].decode()
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{python-cryptography (fixed)}
+\begin{frame}[fragile]{python-cryptography (fixed)
+  \footnote[frame,5]{
+    \url{https://github.com/pyca/cryptography/pull/3612}
+  }\textsuperscript{,}\footnote[frame,6]{
+    \url{https://bugs.python.org/issue30502}
+  }
+}
 \begin{lstlisting}[language=Python]
 buf_len = 80
 buf = backend._ffi.new("char[]", buf_len)
@@ -338,7 +349,9 @@ return backend._ffi.buffer(buf, res)[:].decode()
 \begin{quote}
 A buffer length of 80 should be more than enough to
 handle any OID encountered in practice.\\
-{\hfill --- \tt OBJ\_obj2txt(3)}
+  {\hfill --- \tt OBJ\_obj2txt(3)\footnote[frame]{\url{
+    https://www.openssl.org/docs/manmaster/man3/OBJ_nid2ln.html\#return_values
+  }}}
 \end{quote}
 \end{frame}
 
@@ -353,10 +366,14 @@ handle any OID encountered in practice.\\
 
 \begin{frame}[plain]
 \huge
-CVE-2017-7792
+  CVE-2017-7792\footnote[frame]{
+    \url{https://access.redhat.com/security/cve/cve-2017-7792}
+  }
 \end{frame}
 
-\begin{frame}[fragile]{Firefox (bug)}
+\begin{frame}[fragile]{Firefox (bug)\footnote[frame]{
+    \url{https://bugzilla.mozilla.org/show_bug.cgi?id=1368652}
+  }}
 \begin{lstlisting}[language=C++]
 char buf[300];
 int i, n = 0, first = 1;
@@ -378,10 +395,14 @@ for (i = 0; i < oid->len; ++i) {
 Principle: don't rely on assumptions about input
 \pause
 
-\Large Corollary: validate everything
+\Large Corollary: validate / sanitise everything
 \end{frame}
 
-% consider IFC, taint mode, etc
+% - This doesn't mean don't *make* assumptions about input.
+%   But you have to validate data against those assumptions
+%   and fail in a safe way when they are violated
+
+% - Consider IFC, taint mode, etc
 
 \begin{frame}[plain]
 \huge
@@ -395,7 +416,7 @@ Principle: use memory-safe languages
 
 \section{An unnamed online service}\label{unnamed}
 
-\begin{frame}[fragile]{authentication - library (v1)}
+\begin{frame}[fragile]{Authentication - library (v1)}
 \begin{lstlisting}[language=Python]
 def authenticate(user, password):
     ... # talk to the database
@@ -406,7 +427,7 @@ def authenticate(user, password):
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{authentication - application}
+\begin{frame}[fragile]{Authentication - application}
 \begin{lstlisting}[language=Python]
 user = request['username']
 password = request['password']
@@ -421,7 +442,7 @@ do_stuff()
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{authentication - library (v2)}
+\begin{frame}[fragile]{Authentication - library (\textbf{v2})}
 \begin{lstlisting}[language=Python]
 def authenticate(user, password):
     ... # talk to the database
@@ -446,11 +467,11 @@ Principle: avoid using exceptions
 
 \begin{frame}[fragile]{Error handling in Rust}
 \begin{lstlisting}[language=]
-pub enum Result<T, E> { Ok(T), Err(E) }
+enum Result<T, E> { Ok(T), Err(E) }
 
-pub enum Error { AuthError(), ... }
+enum Error { AuthError(), ... }
 
-pub fn authenticate(user: &str, password: &str)
+fn authenticate(user: &str, password: &str)
                   -> Result<String, Error> {
     ... // talk to the database
     if all_good {
@@ -467,18 +488,18 @@ pub fn authenticate(user: &str, password: &str)
 
 \section{Wrapping up}\label{wrapping-up}
 
-\begin{frame}{things that weren't covered}
-\begin{itemize}
-\tightlist
-\item cryptography
-\item input validation {\em in general}
-\item information flow control
-\item web things (XSS, CSRF, etc)
-\item so much other stuff\ldots{}
-\end{itemize}
-\end{frame}
+%\begin{frame}{things that weren't covered}
+%\begin{itemize}
+%\tightlist
+%\item cryptography
+%\item input validation {\em in general}
+%\item information flow control
+%\item web things (XSS, CSRF, etc)
+%\item so much other stuff\ldots{}
+%\end{itemize}
+%\end{frame}
 
-\begin{frame}{principles}
+\begin{frame}{Principles}
 \begin{itemize}
 \tightlist
 \item avoid booleans; use custom types
@@ -506,25 +527,16 @@ Principle: learn from mistakes
 
 
 \begin{frame}[plain]
-\begin{columns}
 
-  \begin{column}{.4\textwidth}
-    \begin{center}
-    {
-        \Large Questions?\\
-        \medskip
-    }
-    \end{center}
-
-
-  \end{column}
-
-  \begin{column}{.6\textwidth}
     \hypersetup{urlcolor=black}
 
     \setlength{\parskip}{.5em}
 
     { \centering
+
+    {\Huge Thank you!}
+    \bigskip
+    \bigskip
 
     \input{cc-by-ARTIFACT.pdf_tex}
     \\
@@ -543,9 +555,7 @@ Principle: learn from mistakes
     \href{https://twitter.com/hackuador}{@hackuador}
 
     }
-  \end{column}
 
-\end{columns}
 \end{frame}
 
 
