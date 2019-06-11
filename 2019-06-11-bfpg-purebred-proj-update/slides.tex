@@ -1,0 +1,291 @@
+\documentclass[ignorenonframetext,aspectratio=169,dvipsnames]{beamer}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\newif\ifbibliography
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight0.8\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+%\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newcommand{\includegraphicsscaled}[1]{
+    \includegraphics[width=\maxwidth,height=\maxheight,keepaspectratio]{#1}
+}
+
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+
+\AtBeginPart{
+  \let\insertpartnumber\relax
+  \let\partname\relax
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \let\insertsectionnumber\relax
+    \let\sectionname\relax
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \let\insertsubsectionnumber\relax
+  \let\subsectionname\relax
+  \frame{\subsectionpage}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+\input{../share/unicode-decl.tex}
+\usefonttheme[onlymath]{serif}
+\hypersetup{breaklinks=true,colorlinks,linkcolor=,urlcolor=purple}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{footnote mark}{fg=gray}
+\setbeamerfont{footnote}{size=\tiny}
+\usepackage[normalem]{ulem}
+\usepackage{listings}
+\lstset{
+    literate={ }{{~}}1,
+    basicstyle=\ttfamily\large,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color[rgb]{0,0.5,0}\bfseries\em,
+    stringstyle=\color{BrickRed}\bfseries\em
+}
+
+\newcommand\greyuline{\bgroup\markoverwith
+    {\textcolor{lightgray}{\rule[-0.5ex]{2pt}{0.4pt}}}\ULon}
+
+\title{\Huge \bf purebred project update}
+\author{\Large \bf Fraser Tweedale\\
+    \texttt{@hackuador}}
+\date{\large \bf June 11, 2019}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{What is purebred?}
+\begin{itemize}
+    \item Console-based mail use agent (MUA)
+    \item {\em notmuch}-based storage/tagging/search
+    \item {\em Mutt}-inspired UI (built with {\em brick})
+    \item Haskell
+    \item AGPL
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why is purebred?}
+\begin{itemize}
+    \item We like {\em mutt}
+    \item We like {\em notmuch}
+    \item We didn't like existing mutt + notmuch solutions
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Who is purebred?}
+\begin{itemize}
+    \item Fraser Tweedale (that's me)
+    \item Róman Joost ({\tt romanofski})
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Where is purebred?}
+    \centering
+\LARGE \url{https://github.com/purebred-mua}
+\end{frame}
+
+\begin{frame}{purebred projects}
+\begin{itemize}
+    \item {\em hs-notmuch}: FFI binding to {\em libnotmuch}
+    \item {\em purebred-email}: MIME message handling
+    \item {\em purebred}: The main program
+    \item {\em purebred-icu}: charsets plugin (coming soon!)
+    \item ??? acceptance testing framework ???
+\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+\Huge
+  Demo
+\end{frame}
+
+
+\begin{frame}{Since the last update... (October 2018)}
+    \begin{itemize}
+        \item lazy loading of search results
+        \item better attachment handling (à la {\em mailcap})
+        \item drafts
+        \item taint untrusted input (ongoing)
+        \item speed up and stabilise acceptance tests
+        \item move away from {\em Stack} tool
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Other projects...}
+    \begin{itemize}
+        \item {\em brick}: generalised {\tt List} widget over container
+            type, supporting laziness
+        \item {\em typed-process}: {\tt readProcessInterleaved}, doc fixes
+        \item {\em dyre}: became maintainer; updates coming soon
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Plugins}
+    \begin{itemize}
+        \item {\em purebred-icu} will be our first plugin
+        \item {\em OpenPGP} on roadmap
+        \item address book support
+        \item {\em SMTP} ?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Major missing features}
+    \begin{itemize}
+        \item thread tree view
+        \item text search in mail body
+        \item new mail notification
+        \item {\em haskeline} integration ? % #280
+        \item quoted text folding
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Critical bugs}
+    \begin{itemize}
+        \item crash when opening mail % #284
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{How to help?}
+    \begin{itemize}
+        \item try it out; file bugs / feature requests
+        \item tackle a ticket (plenty are {\em easyfix})
+        \item test it on other OSes (and send patches)
+        \item write docs / blog posts
+        \item we will mentor contributors; talk to us!
+    \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[plain]
+\begin{columns}
+
+  \begin{column}{.4\textwidth}
+    \begin{center}
+    {
+        \Large Questions?\\
+        \medskip
+        \medskip
+        \def\svgwidth{.8\columnwidth}
+        \input{purebred-logo-ARTIFACT.pdf_tex}
+    }
+    \end{center}
+
+
+  \end{column}
+
+  \begin{column}{.6\textwidth}
+    \hypersetup{urlcolor=black}
+
+    \setlength{\parskip}{.5em}
+
+    { \centering
+
+    \input{cc-by-ARTIFACT.pdf_tex}
+    \\
+    { \scriptsize
+    Except where otherwise noted this work is licensed under
+    }\\
+    { \footnotesize
+      \textbf{\url{http://creativecommons.org/licenses/by/4.0/}}
+    }
+
+    \bigskip
+    \large \tt
+
+    \url{https://speakerdeck.com/frasertweedale}
+
+    \href{https://twitter.com/hackuador}{@hackuador}
+
+    \url{https://github.com/purebred-mua}
+
+    }
+  \end{column}
+
+\end{columns}
+\end{frame}
+
+\end{document}
