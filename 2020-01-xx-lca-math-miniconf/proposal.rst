@@ -40,7 +40,8 @@ Topics in scope include (but are not limited to):
   domains, e.g. networks, AI/ML, computer vision, databases,
   distributed systems
 
-- Quantum computing
+- Mathematics of digital electronics, circuit and hardware design;
+  quantum computing
 
 Talks will be at an *introductory* level.  Talks may assume a
 high-school level of mathematics and, if programming-related, some
@@ -53,15 +54,15 @@ lifelong learning and continuous improvement.
 Private abstract
 ================
 
-I was the organiser of the linux.conf.au 2016 FP Miniconf, and 2018
-Applied FP miniconf, which were both successful.  With this proposal
-I want to extend the scope to include other branches of mathematics
-that contribute to our industry, and the success of practitioners in
-it.
+I was the organiser of the linux.conf.au 2016 Functional Programming
+(FP) Miniconf, and 2018 Applied FP miniconf, which were both
+successful.  With this proposal I want to expand the scope to
+include other branches of mathematics that contribute to our
+industry, and the success of practitioners in it.
 
 The success of the free software movement depends on many things,
 including the quality (correctness, robustness, maintainability,
-readability) of the software we produce.  The tools of mathematics
-exist to help us deliver on this.  So it is important to learn about
-these tools, and teach others what we have learned.  The Mathematics
-of Computing Miniconf serves this goal.
+readability, usability) of the software we produce.  The tools of
+mathematics exist to help us deliver on this.  So it is important to
+learn about these tools, and teach others what we have learned.  The
+Mathematics of Computing Miniconf serves this goal.
