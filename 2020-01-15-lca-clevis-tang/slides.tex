@@ -253,7 +253,7 @@ CC BY-SA 3.0
 \begin{frame}{McCallum-Relyea - parameters}
 \protect\hypertarget{mccallum-relyea-parameters}{}
 \begin{itemize}
-\item $G$, $n$, $g \in G$ (same as DH)
+\item $G$, $n = |G|$, $g \in G$ (same as DH)
 \item key derivation function $KDF$ (e.g. SHA-256)
 \item symmetric encryption algorithm \(Enc\) (e.g. AES-GCM)
 \item message \(m\) to be encrypted
@@ -293,8 +293,7 @@ CC BY-SA 3.0
  {\small 3.~~~~} &  \multicolumn{2}{c}{$ x \to $} \\
  {\small 4.~~~~} &  & $x' \gets x^B = g^{AB} \cdot g^{XB} $ \\
  {\small 5.~~~~} &  \multicolumn{2}{c}{$ \gets x' $} \\
- {\small 6.~~~~} &  $ K \gets KDF(x' \cdot (b^X)^{-1}) $ & \\
-        ~        &  $ ~~~ = KDF(g^{AB} \cdot g^{XB} \cdot g^{-XB}) = KDF(g^{AB}) $ & \\
+ {\small 6.~~~~} &  $ K \gets KDF(x' \cdot (b^X)^{-1} = g^{AB} \cdot g^{XB} \cdot g^{-XB} = g^{AB}) $ & \\
  {\small 7.~~~~} &  $ m \gets Enc^{-1}(K, c) $ & \\
 \end{tabular}
 \end{center}
