@@ -1,0 +1,64 @@
+\begin{frame}{FreeIPA on OpenShift - ingress}
+\protect\hypertarget{freeipa-openshift-ingress}{}
+\begin{itemize}
+\item FreeIPA provides and relies upon several non-HTTP protocols
+    \begin{itemize}
+        \item Kerberos (TCP + UDP), LDAP, CLDAP (UDP)
+        \item HTTP(S) too!
+    \end{itemize}
+\item Kerberos and (C)LDAP use SRV records
+    \begin{itemize}
+        \item \footnotesize {\tt \_kerberos.\_tcp.example.org IN SRV \{prio\} \{weight\} \{port\} \{target\}}
+        \item \footnotesize {\tt \_kerberos.\_udp.example.org IN SRV \{prio\} \{weight\} \{port\} \{target\}}
+    \end{itemize}
+\item These requirements are {\em atypical} but not unique
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Ingress - TCP + UDP}
+\protect\hypertarget{freeipa-openshift-ingress-tcp-udp}{}
+\begin{itemize}
+
+\item Kubernetes doesn't support load balancers with TCP {\em and} UDP ports
+
+\item yet\ldots{} KEP\footnote{Kubernetes Enhancement Proposal}-1435\footnote{\url{https://github.com/kubernetes/enhancements/tree/master/keps/sig-network/1435-mixed-protocol-lb}}
+  \begin{itemize}
+  \item Currently alpha, targeting k8s 1.24 for graduation to beta
+  \item Cloud provider support varies
+  \end{itemize}
+
+\item for now, you need separate Service objects
+  \begin{itemize}
+  \item which means multiple LBs, increased costs
+  \item if your application uses SRV records {\em properly}, that's OK
+  \item CLDAP doesn't\ldots{}
+  \end{itemize}
+
+\item I blogged about this
+      issue\footnote{\url{https://frasertweedale.github.io/blog-redhat/posts/2021-11-18-k8s-tcp-udp-ingress.html}}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Ingress - SRV records}
+\protect\hypertarget{freeipa-openshift-ingress-srv}{}
+\begin{itemize}
+
+\item Kubernetes DNS-Based Service
+  Discovery\footnote{\url{https://github.com/kubernetes/dns/blob/master/docs/specification.md}}
+  system generates SRV records
+
+\item Kubernetes doesn't allow services with same name, different port
+  \begin{itemize}
+  \item Issue: kubernetes/97149\footnote{\url{https://github.com/kubernetes/kubernetes/issues/97149}}
+  \item Next step: we will develop a KEP
+  \end{itemize}
+
+\item {\bf ExternalDNS}\footnote{\url{https://github.com/kubernetes-sigs/external-dns}}
+      system will inherit the same limitation
+
+\item Workaround: application or operator manages DNS records itself
+
+\end{itemize}
+\end{frame}

@@ -1,0 +1,14 @@
+\begin{frame}{Kubernetes / OpenShift tools}
+\protect\hypertarget{openshift-tools}{}
+\begin{itemize}
+\item {\tt kubectl}: Kubernetes API client
+\item {\tt oc}: OpenShift client (superset of {\tt kubectl})
+    \begin{itemize}
+    \item {\tt oc rsh POD}: enter shell or run command in a Pod
+    \item {\tt oc debug node/NODE}: start debug shell on a Node
+    \item {\tt oc create|get|edit|patch|replace|delete}
+    \end{itemize}
+\item {\tt crictl}: Control / query CRI-O (on a Node)
+\item {\tt jq}: command line JSON processor
+\end{itemize}
+\end{frame}

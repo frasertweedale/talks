@@ -1,0 +1,10 @@
+\begin{frame}{FreeIPA on OpenShift - volumes and mounts}
+\protect\hypertarget{freeipa-openshift-challenges-volumes}{}
+
+\begin{itemize}
+\item {\tt systemd-tmpfiles} doesn't like tmpfs owned by unmapped user
+\item tmpfs owner is {\tt root} ({\bf unmapped} in user namespace)
+\item Workaround: set up temp files / dirs ourselves
+\end{itemize}
+
+\end{frame}

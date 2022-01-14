@@ -1,0 +1,634 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[ignorenonframetext,aspectratio=169,12pt]{beamer}
+\usepackage{pgfpages}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{hyperref}
+\hypersetup{
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\newif\ifbibliography
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+\setbeamertemplate{part page}{
+\centering
+\begin{beamercolorbox}[sep=16pt,center]{part title}
+  \usebeamerfont{part title}\insertpart\par
+\end{beamercolorbox}
+}
+\setbeamertemplate{section page}{
+\centering
+\begin{beamercolorbox}[sep=12pt,center]{part title}
+  \usebeamerfont{section title}\insertsection\par
+\end{beamercolorbox}
+}
+\setbeamertemplate{subsection page}{
+\centering
+\begin{beamercolorbox}[sep=8pt,center]{part title}
+  \usebeamerfont{subsection title}\insertsubsection\par
+\end{beamercolorbox}
+}
+\AtBeginPart{
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \frame{\subsectionpage}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\input{../share/unicode-decl.tex}
+
+\hypersetup{colorlinks,linkcolor=,urlcolor=purple}
+\setbeamertemplate{navigation symbols}{}
+\usefonttheme[onlymath]{serif}
+
+\setbeamercolor{footnote mark}{fg=gray}
+\setbeamerfont{footnote}{size=\tiny}
+\usepackage{color}
+\usepackage[normalem]{ulem}
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\normalsize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color[rgb]{0,0.5,0}\bfseries\em,
+    stringstyle=\color{red}\bfseries\em,
+    escapeinside={(*}{*)}
+}
+
+\title{\bf send in the {\tt chown}s}
+\providecommand{\subtitle}[1]{}
+\subtitle{\bf systemd containers on OpenShift}
+\author{{\bf Fraser Tweedale}\\
+    \texttt{@hackuador}\\
+    \bigskip
+    \def\svgwidth{4cm}
+    \input{Logo-RedHat-A-Color-RGB-ARTIFACT.pdf_tex}}
+\date{January 15, 2022}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}{Preliminaries}
+\protect\hypertarget{preliminaries}{}
+\begin{itemize}
+    \item CC-BY 4.0, except where otherwise noted
+    \item Slides are available at
+      \href{https://speakerdeck.com/frasertweedale}{speakerdeck.com/frasertweedale}
+    \item I will be available in the chatroom following the presentation
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Agenda}
+\protect\hypertarget{agenda}{}
+
+\begin{itemize}
+    \item Containers and container standards
+    \item Kubernetes and OpenShift
+    \item FreeIPA: overview and use cases
+    \item FreeIPA and systemd-based workloads on Kubernetes/OpenShift
+      \begin{itemize}
+      \item challenges, workarounds, solutions
+      \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{What is a container?}
+\protect\hypertarget{container-definition}{}
+
+\begin{itemize}
+    \item An process isolation and confinement {\em abstraction}
+    \item Most commonly: OS-level virtualisation (shared kernel)
+        \begin{itemize}
+        \item e.g. FreeBSD jails, Solaris zones
+        \end{itemize}
+    \item Container \emph{\textbf{image}} defines filesystem contents
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Containers on linux}
+\protect\hypertarget{container-linux}{}
+
+\begin{itemize}
+    \item {\tt namespaces}: pid, mount, network, cgroup, \ldots{}
+    \item (maybe) SELinux/AppArmor
+    \item (maybe) restricted \texttt{capabilities(7)} or
+        \texttt{seccomp(2)} profile
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Container standards}
+\protect\hypertarget{container-standards}{}
+\begin{itemize}
+    \item {\em Open Container Initiative (OCI)\footnote{\url{https://opencontainers.org}}}
+    \item {\bf Runtime Specification}\footnote{\url{https://github.com/opencontainers/runtime-spec}} - low level runtime interface
+    \begin{itemize}
+        \item Linux, Solaris, Windows, VMs, \ldots{}
+        \item Implementations\footnote{\url{https://github.com/opencontainers/runtime-spec/blob/main/implementations.md}}:
+          {\bf runc}\footnote{\url{https://github.com/opencontainers/runc}} (reference implementation),
+          crun\footnote{\url{https://github.com/containers/crun}},
+          Kata Containers\footnote{\url{https://katacontainers.io/}}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{OCI Runtime Specification}
+\protect\hypertarget{oci-runtime-spec}{}
+\begin{itemize}
+
+\item JSON configuration (example\footnote{\url{https://github.com/opencontainers/runtime-spec/blob/main/config.md\#configuration-schema-example}})
+
+\item mounts, process and environment, lifecycle hooks, \ldots{}
+
+\item Linux-specific: capabilities, namespaces, cgroup, sysctls,
+      {\tt seccomp} profile
+
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}[plain]
+\centering
+\huge Kubernetes and OpenShift
+\end{frame}
+
+
+\begin{frame}{Kubernetes - container orchestration}
+\protect\hypertarget{kubernetes-intro}{}
+
+\begin{itemize}
+\item Abbreviation: {\bf ``k8s''}
+\item A container orchestration system
+\item Declarative configuration of container-based applications
+\item Integration with many cloud providers
+\item \url{https://kubernetes.io/}
+\item \url{https://github.com/kubernetes/}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Kubernetes - terminology}
+\protect\hypertarget{kubernetes-terminology}{}
+
+\begin{itemize}
+\item {\bf Container}: isolated/confined process [tree]
+\item {\bf Pod}: group (1+) of related Containers (e.g. HTTP app + database)
+\item {\bf Namespace}: object and auth[nz] scope, such as for a team/project
+\item {\bf Node}: a machine in the cluster; where Pods are executed
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Kubernetes - more terminology}
+\protect\hypertarget{kubernetes-terminology-2}{}
+\begin{itemize}
+
+\item {\bf
+  Kubelet}\footnote{\url{https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/}}:
+  agent that executes Pods on Nodes
+
+\item {\bf Sandbox}: isolation/confinement mechanism(s); one per Pod
+\item {\bf Container Runtime Interface
+  (CRI)}\footnote{\url{https://kubernetes.io/docs/concepts/architecture/cri/}}:
+  interface used by Kubelet to create/start/stop/destroy Sandboxes and
+  Containers
+  \begin{itemize}
+  \item CRI-O\footnote{\url{https://cri-o.io/}}
+  \item containerd\footnote{\url{https://containerd.io/}}
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Kubernetes - Container Runtime Interface}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{figure-cri-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kubernetes - Container Runtime Interface - CRI-O}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{figure-cri-crio-oci-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kubernetes - Container Runtime Interface - CRI-O + runc}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{figure-cri-crio-runc-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Kubernetes - Pod definition}
+\protect\hypertarget{kubernetes-pod-spec}{}
+\begin{lstlisting}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fedora
+  labels:
+    app: fedora
+spec:
+  containers:
+  - name: fedora
+    (*\colorbox{yellow}{image}*): registry.fedoraproject.org/fedora:35-x86_64
+    (*\colorbox{yellow}{command}*): ["sleep", "3600"]
+    (*\colorbox{yellow}{env}*):
+    - name: DEBUG
+      value: "1"
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{OpenShift\footnote{\url{https://openshift.com/}}}
+\protect\hypertarget{openshift-intro}{}
+
+\begin{itemize}
+\item a.k.a. {\em OpenShift Container Platform (OCP)}
+\item An {\em enterprise-ready Kubernetes container platform}
+\item Additional security features
+\item Commercially supported by Red Hat
+\item Community ``upstream'' distribution: OKD\footnote{\url{https://www.okd.io/}}
+\item Uses {\bf CRI-O} and {\bf runc}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{OpenShift - terminology}
+\protect\hypertarget{openshift-terminology}{}
+
+\begin{itemize}
+
+\item All existing Kubernetes terminology, plus\ldots{}
+
+\item {\bf Project}: Extends the {\em Namespace} concept
+
+\item {\bf Security Context Constraint (SCC)}: policy affecting
+    SELinux context, {\tt seccomp} profile, {\tt capabilities}, UID
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{OpenShift runtime environment (today)}
+\protect\hypertarget{openshift-runtime-today}{}
+\begin{itemize}
+\item Sandboxes use SELinux, namespaces (cgroup, pid, mount, uts, network)
+\item Each {\em Project} gets assigned a unique UID range
+\item Containers run as a UID from that range
+    \begin{itemize}
+    \item Circumvent via {\tt RunAsUser} and SCCs ({\bf bad idea})
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain]
+\centering
+\huge FreeIPA
+\end{frame}
+
+
+\begin{frame}{FreeIPA}
+\protect\hypertarget{freeipa-intro}{}
+
+\begin{itemize}
+\item Open Source identity management solution
+\item Users, groups, services, authentication, access policies
+\item 389 DS (LDAP), MIT Kerberos, Apache, Dogtag PKI, SSSD, \ldots{}
+\item Part of RHEL (commercial support) and Fedora (community support)
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{FreeIPA on Kubernetes/OpenShift - use cases}
+\protect\hypertarget{freeipa-openshift-use-cases}{}
+Identity services\ldots{}
+\begin{itemize}
+\item for business applications running on the cluster
+\item for the cluster itself (API access, node access)
+\item for an entire organisation, hosted on their OpenShift cluster
+\item {\em as a service}, hosted and managed by a service provider
+\end{itemize}
+\end{frame}
+
+\begin{frame}{FreeIPA container}
+\protect\hypertarget{freeipa-container}{}
+\begin{itemize}
+\item Encapsulate the whole RHEL/Fedora-based system in a container
+\item PID 1 is {\tt systemd}, which starts/manages all services
+\item We call this a {\em monolithic container}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Whyyyy?!}
+\protect\hypertarget{freeipa-monolith-why}{}
+\begin{itemize}
+\item Big engineering effort to rearchitect FreeIPA to be "cloud native"
+\item {\em Ongoing costs} as we support two
+    different application architectures
+\item If we were starting from scratch today\ldots{}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{FreeIPA on OpenShift - challenges}
+\protect\hypertarget{freeipa-openshift-challenges}{}
+\begin{itemize}
+\item Unsurprisingly, there are many
+\item Main areas:
+    \begin{itemize}
+    \item {\bf runtime}
+    \item volumes and mounts
+    \item
+    ingress\footnote{\url{https://frasertweedale.github.io/blog-redhat/posts/2021-11-18-k8s-tcp-udp-ingress.html}}\textsuperscript{,}\footnote{\url{https://frasertweedale.github.io/blog-redhat/posts/2020-12-08-k8s-srv-limitation.html}}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain]
+\centering
+\huge Challenges, workarounds and solutions
+\end{frame}
+
+
+\begin{frame}{Runtime - user namespaces}
+\protect\hypertarget{freeipa-openshift-runtime-userns}{}
+\begin{itemize}
+\item systemd and other components expect to run as {\tt root} or
+  other specific UID
+\item Solution: {\tt user\_namespaces(7)}
+  \begin{itemize}
+  \item Implemented in CRI-O, since OpenShift 4.7
+  \item Requires non-default cluster configuration
+  \item Triggered via Pod annotation
+  \item Requires Pod to be admitted via {\tt anyuid} or
+        similar SCC\footnote{I am working on a way to avoid this}
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Runtime - user namespaces}
+\protect\hypertarget{runtime-userns-figure}{}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{figure-user-namespaces-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Runtime - user namespaces}
+\protect\hypertarget{runtime-userns-spec}{}
+\begin{lstlisting}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+  annotations:
+    (*\colorbox{yellow}{io.kubernetes.cri-o.userns-mode: "auto:size=65536"}*)
+spec:
+  containers:
+  - name: nginx
+    image: quay.io/ftweedal/test-nginx:latest
+    tty: true
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Runtime - user namespaces - Kubernetes support}
+\protect\hypertarget{runtime-userns-kubernetes}{}
+\begin{itemize}
+\item KEP\footnote{Kubernetes Enhancement Proposal}-127: a long-running and ongoing discussion
+\item First proposal: \url{https://github.com/kubernetes/enhancements/pull/1903}
+\item Second proposal: \url{https://github.com/kubernetes/enhancements/pull/2101}
+\item Current proposal: \url{https://github.com/kubernetes/enhancements/pull/3065}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Runtime - cgroups}
+\protect\hypertarget{openshift-cgroup}{}
+\begin{itemize}
+
+\item OpenShift creates a unique cgroup\footnote{\tt cgroups(7)} for each container
+
+\item cgroup namespace\footnote{\tt cgroup\_namespaces(7)} makes it the ``root''
+      namespace inside the container
+
+\item cgroupfs mounts it at {\tt /sys/fs/cgroup}
+
+\item {\tt systemd} needs write access\ldots{} but doesn't have it
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Runtime - cgroup ownership}
+\protect\hypertarget{openshift-cgroup-ownership}{}
+\begin{itemize}
+
+\item Solution: modify runtime to {\tt chown} the cgroup to the container
+      process UID
+
+\item But first: extend OCI Runtime Spec with semantics for
+      cgroup ownership\footnote{\url{https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md\#cgroup-ownership}}
+
+\item runc pull request\footnote{\url{https://github.com/opencontainers/runc/pull/3057}}
+  \begin{itemize}
+  \item Merged; release expected in OpenShift 4.11 or later
+  \end{itemize}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Runtime - OCI cgroup ownership semantics}
+\protect\hypertarget{openshift-cgroup-ownership-semantics}{}
+{\tt chown} container's cgroup to host UID matching the process UID in
+container's user namespace, if and only if\ldots{}
+\begin{itemize}
+\item cgroups v2 in use, and
+\item container has its own cgroup namespace, and
+\item cgroupfs is mounted read/write
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Runtime - OCI cgroup ownership semantics}
+\protect\hypertarget{openshift-cgroup-ownership-semantics-files}{}
+Only the cgroup directory itself, and the files mentioned in {\tt
+/sys/kernel/cgroup/delegate}, should be {\tt chown}'d:
+
+\begin{itemize}
+\item {\tt cgroup.procs}
+\item {\tt cgroup.threads}
+\item {\tt cgroup.subtree\_control}
+\item {\tt memory.oom.group}\footnote{depends on kernel version}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Runtime - cgroups v2}
+\protect\hypertarget{openshift-cgroups-v2}{}
+\begin{itemize}
+\item cgroups v2 is required for secure cgroup delegation
+\item it works, but is not yet the default cluster configuration
+\item it is on the roadmap
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Runtime - cgroups v2}
+\protect\hypertarget{openshift-cgroups-v2-machineconfig}{}
+\begin{lstlisting}
+apiVersion: machineconfiguration.openshift.io/v1
+kind: (*\colorbox{yellow}{MachineConfig}*)
+metadata:
+  name: enable-cgroupv2-workers
+  labels:
+    machineconfiguration.openshift.io/role: worker
+spec:
+  kernelArguments:
+    - systemd.unified_cgroup_hierarchy=1
+    - cgroup_no_v1="all"
+    - psi=1
+\end{lstlisting}
+\end{frame}
+
+% TODO main demo? (putting it all together)
+\begin{frame}[plain]
+\centering
+\huge Demo
+\end{frame}
+
+
+\begin{frame}{Status and future}
+\protect\hypertarget{future}{}
+
+\begin{itemize}
+\item OpenShift: systemd-based workloads in user namespaces
+\item Official support is an open question
+    \begin{itemize}
+    \item We are hopeful, collaborating with OpenShift project and
+      product management, looking for allies
+    \item But we may end up having to rearchitect FreeIPA for the cloud
+    \end{itemize}
+\item User namespaces support in Kubernetes is an ongoing discussion
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Links / resources}
+\protect\hypertarget{links}{}
+
+\begin{itemize}
+\item Project main repo: \url{https://github.com/freeipa/freeipa-openshift}
+    \begin{itemize}
+    \item not much here yet, watch this space
+    \end{itemize}
+\item runc builds: \url{https://ftweedal.fedorapeople.org/}
+\item Team blogs:
+    \begin{itemize}
+    \item \url{https://frasertweedale.github.io/blog-redhat/tags/containers.html}
+    \item \url{https://avisiedo.github.io/docs/}
+    \end{itemize}
+\item Demo: \url{https://www.youtube.com/watch?v=OGAVvIJwmd0}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[plain]
+\begin{columns}
+
+  \begin{column}{.4\textwidth}
+    \begin{center}
+      \includegraphics[width=\textwidth]{img/elias.jpg}
+    \end{center}
+    \tiny Elias Wicked Ales \& Spirits
+    \\ \scalebox{.9}{\url{https://www.facebook.com/wickedelias/posts/2967000120196980}}
+    \\ Fair dealing for purpose of parody or satire
+  \end{column}
+
+  \begin{column}{.6\textwidth}
+
+    \setlength{\parskip}{.5em}
+
+    { \centering
+
+    \input{cc-by-ARTIFACT.pdf_tex}
+
+    \copyright~2022  Red Hat, Inc.
+
+    { \scriptsize
+    Except where otherwise noted this work is licensed under
+    }
+    { \footnotesize
+    \textbf{http://creativecommons.org/licenses/by/4.0/}
+    }
+
+    }
+
+    \begin{description}
+      \item[Slides] \href{https://speakerdeck.com/frasertweedale}{speakerdeck.com/frasertweedale}
+      \item[Blog] \href{https://frasertweedale.github.io/blog-redhat/}{frasertweedale.github.io/blog-redhat}
+      \item[Email] \texttt{ftweedal@redhat.com}
+      \item[Twitter] \href{https://twitter.com/hackuador}{@hackuador}
+    \end{description}
+  \end{column}
+
+\end{columns}
+\end{frame}
+
+\end{document}
