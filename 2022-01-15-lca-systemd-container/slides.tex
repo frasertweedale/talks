@@ -117,8 +117,8 @@
 \protect\hypertarget{preliminaries}{}
 \begin{itemize}
     \item CC-BY 4.0, except where otherwise noted
-    \item Slides are available at
-      \href{https://speakerdeck.com/frasertweedale}{speakerdeck.com/frasertweedale}
+    \item Slides:
+      \href{https://speakerdeck.com/frasertweedale/systemd-containers-on-openshift}{speakerdeck.com/frasertweedale/systemd-containers-on-openshift}
     \item I will be available in the chatroom following the presentation
 \end{itemize}
 \end{frame}
@@ -131,10 +131,7 @@
     \item Containers and container standards
     \item Kubernetes and OpenShift
     \item FreeIPA: overview and use cases
-    \item FreeIPA and systemd-based workloads on Kubernetes/OpenShift
-      \begin{itemize}
-      \item challenges, workarounds, solutions
-      \end{itemize}
+    \item systemd-based workloads on Kubernetes/OpenShift
 \end{itemize}
 
 \end{frame}
@@ -277,7 +274,7 @@
 \protect\hypertarget{kubernetes-pod-spec}{}
 \begin{lstlisting}
 apiVersion: v1
-kind: Pod
+(*\colorbox{yellow}{kind: Pod}*)
 metadata:
   name: fedora
   labels:
@@ -299,10 +296,10 @@ spec:
 \begin{itemize}
 \item a.k.a. {\em OpenShift Container Platform (OCP)}
 \item An {\em enterprise-ready Kubernetes container platform}
-\item Additional security features
 \item Commercially supported by Red Hat
 \item Community ``upstream'' distribution: OKD\footnote{\url{https://www.okd.io/}}
 \item Uses {\bf CRI-O} and {\bf runc}
+\item Latest stable release: 4.9
 \end{itemize}
 
 \end{frame}
@@ -350,6 +347,7 @@ spec:
 \item Users, groups, services, authentication, access policies
 \item 389 DS (LDAP), MIT Kerberos, Apache, Dogtag PKI, SSSD, \ldots{}
 \item Part of RHEL (commercial support) and Fedora (community support)
+\item \url{https://www.freeipa.org/}
 \end{itemize}
 
 \end{frame}
@@ -416,10 +414,10 @@ Identity services\ldots{}
 \item Solution: {\tt user\_namespaces(7)}
   \begin{itemize}
   \item Implemented in CRI-O, since OpenShift 4.7
+  \item Opt-in via Pod annotation
   \item Requires non-default cluster configuration
-  \item Triggered via Pod annotation
-  \item Requires Pod to be admitted via {\tt anyuid} or
-        similar SCC\footnote{I am working on a way to avoid this}
+  \item Requires Pod to be admitted via {\tt anyuid} (or
+      similar) SCC\footnote{I am working on a way to avoid this}
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -442,6 +440,7 @@ metadata:
   labels:
     app: nginx
   annotations:
+    (*\colorbox{yellow}{io.openshift.builder: "true"}*)
     (*\colorbox{yellow}{io.kubernetes.cri-o.userns-mode: "auto:size=65536"}*)
 spec:
   containers:
@@ -508,7 +507,7 @@ container's user namespace, if and only if\ldots{}
 
 \begin{frame}{Runtime - OCI cgroup ownership semantics}
 \protect\hypertarget{openshift-cgroup-ownership-semantics-files}{}
-Only the cgroup directory itself, and the files mentioned in {\tt
+Only the {\bf cgroup directory itself}, and the files mentioned in {\tt
 /sys/kernel/cgroup/delegate}, should be {\tt chown}'d:
 
 \begin{itemize}
@@ -526,12 +525,12 @@ Only the cgroup directory itself, and the files mentioned in {\tt
 \begin{itemize}
 \item cgroups v2 is required for secure cgroup delegation
 \item it works, but is not yet the default cluster configuration
-\item it is on the roadmap
+\item on the roadmap
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Runtime - cgroups v2}
-\protect\hypertarget{openshift-cgroups-v2-machineconfig}{}
+\begin{frame}[fragile]{Runtime - cluster configuration (OCP 4.10) - 1/3}
+\protect\hypertarget{openshift-cluster-config-1}{}
 \begin{lstlisting}
 apiVersion: machineconfiguration.openshift.io/v1
 kind: (*\colorbox{yellow}{MachineConfig}*)
@@ -540,10 +539,51 @@ metadata:
   labels:
     machineconfiguration.openshift.io/role: worker
 spec:
-  kernelArguments:
+  (*\colorbox{yellow}{kernelArguments}*):
     - systemd.unified_cgroup_hierarchy=1
     - cgroup_no_v1="all"
     - psi=1
+  ...
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Runtime - cluster configuration (OCP 4.10) - 2/3}
+\protect\hypertarget{openshift-cluster-config-2}{}
+\begin{lstlisting}
+  config:
+    ignition:
+      version: 3.1.0
+    storage:
+      (*\colorbox{yellow}{files}*):
+      - path: (*\colorbox{yellow}{/etc/subuid}*)
+        overwrite: true
+        contents:
+          source: data:text/plain;charset=utf-8;base64,Y29yZToxMDAwMDA6NjU1MzYKY29udGFpbmVyczoyMDAwMDA6MjY4NDM1NDU2Cg==
+      - path: (*\colorbox{yellow}{/etc/subgid}*)
+        overwrite: true
+        contents:
+          source: data:text/plain;charset=utf-8;base64,Y29yZToxMDAwMDA6NjU1MzYKY29udGFpbmVyczoyMDAwMDA6MjY4NDM1NDU2Cg==
+    ...
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Runtime - cluster configuration (OCP 4.10) - 3/3}
+\protect\hypertarget{openshift-cluster-config-2}{}
+\begin{lstlisting}
+    (*\colorbox{yellow}{systemd}*):
+      (*\colorbox{yellow}{units}*):
+      - name: "rpm-overrides.service"
+        enabled: true
+        contents: |
+          [Unit]
+          Description=Install RPM overrides
+          After=network-online.target rpm-ostreed.service
+          [Service]
+          ExecStart=/bin/sh -c 'rpm -q runc-1.0.3-992.rhaos4.10.el8.x86_64 \
+            || (*\colorbox{yellow}{rpm-ostree override replace}*) --reboot https://ftweedal.fedorapeople.org/runc-1.0.3-992.rhaos4.10.el8.x86_64.rpm'
+          Restart=on-failure
+          [Install]
+          WantedBy=multi-user.target
 \end{lstlisting}
 \end{frame}
 
@@ -553,22 +593,6 @@ spec:
 \huge Demo
 \end{frame}
 
-
-\begin{frame}{Status and future}
-\protect\hypertarget{future}{}
-
-\begin{itemize}
-\item OpenShift: systemd-based workloads in user namespaces
-\item Official support is an open question
-    \begin{itemize}
-    \item We are hopeful, collaborating with OpenShift project and
-      product management, looking for allies
-    \item But we may end up having to rearchitect FreeIPA for the cloud
-    \end{itemize}
-\item User namespaces support in Kubernetes is an ongoing discussion
-\end{itemize}
-
-\end{frame}
 
 \begin{frame}{Links / resources}
 \protect\hypertarget{links}{}
@@ -588,6 +612,24 @@ spec:
 \end{itemize}
 
 \end{frame}
+
+
+\begin{frame}{Status and future}
+\protect\hypertarget{future}{}
+
+\begin{itemize}
+\item Kubernetes: user namespaces support in an ongoing discussion
+\item OpenShift: systemd container in user namespace works, but experimental
+\item Official support is an open question
+    \begin{itemize}
+    \item We are hopeful, collaborating with OpenShift project and
+      product management, looking for allies
+    \item But we may end up having to rearchitect FreeIPA for the cloud
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
 
 \begin{frame}[plain]
 \begin{columns}
