@@ -1,0 +1,596 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[ignorenonframetext,aspectratio=169,12pt]{beamer}
+\usepackage{pgfpages}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{hyperref}
+\hypersetup{
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\newif\ifbibliography
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+\setbeamertemplate{part page}{
+\centering
+\begin{beamercolorbox}[sep=16pt,center]{part title}
+  \usebeamerfont{part title}\insertpart\par
+\end{beamercolorbox}
+}
+\setbeamertemplate{section page}{
+\centering
+\begin{beamercolorbox}[sep=12pt,center]{part title}
+  \usebeamerfont{section title}\insertsection\par
+\end{beamercolorbox}
+}
+\setbeamertemplate{subsection page}{
+\centering
+\begin{beamercolorbox}[sep=8pt,center]{part title}
+  \usebeamerfont{subsection title}\insertsubsection\par
+\end{beamercolorbox}
+}
+\AtBeginPart{
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \frame{\subsectionpage}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\input{../share/unicode-decl.tex}
+
+\hypersetup{colorlinks,linkcolor=,urlcolor=purple}
+\setbeamertemplate{navigation symbols}{}
+\usefonttheme[onlymath]{serif}
+
+\setbeamercolor{footnote mark}{fg=gray}
+\setbeamerfont{footnote}{size=\tiny}
+\usepackage{color}
+\usepackage[normalem]{ulem}
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\normalsize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color[rgb]{0,0.5,0}\bfseries\em,
+    stringstyle=\color{red}\bfseries\em,
+    escapeinside={(*}{*)}
+}
+
+\title{\bf send in the {\tt chown(2)}s}
+\providecommand{\subtitle}[1]{}
+\subtitle{\bf systemd containers in user namespaces}
+\author{{\bf Fraser Tweedale}\\
+    \texttt{@hackuador@functional.cafe}\\
+    \bigskip
+    \medskip
+    \def\svgwidth{4cm}
+    \input{Logo-RedHat-A-Color-RGB-ARTIFACT.pdf_tex}}
+\date{February 4, 2023}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}{Agenda}
+\protect\hypertarget{agenda}{}
+
+\begin{itemize}
+    \item Containers and container standards
+    \item Kubernetes and OpenShift
+    \item User namespaces and cgroups
+    \item systemd-based workloads on Kubernetes/OpenShift
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{What is a container?}
+\protect\hypertarget{container-definition}{}
+
+\begin{itemize}
+    \item An process isolation and confinement {\em abstraction}
+    \item Most commonly: OS-level virtualisation (shared kernel)
+        \begin{itemize}
+        \item e.g. FreeBSD jails, Solaris zones
+        \end{itemize}
+    \item Container \emph{\textbf{image}} defines filesystem contents
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Containers on linux}
+\protect\hypertarget{container-linux}{}
+
+Some combination of the following security mechanisms:
+
+\begin{itemize}
+  \item \textbf{\texttt{namespaces(7)}}: pid, mount, network, cgroup, \ldots{}
+    % \begin{itemize} \item  What can I see?   \end{itemize}
+  \item restricted \textbf{\texttt{capabilities(7)}} and/or \textbf{\texttt{seccomp(2)}} profile
+    % \begin{itemize} \item  What can I do (syscalls)?   \end{itemize}
+  \item {\bf SELinux} or AppArmor MAC policy
+    % \begin{itemize} \item  What can I access (files)?   \end{itemize}
+  \item \textbf{\texttt{cgroups(7)}} for resource limits
+    % \begin{itemize} \item  What resources can I consume? \end{itemize}
+\end{itemize}
+
+\emph{Not necessarily all of these at the same time\ldots{}}
+
+\end{frame}
+
+\begin{frame}{Container standards}
+\protect\hypertarget{container-standards}{}
+\begin{itemize}
+    \item {\em Open Container Initiative (OCI)\footnote{\url{https://opencontainers.org}}}
+    \item {\bf Runtime Specification}\footnote{\url{https://github.com/opencontainers/runtime-spec}} - low level runtime interface
+    \begin{itemize}
+        \item Linux, Solaris, Windows, VMs, \ldots{}
+        \item Implementations\footnote{\url{https://github.com/opencontainers/runtime-spec/blob/main/implementations.md}}:
+          {\bf runc}\footnote{\url{https://github.com/opencontainers/runc}} (reference implementation),
+          crun\footnote{\url{https://github.com/containers/crun}}, \\
+          Kata Containers\footnote{\url{https://katacontainers.io/}}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{OCI Runtime Specification}
+\protect\hypertarget{oci-runtime-spec}{}
+\begin{itemize}
+\item JSON configuration (example\footnote{\url{https://github.com/opencontainers/runtime-spec/blob/main/config.md\#configuration-schema-example}})
+\item mounts, process and environment, lifecycle hooks, \ldots{}
+\item Linux-specific: capabilities, namespaces, cgroup, sysctls,
+      {\tt seccomp} profile
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{OCI Runtime Specification}
+\protect\hypertarget{kubernetes-pod-spec-example}{}
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+{
+  "process": {
+    (*\colorbox{yellow}{"user"}*): { "uid": 0, "gid": 0 },
+    "args": [ "/sbin/init" ],
+    "env": [ ... ],
+    ...
+  },
+  "root": {"path": "/home/ftweedal/scratch/fs", "readonly": false},
+  "hostname": "runc",
+  "mounts": [ ... ],
+  "linux": {
+    (*\colorbox{yellow}{"namespaces"}*): [
+      { "type": "pid" }, { "type": "ipc" }, { "type": "uts" },
+      { "type": "mount" }, { "type": "cgroup" }
+    ],
+    "cgroupsPath": "user.slice:runc:sandbox"
+  }
+}
+\end{lstlisting}
+\end{frame}
+
+
+
+\begin{frame}[plain]
+\centering
+\huge Kubernetes and OpenShift
+\end{frame}
+
+
+\begin{frame}{Kubernetes - container orchestration}
+\protect\hypertarget{kubernetes-intro}{}
+
+\begin{itemize}
+\item A container orchestration system
+\item Declarative configuration of container-based applications
+\item Integration with many cloud providers
+\item \url{https://kubernetes.io/}
+\item \url{https://github.com/kubernetes/}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Kubernetes - terminology}
+\protect\hypertarget{kubernetes-terminology}{}
+
+\begin{itemize}
+\item {\bf Container}: isolated/confined process [tree]
+\item {\bf Pod}: group (1+) of related Containers (e.g. HTTP app + database)
+\item {\bf Namespace}: object and auth[nz] scope, such as for a team/project
+\item {\bf Node}: a machine in the cluster; where Pods are executed
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Kubernetes - more terminology}
+\protect\hypertarget{kubernetes-terminology-2}{}
+\begin{itemize}
+
+\item {\bf
+  Kubelet}\footnote{\url{https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/}}:
+  agent that executes Pods on Nodes
+
+\item {\bf Sandbox}: isolation/confinement mechanism(s); one per Pod
+\item {\bf Container Runtime Interface
+  (CRI)}\footnote{\url{https://kubernetes.io/docs/concepts/architecture/cri/}}:
+  interface used by Kubelet to create/start/stop/destroy Sandboxes and
+  Containers
+  \begin{itemize}
+  \item CRI-O\footnote{\url{https://cri-o.io/}}
+  \item containerd\footnote{\url{https://containerd.io/}}
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Kubernetes - Container Runtime Interface}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{figure-cri-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kubernetes - Container Runtime Interface - CRI-O}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{figure-cri-crio-oci-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kubernetes - Container Runtime Interface - CRI-O + runc}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{figure-cri-crio-runc-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Kubernetes - Pod definition}
+\protect\hypertarget{kubernetes-pod-spec}{}
+\begin{lstlisting}
+apiVersion: v1
+(*\colorbox{yellow}{kind: Pod}*)
+metadata:
+  name: fedora
+  labels:
+    app: fedora
+spec:
+  containers:
+  - name: fedora
+    (*\colorbox{yellow}{image}*): registry.fedoraproject.org/fedora:35-x86_64
+    (*\colorbox{yellow}{command}*): ["sleep", "3600"]
+    (*\colorbox{yellow}{env}*):
+    - name: DEBUG
+      value: "1"
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{OpenShift\footnote{\url{https://openshift.com/}}}
+\protect\hypertarget{openshift-intro}{}
+\begin{itemize}
+\item a.k.a. {\em OpenShift Container Platform (OCP)}
+\item An {\em enterprise-ready Kubernetes container platform}
+\item Commercially supported by Red Hat
+\item Community ``upstream'' distribution: OKD\footnote{\url{https://www.okd.io/}}
+\item Uses {\bf CRI-O} and {\bf runc}
+\item Latest stable release: 4.12
+\end{itemize}
+\end{frame}
+
+\begin{frame}{OpenShift runtime environment (default)}
+\protect\hypertarget{openshift-runtime-today}{}
+\begin{itemize}
+\item Confinement: SELinux, namespaces (cgroup, pid, mount, uts, network)
+\item Each {\em namespace} gets assigned a unique uid range
+\item Containers run as a uid from that range
+    \begin{itemize}
+      \item Circumvent via {\tt RunAsUser} and {\em Security Context
+        Constraints (SCCs)}
+      \item \dots{}which is a {\bf bad idea}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain]
+\centering
+\huge User namespaces
+\end{frame}
+
+\begin{frame}{User namespaces - why}
+\protect\hypertarget{userns-why}{}
+\begin{itemize}
+\item Increase workload isolation and confinement
+\item Run applications that require/assume specific uid(s)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{User namespaces - why}
+\protect\hypertarget{userns-why-cves}{}
+  \centering
+  \small
+  \def\arraystretch{1.5}
+  \begin{tabular}{|l|p{0.5\textwidth}|c|}
+      \centering {\bf CVE} & \centering {\bf description} & {\bf CVSS}\footnote{{\bf NIST} or {\bf NIST / CNA Kubernetes}} \\
+    \hline
+    CVE-2019-5736    & host runc binary overwritten from container & 8.6 \\
+    CVE-2021-25741   & host fs access via symlink exchange attack & 8.1 / 8.6 \\
+    CVE-2021-30465   & host fs access via symlink exchange attack & 8.5 \\
+    CVE-2017-1002101 & host fs access via subpath volume mount & 9.6 / 8.8 \\
+    CVE-2016-8867    & privesc due to excessive ambient capabilities & 7.5 \\
+    CVE-2018-15664   & host fs access via subpath volume mount & 7.5 \\
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{User namespaces - what}
+\protect\hypertarget{userns-what}{}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{figure-user-namespaces-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{User namespaces - how (Linux)}
+\protect\hypertarget{userns-how-linux}{}
+\begin{itemize}
+    \item {\tt user\_namespaces(7)}
+    \item {\tt unshare(2)}
+    \item {\tt unshare(1)}
+\begin{lstlisting}
+% id -u
+1000
+% unshare --user --map-root-user id -u
+0
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{User namespaces - how (OCI runtime)}
+\protect\hypertarget{userns-how-oci}{}
+\begin{lstlisting}[basicstyle=\ttfamily\small]
+{
+  ...
+  "linux": {
+    ...
+    "namespaces": [
+      { "type": "user" },
+      ...
+    ],
+    "uidMappings": [
+      { "containerID": 0, "hostID": 1000000, "size": 65536 }
+    ],
+    "gidMappings": [
+      { "containerID": 0, "hostID": 1000000, "size": 65536 }
+    ]
+  }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{User namespaces - how (OpenShift)}
+\protect\hypertarget{userns-how-openshift}{}
+\begin{itemize}
+  \item Implemented in CRI-O
+    \begin{itemize}
+      \item OpenShift 4.7 (with non-default cluster config)
+      \item OpenShift 4.10 (out of the box)
+    \end{itemize}
+  \item Opt-in via Pod {\em annotations}
+  \item Requires \textbf{\texttt{anyuid}} SCC (or equivalent) for {\bf admission}
+  \item Some workloads may still require non-default cluster
+    configuration
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{User namespaces - how (OpenShift)}
+\protect\hypertarget{userns-how-openshift-2}{}
+\begin{lstlisting}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+  annotations:
+    (*\colorbox{yellow}{io.openshift.builder: "true"}*)
+    (*\colorbox{yellow}{io.kubernetes.cri-o.userns-mode: "auto:size=65536"}*)
+spec:
+  containers:
+  - name: nginx
+    image: quay.io/ftweedal/test-nginx:latest
+    tty: true
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{User namespaces - how (Kubernetes)}
+\protect\hypertarget{userns-how-kubernetes}{}
+\begin{itemize}
+\item KEP\footnote{Kubernetes Enhancement Proposal}-127\footnote{\url{https://github.com/kubernetes/enhancements/pull/3065}}
+\item Initial support delivered in k8s v1.25 (OpenShift 4.12)
+    \begin{itemize}
+        \item Alpha; feature gate: \textbf{\texttt{UserNamespacesStatelessPodsSupport}}
+        \item Supported volume types: emptyDir, configmap, secret
+        \item Post must opt in by setting \textbf{\texttt{spec.hostUsers: false}}
+        \item Fixed mapping size (65536); unique to Pod
+    \end{itemize}
+\item Support for more volume types deferred to later phase
+\end{itemize}
+\end{frame}
+
+\begin{frame}{User namespaces - how (Kubernetes) - challenges}
+\protect\hypertarget{userns-how-kubernetes-3}{}
+\begin{itemize}
+\item shared / persistent volumes require \textbf{\em ID-mapped mounts}
+\item {\bf simple heuristics} for ID range assignment $\to$ lower number
+  of pods with unique user namespaces
+\item other mount point and file ownership issues (e.g. cgroupfs)
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{cgroups}
+\protect\hypertarget{openshift-cgroup}{}
+\begin{itemize}
+
+\item OpenShift creates a {\bf unique cgroup}\footnote{\tt cgroups(7)} for each container
+
+\item {\bf cgroup namespace}\footnote{\tt cgroup\_namespaces(7)} makes it the ``root''
+      namespace inside the container
+
+\item cgroupfs mounts it at {\tt /sys/fs/cgroup}
+
+\item {\tt systemd} needs write access\ldots{} but doesn't have it
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{cgroups - send in the \texttt{chown(2)}s}
+\protect\hypertarget{openshift-cgroup-ownership}{}
+\begin{itemize}
+
+\item Solution: modify runtime to {\tt chown} the cgroup to the container
+      process UID
+
+\item But first: extend OCI Runtime Spec with semantics for
+      cgroup ownership\footnote{\url{https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md\#cgroup-ownership}}
+
+\item runc pull request\footnote{\url{https://github.com/opencontainers/runc/pull/3057}}
+  \begin{itemize}
+  \item Merged; released in OpenShift 4.11
+  \end{itemize}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{cgroups - OCI runtime semantics}
+\protect\hypertarget{openshift-cgroup-ownership-semantics}{}
+{\tt chown} container's cgroup to host UID matching the process UID in
+container's user namespace, if and only if\ldots{}
+\begin{itemize}
+\item {\bf cgroups v2} in use; and
+\item container has its own cgroup namespace; and
+\item cgroupfs is mounted read/write
+\end{itemize}
+\end{frame}
+
+\begin{frame}{cgroups - OCI runtime semantics}
+\protect\hypertarget{openshift-cgroup-ownership-semantics-files}{}
+Only the {\bf cgroup directory itself}, and the files mentioned in {\tt
+/sys/kernel/cgroup/delegate}, should be {\tt chown}'d:
+
+\begin{itemize}
+\item {\tt cgroup.procs}
+\item {\tt cgroup.threads}
+\item {\tt cgroup.subtree\_control}
+\item {\tt memory.oom.group}\footnote{depends on kernel version}
+\item {\tt memory.reclaim}\footnotemark[\value{footnote}]
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{cgroups - OpenShift}
+\protect\hypertarget{openshift-cgroups-v2}{}
+\begin{itemize}
+\item cgroups v2 not the default (yet)
+\item but it works and is supported
+\item annotation required to activate the ownership semantics: \\
+    \textbf{\texttt{io.kubernetes.cri-o.cgroup2-mount-hierarchy-rw: "true"}}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain]
+\centering
+\huge Demo
+\end{frame}
+
+
+\begin{frame}{Links / resources}
+\protect\hypertarget{links}{}
+
+\begin{itemize}
+\item My blog: \url{https://frasertweedale.github.io/blog-redhat/tags/containers.html}
+\item Demo: \url{https://www.youtube.com/watch?v=OGAVvIJwmd0}
+\item KEP-127: \url{https://github.com/kubernetes/enhancements/tree/master/keps/sig-node/127-user-namespaces}
+\item OCI Runtime Specification: \url{https://github.com/opencontainers/runtime-spec}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[plain]
+\begin{columns}
+
+  \begin{column}{.6\textwidth}
+
+    \setlength{\parskip}{.5em}
+
+    { \centering
+
+    \input{cc-by-ARTIFACT.pdf_tex}
+
+    \copyright~2023  Red Hat, Inc.
+
+    { \scriptsize
+    Except where otherwise noted this work is licensed under
+    }
+    { \footnotesize
+    \textbf{http://creativecommons.org/licenses/by/4.0/}
+    }
+
+    }
+
+    \begin{description}
+      \item[Slides] \href{https://speakerdeck.com/frasertweedale}{speakerdeck.com/frasertweedale}
+      \item[Blog] \href{https://frasertweedale.github.io/blog-redhat/}{frasertweedale.github.io/blog-redhat}
+      \item[Email] \texttt{ftweedal@redhat.com}
+      \item[Fediverse] \href{https://functional.cafe/@hackuador}{@hackuador@functional.cafe}
+    \end{description}
+  \end{column}
+
+\end{columns}
+\end{frame}
+
+\end{document}
