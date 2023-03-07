@@ -3,5 +3,5 @@ SVG_CMD() {
   IN="${DIR}/$1.svg"
   OUT="$1-ARTIFACT.pdf"
   [ ! -e $OUT -o $IN -nt $OUT ] \
-    && inkscape -D -z --file=$IN --export-pdf=$OUT --export-latex
+    && inkscape --export-area-drawing --export-filename=$OUT --export-latex $IN
 }
