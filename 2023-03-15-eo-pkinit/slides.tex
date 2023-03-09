@@ -161,63 +161,63 @@
 \end{frame}
 
 
-\begin{frame}{Kerberos - protocol}
+\begin{frame}{Kerberos - protocol - parties}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-parties-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{Kerberos - protocol}
+\begin{frame}{Kerberos - protocol - Authentication Service request}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-as-req-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{Kerberos - protocol}
+\begin{frame}{Kerberos - protocol - Authentication Service response}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-as-rep-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{Kerberos - protocol}
+\begin{frame}{Kerberos - protocol - after AS exchange}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-as-exchange-post-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{Kerberos - protocol}
+\begin{frame}{Kerberos - protocol - Ticket-Granting Service request}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-tgs-req-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{Kerberos - protocol}
+\begin{frame}{Kerberos - Ticket-Granting Service response}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-tgs-rep-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{Kerberos - protocol}
+\begin{frame}{Kerberos - after TGS exchange}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-tgs-rep-post-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{Kerberos - protocol}
+\begin{frame}{Kerberos - application request}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-ap-req-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{Kerberos - protocol}
+\begin{frame}{Kerberos - application session}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-ap-req-post-ARTIFACT.pdf_tex}
@@ -283,49 +283,74 @@
 \end{itemize}
 \end{frame}
 
-\begin{frame}{PKINIT - protocol}
+\begin{frame}{PKINIT - protocol - Authenticate Service request}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-pkinit-as-req-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{PKINIT - protocol}
+\begin{frame}{PKINIT - protocol - Authentication Service response}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-pkinit-as-rep-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{PKINIT - protocol}
+\begin{frame}{PKINIT - protocol - after AS exchange}
 \begin{center}
 \def\svgwidth{\textwidth}
 \input{kerb-pkinit-as-exchange-post-ARTIFACT.pdf_tex}
 \end{center}
 \end{frame}
 
-\begin{frame}{PKINIT in FreeIPA}
+\begin{frame}{PKINIT - user experience}
+\protect\hypertarget{pkinit-ux}{}
+\begin{itemize}
+    \item {\bf CLI}: {\tt kinit -X X509\_user\_identity=FILE:cert.pem,key.pem}
+    \item {\bf Smart Card} workstation login
+        \begin{itemize}
+            \item SSSD\footnote{\url{https://sssd.io/}} can {\bf
+                integrate with Linux login managers} (e.g.  GDM)
+            \item Prompt for PIN, if required
+            \item {\bf TGT acquired during login}
+            \item Lock screen when Smart Card detached (optional)
+            \item Windows offers a similiar experience
+        \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Smart Card login with SSSD (Fedora / RHEL)}
+\protect\hypertarget{smart-card-login-sssd}{}
+\emph{Enable via \texttt{authselect(8)}:}
+\begin{lstlisting}[basicstyle=\ttfamily\bf]
+% authselect enable-feature \
+    with-smartcard[-required]
+    with-smartcard-lock-on-removal
+\end{lstlisting}
+
+\emph{Update {\texttt{/etc/sssd/sssd.conf}}:}
+\begin{lstlisting}[basicstyle=\ttfamily\bf]
+[pam]
+pam_cert_auth = True
+pam_cert_db_path = <path-to-pem-bundle>
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{SSSD PKINIT login with FreeIPA provider}
 \protect\hypertarget{pkinit-in-freeipa}{}
 \begin{itemize}
     \item Default: {\bf exact certificate match} only
+        \begin{itemize}
+            \item match the LDAP {\tt userCertificate} attribute
+        \end{itemize}
     \item Optional: \textbf{\em certificate mapping rules}
         \begin{itemize}
+            \item use attributes in certificate to look up principal
             \item {\tt ipa certmaprule-add certmap \textbackslash{} \\
                 ~~~~{-}{-}maprule "(fqdn=\{subject\_dns\_name\})"}
         \end{itemize}
     \item Client certs can be signed by internal or third-party CA
-\end{itemize}
-\end{frame}
-
-\begin{frame}{PKINIT - user experience}
-\protect\hypertarget{pkinit-ux}{}
-\begin{itemize}
-    \item CLI: {\tt kinit -X X509\_user\_identity=FILE:cert.pem,key.pem}
-    \item SSSD can integrate with Linux login managers
-        \begin{itemize}
-            \item Nice UX for smartcards and 2FA
-            \item Windows offers a similiar experience
-        \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -339,8 +364,8 @@
 \protect\hypertarget{pkinit-advantages}{}
 \begin{itemize}
     \item No more passwords / client shared secret
-    \item Key can reside on smart-card (e.g. Yubikey) / TPM / HSM
-    \item The rest of the protocol is unchanged
+    \item Key can reside on Smart Card (e.g. Yubikey) / TPM / HSM
+    \item The rest of the protocol (after {\em AS Exchange}) is unchanged
 \end{itemize}
 \end{frame}
 
@@ -350,7 +375,7 @@
     \item X.509 PKI required
     \item Renewal considerations
     \item Revocation checking is hard (or time consuming)
-    \item Hardware (e.g. smart cards) → additional cost
+    \item Hardware (e.g. Smart Cards) → additional cost
     \item Binding the public key to the principal - how?
 \end{itemize}
 \end{frame}
