@@ -349,6 +349,7 @@ pam_cert_db_path = <path-to-pem-bundle>
             \item use attributes in certificate to look up principal
             \item {\tt ipa certmaprule-add certmap \textbackslash{} \\
                 ~~~~{-}{-}maprule "(fqdn=\{subject\_dns\_name\})"}
+            \item caveat: only one active mapping rule will be used
         \end{itemize}
     \item Client certs can be signed by internal or third-party CA
 \end{itemize}
@@ -527,12 +528,19 @@ REQ as follows:
 \end{frame}
 
 
-\begin{frame}{Links}
+\begin{frame}{Links / resources}
 \protect\hypertarget{links}{}
 
+certmap vulnerability:
 \begin{itemize}
 \item Writeup: \url{https://is.gd/CVE_2022_4254}
 \item Red Hat CVE database: \url{https://access.redhat.com/security/cve/CVE-2022-4254}
+\end{itemize}
+
+Related effort: FreeIPA FIDO2/Webauthn support
+\begin{itemize}
+    \item FOSDEM 2023 talk: {\em Enabling FIDO2/WebAuthn support for
+        remotely managed users}\footnote{\url{https://fosdem.org/2023/schedule/event/security_remote_fido/}}
 \end{itemize}
 
 \end{frame}
@@ -569,6 +577,39 @@ REQ as follows:
   \end{column}
 
 \end{columns}
+\end{frame}
+
+
+\begin{frame}{Smart Card-related specifications}
+\protect\hypertarget{smart-card-standards}{}
+
+\begin{itemize}
+    \item {\bf Chip Card Interface Device (CCID)}: USB smart card
+        interface standard.
+        \begin{itemize}
+            \item Can be carried over {\bf NFC}
+        \end{itemize}
+
+    \item {\bf Personal Identify Verification (PIV)}: smart card
+        standard from NIST.
+        \begin{itemize}
+            \item Defines the slots, PIN behaviour, etc.
+        \end{itemize}
+
+    \item {\bf PKCS \#15}: token information format
+        \begin{itemize}
+            \item \textbf{\emph{OpenSC}}\footnote{\url{https://github.com/OpenSC/OpenSC/wiki}}
+                provides an PKCS \#15 emulation for PIV cards
+        \end{itemize}
+
+    \item {\bf PKCS \#11}: cryptographic token interface (keys,
+        signing, encryption/decryption)
+        \begin{itemize}
+            \item Token and HSM vendors provide PKCS \#11 modules for their devices
+            \item OpenSC provides a PKCS \#11 interface to PKCS \#15 tokens (including emulated PIV tokens)
+        \end{itemize}
+
+\end{itemize}
 \end{frame}
 
 \end{document}
