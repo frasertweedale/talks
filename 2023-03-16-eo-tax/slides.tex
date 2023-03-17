@@ -1,0 +1,341 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[ignorenonframetext,aspectratio=169,12pt]{beamer}
+\usepackage{pgfpages}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{hyperref}
+\hypersetup{
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\newif\ifbibliography
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+\setbeamertemplate{part page}{
+\centering
+\begin{beamercolorbox}[sep=16pt,center]{part title}
+  \usebeamerfont{part title}\insertpart\par
+\end{beamercolorbox}
+}
+\setbeamertemplate{section page}{
+\centering
+\begin{beamercolorbox}[sep=12pt,center]{part title}
+  \usebeamerfont{section title}\insertsection\par
+\end{beamercolorbox}
+}
+\setbeamertemplate{subsection page}{
+\centering
+\begin{beamercolorbox}[sep=8pt,center]{part title}
+  \usebeamerfont{subsection title}\insertsubsection\par
+\end{beamercolorbox}
+}
+\AtBeginPart{
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \frame{\subsectionpage}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\input{../share/unicode-decl.tex}
+
+\hypersetup{colorlinks,linkcolor=,urlcolor=purple}
+\setbeamertemplate{navigation symbols}{}
+\usefonttheme[onlymath]{serif}
+
+\setbeamercolor{footnote mark}{fg=gray}
+\setbeamerfont{footnote}{size=\tiny}
+\usepackage{color}
+\usepackage[normalem]{ulem}
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\normalsize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color[rgb]{0,0.5,0}\bfseries\em,
+    stringstyle=\color{red}\bfseries\em,
+    escapeinside={(*}{*)}
+}
+
+\title{\bf A tax combinator library could be useful for {\em Rules as Code}}
+\providecommand{\subtitle}[1]{}
+\subtitle{\footnotesize {\em or:} surely you didn't think you'd escape without hearing me talk about Haskell?}
+\author{{\bf Fraser Tweedale}\\
+    \texttt{@hackuador@functional.cafe}}
+\date{March 16, 2023}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}[fragile]{Rates Rebate Act 1973 (NZ) s 3(1)}
+\footnotesize
+\begin{verbatim}
+
+A ratepayer who, at the commencement of a rating year, was the
+ratepayer of a residential property is entitled, on application
+in that year, to a rebate of—
+
+(a) so much of the rates payable for that rating year in respect of
+    the property as represents—
+    (i) two-thirds of the amount by which those rates exceed $160,
+        reduced by—
+    (ii) $1 for each $8 by which the ratepayer’s income for the
+         preceding tax year exceeded $28,080, that last-mentioned
+         amount being increased by $500 in respect of each person who
+         was a dependant of the ratepayer at the commencement of the
+         rating year in respect of which the application is made; or
+(b) $700,—
+
+whichever amount is smaller.
+
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile]{}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+incomeThreshold :: Natural -> Money Rational
+incomeThreshold numDependants =
+  Money (28080 + fromIntegral numDependants * 500)
+
+reduction :: Natural -> Tax (Money Rational) (Money Rational)
+reduction numDependants =
+  (*\colorbox{yellow}{above}*) (incomeThreshold numDependants) (-1/8)
+
+rebate :: Natural -> Money Rational
+       -> Tax (Money Rational) (Money Rational)
+rebate numDependants income =
+  (*\colorbox{yellow}{lesserOf}*)
+    ((*\colorbox{yellow}{lump}*) (Money 700))
+    ((*\colorbox{yellow}{greaterOf}*)
+      ((*\colorbox{yellow}{lump}*) (Money 0))
+      ((*\colorbox{yellow}{above}*) (Money 160) (2/3)
+       <> (*\colorbox{yellow}{lump}*) ((*\colorbox{yellow}{getTax}*) (reduction numDependants) income)))
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[plain]{}
+\textbf{\em Combinators}:
+\begin{itemize}
+  \item functions that \textbf{\em compose} smaller computations into
+    a more complex computation\ldots{}
+  \item that (typically) follow some \textbf{\em laws}\ldots{}
+  \item such that our ability to \textbf{\em reason} about the computation can
+    scale as it grows.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\center
+
+\begin{lstlisting}
+medicareLevy loThreshold =
+  (*\colorbox{yellow}{lesserOf}*) ((*\colorbox{yellow}{above}*) loThreshold 0.1) ((*\colorbox{yellow}{flat}*) 0.02)
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\center
+
+\begin{lstlisting}
+lowIncomeTaxOffset =
+  (*\colorbox{yellow}{limit}*) (Money 0)
+    ( (*\colorbox{yellow}{lump}*) (Money (-445))
+      <> (*\colorbox{yellow}{above}*) (Money 37000) 0.015
+    )
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\center
+
+\begin{lstlisting}
+individualIncomeTax = (*\colorbox{yellow}{marginal'}*)
+  [ ( 18200, 0.19         )
+  , ( 45000, 0.325 - 0.19 )
+  , (120000, 0.37  - 0.325)
+  , (180000, 0.45  - 0.37 ) ]
+\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\center
+
+\begin{lstlisting}[language=Haskell]
+data Tax b a = Tax { getTax :: (*\colorbox{yellow}{b -> a}*) }
+  deriving ((*\colorbox{yellow}{Semigroup, Monoid, Functor, Profunctor}*))
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\center
+
+\begin{lstlisting}
+allTheTaxes =
+  individualIncomeTax
+  (*\colorbox{yellow}{<>}*) medicareLevy (Money 23226)
+  (*\colorbox{yellow}{<>}*) lowIncomeTaxOffset
+
+weeklyWithholding  = (*\colorbox{yellow}{dimap}*) ($* 52) ($/ 52) allTheTaxes
+fnlyWithholding    = (*\colorbox{yellow}{dimap}*) ($* 26) ($/ 26) allTheTaxes
+monthlyWithholding = (*\colorbox{yellow}{dimap}*) ($* 12) ($/ 12) allTheTaxes
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[plain]
+\Large
+\center
+\ttfamily
+\url{https://hackage.haskell.org/package/tax}\\
+\bigskip
+\url{https://github.com/frasertweedale/hs-tax}\\
+\bigskip
+blog post: \url{https://is.gd/tax_combinators}\\
+\bigskip
+\bigskip
+useful for "Rules as Code" calculations relating to tax, levies,
+rates, rebates, payroll...
+
+\end{frame}
+
+
+
+\begin{frame}[plain]
+\Large
+\center
+\ttfamily
+What do /I/ use it for?\\
+\bigskip
+hs-tax-ato - personal income tax library\\
+\bigskip
+\url{https://hackage.haskell.org/package/tax-ato}\\
+\bigskip
+\url{https://github.com/frasertweedale/hs-tax-ato}
+
+\end{frame}
+
+\begin{frame}{hs-tax-ato: stuff that's implemented}
+\begin{itemize}
+  \item individual income tax, employee share schemes
+  \item Medicare levy, Medicare levy surcharge
+  \item HELP (HECS/SFSS student loans)
+  \item deductions
+  \item offsets: low income, LMITO, spouse contribution
+  \item private health insurance rebate adjustments
+  \item dividends, CGT, foreign income, foreign income tax offset
+  \item rates/rules for previous financial years (back to 2017)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{hs-tax-ato: stuff that's NOT implemented}
+\begin{itemize}
+  \item PAYG instalments ({\em coming soon})
+  \item some adjustments/variations based on family income or dependents
+  \item partnership/trust/personal services income
+  \item super income streams and lump payments
+  \item some "grandfathering" rules (e.g. CGT indexation method)
+  \item lots of other esoteric (to me) features and quirks
+\end{itemize}
+\end{frame}
+
+\begin{frame}{hs-tax-ato: known issues}
+\begin{itemize}
+  \item needs updates for 2022--23 FY ({\em coming soon})
+  \item missing some rounding steps
+  \item lack of usage examples
+\end{itemize}
+
+\end{frame}
+\begin{frame}[plain]
+\centering
+\Large
+  Maybe these libraries will be useful or interesting to someone...
+\end{frame}
+
+
+% END MATTER
+
+\begin{frame}[plain]
+\begin{columns}
+
+  \begin{column}{.6\textwidth}
+
+    \setlength{\parskip}{.5em}
+
+    { \centering
+
+    \input{cc-by-ARTIFACT.pdf_tex}
+
+    \copyright~2023  Fraser Tweedale
+
+    { \scriptsize
+    Except where otherwise noted this work is licensed under
+    }
+    { \footnotesize
+    \textbf{http://creativecommons.org/licenses/by/4.0/}
+    }
+
+    }
+
+    \begin{description}
+      \item[Code] \url{https://github.com/frasertweedale}
+      \item[Blog] \href{https://frasertweedale.github.io/blog-fp/}{frasertweedale.github.io/blog-fp}
+      \item[Fediverse] \href{https://functional.cafe/@hackuador}{@hackuador@functional.cafe}
+    \end{description}
+  \end{column}
+
+\end{columns}
+\end{frame}
+
+\end{document}
