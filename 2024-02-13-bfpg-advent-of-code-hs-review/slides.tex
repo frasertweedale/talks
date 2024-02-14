@@ -1,0 +1,394 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[ignorenonframetext,aspectratio=169,12pt]{beamer}
+\usepackage{pgfpages}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{hyperref}
+\hypersetup{
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\newif\ifbibliography
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+\setbeamertemplate{part page}{
+\centering
+\begin{beamercolorbox}[sep=16pt,center]{part title}
+  \usebeamerfont{part title}\insertpart\par
+\end{beamercolorbox}
+}
+\setbeamertemplate{section page}{
+\centering
+\begin{beamercolorbox}[sep=12pt,center]{part title}
+  \usebeamerfont{section title}\insertsection\par
+\end{beamercolorbox}
+}
+\setbeamertemplate{subsection page}{
+\centering
+\begin{beamercolorbox}[sep=8pt,center]{part title}
+  \usebeamerfont{subsection title}\insertsubsection\par
+\end{beamercolorbox}
+}
+\AtBeginPart{
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \frame{\subsectionpage}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\input{../share/unicode-decl.tex}
+
+\hypersetup{colorlinks,linkcolor=,urlcolor=purple}
+\setbeamertemplate{navigation symbols}{}
+\usefonttheme[onlymath]{serif}
+
+\setbeamercolor{footnote mark}{fg=gray}
+\setbeamerfont{footnote}{size=\tiny}
+\usepackage{color}
+\usepackage[normalem]{ulem}
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\normalsize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color[rgb]{0,0.5,0}\bfseries\em,
+    stringstyle=\color{red}\bfseries\em,
+    escapeinside={(*}{*)}
+}
+
+\title{\bf Advent of Code 2023}
+\providecommand{\subtitle}[1]{}
+\subtitle{A Haskeller's reflections}
+\author{{\bf Fraser Tweedale}\\
+    \texttt{@hackuador@functional.cafe}}
+\date{2024-02-13}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}{Advent of Code}
+
+    \large
+    \bigskip
+    \bigskip
+
+    \begin{quote}
+    Advent of Code is an Advent calendar of small programming
+    puzzles for a variety of skill sets and skill levels that can be
+    solved in any programming language you like. People use them as
+    interview prep, company training, university coursework,
+    practice problems, a speed contest, or to challenge each other.
+    \end{quote}
+
+    \begin{flushright}
+    ---\url{https://adventofcode.com/2023/about}
+    \end{flushright}
+
+\end{frame}
+
+\begin{frame}{Advent of Code}
+
+    \begin{itemize}
+        \item Founded in 2015 by Eric Wastl
+        \item Two-part puzzle released each day during December
+        \item Unique puzzle input (and solution) for each user
+        \item Global and private leaderboards (fastest correct submissions)
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Advent of Code - puzzle structure}
+
+    \begin{itemize}
+        \item Part 1:
+            \begin{itemize}
+                \item problem description + sample input and result
+                \item unique puzzle input ($\gg$ sample)
+            \end{itemize}
+        \item Part 2: 
+            \begin{itemize}
+                \item revealed when correct Part 1 answer submitted
+                \item {\bf same input}, reinterpreted in some way
+                \item sample input and result
+            \end{itemize}
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Advent of Code - part 1 vs part 2}
+
+    \begin{itemize}
+        \item generalise the part 1 solution
+        \item naive/brute force $\to$ efficient algorithm
+        \item sometimes a complete change of approach
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Advent of Code - Day 1, 2023}
+
+    \centering
+    \LARGE
+    \url{https://adventofcode.com/2023/day/1}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Advent of Code - problem difficulty}
+
+Problems tend toward higher complexity/difficulty:
+
+\begin{verbatim}
+   42 src/Y2023/D01.hs      107 src/Y2023/D12.hs
+   78 src/Y2023/D02.hs       68 src/Y2023/D13.hs
+  104 src/Y2023/D03.hs       71 src/Y2023/D14.hs
+   55 src/Y2023/D04.hs       88 src/Y2023/D15.hs
+  130 src/Y2023/D05.hs       96 src/Y2023/D16.hs
+   46 src/Y2023/D06.hs      126 src/Y2023/D17.hs
+  118 src/Y2023/D07.hs      161 src/Y2023/D18.hs
+  104 src/Y2023/D08.hs      183 src/Y2023/D19.hs
+   47 src/Y2023/D09.hs      204 src/Y2023/D20.hs
+  164 src/Y2023/D10.hs      192 src/Y2023/D21.hs
+   68 src/Y2023/D11.hs
+\end{verbatim}
+
+\end{frame}
+
+
+\begin{frame}{Advent of Code - my results}
+
+    \begin{itemize}
+        \item Most problems took < 2h, some much longer
+        \item I stopped after Day 21 (got too busy)
+        \item Didn't make the daily "Top 100" leaderboard (sometimes close)
+    \end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}{Advent of Code - tips}
+
+    \begin{itemize}
+        \item {\bf No invalid inputs}---you don't need to handle them.
+        \item The sample input is given for a reason.  Test your code!
+        \item Write lots of {\bf comments} (as you go) to explain
+            your solution.
+        \item Don't be afraid to use {\bf pen and paper}!
+    \end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{Advent of Code - gotchas}
+
+The problem description does not always contain everything you need
+to solve the problem.
+
+{\bf Occasionally it depends on properties of the input, which you must
+    discover yourself.}
+
+e.g. \url{https://adventofcode.com/2023/day/21}
+
+\end{frame}
+
+
+\begin{frame}{Advent of Code - common topics}
+
+    Most common:
+
+    \begin{itemize}
+        \item parsing
+        \item list processing
+        \item graphs (shortest path, cycles)
+        \item matrices (spacial problems)
+        \item state machines
+    \end{itemize}
+
+    Occasional:
+
+    \begin{itemize}
+        \item combinatorics
+        \item dynamic programming
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Advent of Code - data structures and algorithms}
+
+    Frequently needed:
+
+    \begin{itemize}
+        \item {\bf list} / non-empty list
+            \begin{itemize}
+                \item {\bf matrix} = list-of-list
+            \end{itemize}
+        \item {\bf map/dict} and set
+        \item {\bf graph}
+            \begin{itemize}
+                \item directed and undirected
+                \item adjacency-list and matrix representations
+                \item DFS, BFS, shortest path, cycle detection
+            \end{itemize}
+    \end{itemize}
+
+    Not used (yet\ldots{}):
+
+    \begin{itemize}
+        \item tree, heap, stack, zipper
+    \end{itemize}
+
+\end{frame}
+
+\section{Using Haskell}
+
+\begin{frame}{Advent of Code 2023 - self-imposed constraints}
+
+Limited to the Haskell {\em base} library:
+
+\begin{itemize}
+    \item had to implement {\tt Map} type myself
+        (\href{https://en.wikipedia.org/wiki/AVL_tree}{AVL tree})
+    \item had to implement parsing library myself
+    \item using mature libraries (e.g. {\em vector}, {\em
+        containers}) would reduce development time; solutions
+        somewhat faster
+\end{itemize}
+
+It was worthwhile to review some fundamentals.
+
+I would use off-the-shelf libraries next time.
+
+\end{frame}
+
+
+\begin{frame}{Advent of Code - where Haskell shines}
+
+    \begin{itemize}
+        \item parsing
+        \item list processing (incl. strings)
+        \item laziness
+        \item state machines
+        \item problem-specific data domains (e.g. playing cards)
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Advent of Code - where Haskell does not shine}
+
+    \begin{itemize}
+        \item dynamic programming (memoisation)
+        \item space leaks ({\em deepseq} can help)
+        \item debugging
+    \end{itemize}
+
+\end{frame}
+
+\section{Let's look at some problems}
+
+\begin{frame}{Final remarks}
+
+    \begin{itemize}
+        \item Advent of Code is fun
+        \item Do it in whatever way you want
+            \begin{itemize}
+                \item learn a new language
+                \item practice fundamentals
+                \item space it out
+                \item challenge your friends/workmates
+                \item \ldots{}or solve it together
+            \end{itemize}
+        \item \href{https://www.reddit.com/r/adventofcode/}{\bf r/adventofcode} for tips/ideas/help
+        \item Haskell is a great language to do Advent of Code
+        \item My code is available:
+            \href{https://github.com/frasertweedale/advent}{\bf github.com/frasertweedale/advent}
+    \end{itemize}
+
+\end{frame}
+
+
+\end{frame}
+
+% END MATTER
+
+\begin{frame}[plain]
+\begin{columns}
+
+  \begin{column}{.6\textwidth}
+
+    \setlength{\parskip}{.5em}
+
+    { \centering
+
+    \input{cc-by-ARTIFACT.pdf_tex}
+
+    \copyright~2024  Fraser Tweedale
+
+    { \scriptsize
+    Except where otherwise noted this work is licensed under
+    }
+    { \footnotesize
+    \textbf{http://creativecommons.org/licenses/by/4.0/}
+    }
+
+    }
+
+    \begin{description}
+      \item[Code] \url{https://github.com/frasertweedale}
+      \item[Blog] \href{https://frasertweedale.github.io/blog-fp/}{frasertweedale.github.io/blog-fp}
+      \item[Fediverse] \href{https://functional.cafe/@hackuador}{@hackuador@functional.cafe}
+    \end{description}
+  \end{column}
+
+\end{columns}
+\end{frame}
+
+\end{document}
