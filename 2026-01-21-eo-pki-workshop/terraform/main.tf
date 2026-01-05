@@ -47,7 +47,8 @@ resource "aws_route_table_association" "a" {
 # 1. Unique SSH Key per Environment
 resource "tls_private_key" "ssh_key" {
   count     = var.env_count
-  algorithm = "ED25519"
+  algorithm = "RSA"
+  rsa_bits  = 2048
 }
 
 resource "aws_key_pair" "generated" {
