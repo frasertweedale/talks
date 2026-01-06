@@ -112,10 +112,20 @@ resource "aws_instance" "ipa" {
   key_name               = aws_key_pair.generated[count.index].key_name
   vpc_security_group_ids = [aws_security_group.env_sg[count.index].id]
 
-  # Cloud-Init to set hostname
+  # Cloud-Init to set hostname and install IPA server
   user_data = <<-EOF
     #!/bin/bash
-    hostnamectl set-hostname ipa.e${count.index + 1}.${var.base_domain}
+    DOMAIN="e${count.index + 1}.${var.base_domain}"
+    REALM=$(echo $DOMAIN | tr '[:lower:]' '[:upper:]')
+
+    hostnamectl set-hostname ipa.$DOMAIN
+
+    ipa-server-install -U \
+      --no-ntp \
+      --realm=$REALM \
+      --ds-password=Secret.123 \
+      --admin-password=Secret.123 \
+      --mkhomedir
   EOF
 
   tags = { Name = "env${count.index + 1}-ipa" }
@@ -132,7 +142,26 @@ resource "aws_instance" "client" {
 
   user_data = <<-EOF
     #!/bin/bash
-    hostnamectl set-hostname client.e${count.index + 1}.${var.base_domain}
+    DOMAIN="e${count.index + 1}.${var.base_domain}"
+    hostnamectl set-hostname client.$DOMAIN
+
+    # Wait for IPA server to come up
+    # We verify the HTTP code is < 400 (server is responding)
+    echo "Waiting for IPA Server to be ready..."
+    until curl -s -k --output /dev/null --fail https://ipa.$DOMAIN/ipa/ui/; do
+      sleep 30
+    done
+    echo "IPA Server is up. Installation will proceed in 2 minutes."
+    sleep 120
+
+    ipa-client-install -U \
+      --no-ntp \
+      --server=ipa.$DOMAIN \
+      --domain=$DOMAIN \
+      --principal=admin \
+      --password="Secret.123" \
+      --force-join \
+      --mkhomedir
   EOF
 
   tags = { Name = "env${count.index + 1}-client" }
@@ -155,29 +184,94 @@ resource "aws_instance" "web" {
   tags = { Name = "env${count.index + 1}-web" }
 }
 
-# --- DNS RECORDS ---
+# --- SPLIT-HORIZON DNS CONFIGURATION ---
 
-resource "aws_route53_record" "ipa" {
+# 1. Create the Private Hosted Zone
+# This zone is only visible to machines inside the VPC.
+resource "aws_route53_zone" "private" {
+  name = var.base_domain
+
+  vpc {
+    vpc_id = aws_vpc.workshop_vpc.id
+  }
+
+  tags = {
+    Name = "PKI-Workshop-Private-Zone"
+  }
+}
+
+# 2. INTERNAL Records (Point to PRIVATE IPs in PRIVATE Zone)
+# These enable the "self=true" Security Group rules to work.
+
+resource "aws_route53_record" "ipa_private" {
   count   = var.env_count
-  zone_id = var.route53_zone_id
+  zone_id = aws_route53_zone.private.zone_id
+  name    = "ipa.e${count.index + 1}.${var.base_domain}"
+  type    = "A"
+  ttl     = "60"
+  records = [aws_instance.ipa[count.index].private_ip]
+}
+
+resource "aws_route53_record" "ipa_ca_private" {
+  count   = var.env_count
+  zone_id = aws_route53_zone.private.zone_id
+  name    = "ipa-ca.e${count.index + 1}.${var.base_domain}"
+  type    = "A"
+  ttl     = "60"
+  records = [aws_instance.ipa[count.index].private_ip]
+}
+
+resource "aws_route53_record" "client_private" {
+  count   = var.env_count
+  zone_id = aws_route53_zone.private.zone_id
+  name    = "client.e${count.index + 1}.${var.base_domain}"
+  type    = "A"
+  ttl     = "60"
+  records = [aws_instance.client[count.index].private_ip]
+}
+
+resource "aws_route53_record" "web_private" {
+  count   = var.env_count
+  zone_id = aws_route53_zone.private.zone_id
+  name    = "web.e${count.index + 1}.${var.base_domain}"
+  type    = "A"
+  ttl     = "60"
+  records = [aws_instance.web[count.index].private_ip]
+}
+
+# 3. PUBLIC Records (Point to PUBLIC IPs in PUBLIC Zone)
+# These allow students to SSH in and access the web UI from the internet.
+
+resource "aws_route53_record" "ipa_public" {
+  count   = var.env_count
+  zone_id = var.public_zone_id  # Note: Using the variable for the external zone
   name    = "ipa.e${count.index + 1}.${var.base_domain}"
   type    = "A"
   ttl     = "60"
   records = [aws_instance.ipa[count.index].public_ip]
 }
 
-resource "aws_route53_record" "client" {
+resource "aws_route53_record" "ipa_ca_public" {
   count   = var.env_count
-  zone_id = var.route53_zone_id
+  zone_id = var.public_zone_id  # Note: Using the variable for the external zone
+  name    = "ipa-ca.e${count.index + 1}.${var.base_domain}"
+  type    = "A"
+  ttl     = "60"
+  records = [aws_instance.ipa[count.index].public_ip]
+}
+
+resource "aws_route53_record" "client_public" {
+  count   = var.env_count
+  zone_id = var.public_zone_id
   name    = "client.e${count.index + 1}.${var.base_domain}"
   type    = "A"
   ttl     = "60"
   records = [aws_instance.client[count.index].public_ip]
 }
 
-resource "aws_route53_record" "web" {
+resource "aws_route53_record" "web_public" {
   count   = var.env_count
-  zone_id = var.route53_zone_id
+  zone_id = var.public_zone_id
   name    = "web.e${count.index + 1}.${var.base_domain}"
   type    = "A"
   ttl     = "60"

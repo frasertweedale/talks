@@ -12,7 +12,7 @@ variable "base_domain" {
   default = "pki.frase.id.au"
 }
 
-variable "route53_zone_id" {
+variable "public_zone_id" {
   description = "The Hosted Zone ID for pki.frase.id.au (Found in Route53 console)"
   type        = string
 	default     = "Z07020222557K96HMZHF8"
