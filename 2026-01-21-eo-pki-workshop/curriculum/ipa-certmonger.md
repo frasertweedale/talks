@@ -21,8 +21,8 @@ SSH into this machine now.
 `client.$DOMAIN` already enrolled as a client in the FreeIPA domain.
 That means it has a corresponding *host principal* object in the
 domain (if you're familiar with Microsoft Active Directory, *machine
-account* is the equivalent).  Before proceeding, let's inspect the
-this object.
+account* is the equivalent).  Before proceeding, let's inspect this 
+object.
 
 FreeIPA uses the **Kerberos** protocol for authentication.
 Authenticate as user `user1` (initial password = `Secret.123).  You
