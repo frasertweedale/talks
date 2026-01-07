@@ -126,6 +126,13 @@ resource "aws_instance" "ipa" {
       --ds-password=Secret.123 \
       --admin-password=Secret.123 \
       --mkhomedir
+    echo Secret.123 | kinit admin
+    ipa user-add user1 --first User --last One
+    echo Secret.123 | ipa passwd user1
+    ipa user-add user2 --first User --last Two
+    echo Secret.123 | ipa passwd user2
+    ipa group-add sclogin
+    ipa group-add-member sclogin --users user2
   EOF
 
   tags = { Name = "env${count.index + 1}-ipa" }
