@@ -1,0 +1,14 @@
+
+[ req ]
+prompt = no
+distinguished_name = dn
+
+[ dn ]
+CN = "PKI Workshop CA"
+O = PKI.FRASE.ID.AU
+
+[ exts ]
+# Extensions to add to a certificate request to make it a CA
+basicConstraints=CA:TRUE
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
