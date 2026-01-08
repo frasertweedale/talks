@@ -201,7 +201,7 @@ email = user1@$DOMAIN
 [fedora@client ~]$ openssl req -new \
     -key user.key \
     -config user_csr.cnf \
-    -out user.csr \
+    -out user.csr
 ```
 
 ### Verify user CSR
