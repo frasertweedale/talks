@@ -4,8 +4,11 @@ The **FreeIPA** identity management system (also available in RHEL
 as **Red Hat Identity Management**) provides an enterprise PKI for
 issuing and managing host, service and user certificates.
 
-In this module you will use the **Certmonger** tool to issue and
-renew a certificate for the host principal.
+In this module you'll use the ***Certmonger*** program to request
+and manage (renew) a certificate for an enrolled host from the
+FreeIPA CA.  A real world use case for this might be to enable
+802.1X network authentication.
+
 
 ::: note
 
@@ -21,8 +24,8 @@ SSH into this machine now.
 `client.$DOMAIN` already enrolled as a client in the FreeIPA domain.
 That means it has a corresponding *host principal* object in the
 domain (if you're familiar with Microsoft Active Directory, *machine
-account* is the equivalent).  Before proceeding, let's inspect the
-this object.
+account* is the equivalent).  Before proceeding, let's inspect this
+entry.
 
 FreeIPA uses the **Kerberos** protocol for authentication.
 Authenticate as user `user1` (initial password = `Secret.123).  You
@@ -60,15 +63,7 @@ in the FreeIPA domain.  The password of the `admin` account is
 `Secret.123`.
 
 
-## Scenario 1: Host certificate
-
-In this scenario: you'll use the ***Certmonger*** program to request
-and manage (**renew**) a certificate for an enrolled host from the
-FreeIPA CA.  A real world use case for this might be to enable
-802.1X network authentication.
-
-
-### Preparation
+## Preparation
 
 Enable and start Certmonger:
 
@@ -78,7 +73,7 @@ Enable and start Certmonger:
 ```
 
 
-### Request certificate
+## Request certificate
 
 Use the `ipa-getcert` command, which is part of Certmonger, to
 request a certificate.  Certmonger will automatically perform the
@@ -184,7 +179,7 @@ appears in the `ipa host-show` output:
   ...
 ```
 
-### What is actually happening?
+## What is actually happening?
 
 Under the hood, Certmonger uses the *host keytab* (acquired upon
 joining the FreeIPA domain) to issue an `ipa cert-request` command
@@ -200,7 +195,7 @@ the subject.  Host principals can also request certificates for
 *service principals* managed by that host.
 
 
-### Forcing renewal
+## Forcing renewal
 
 Certmonger will automatically renew the certificate when it is close
 to expiry.  But you can use the `getcert resubmit` command if you
@@ -225,10 +220,3 @@ Request ID '20260107053408':
         dns: client.e1.pki.frase.id.au
         ...
 ```
-
-
-## Scenario 2: User certificates
-
-### Configure CA ACLs
-
-`kinit` as `admin`.

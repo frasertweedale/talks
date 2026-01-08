@@ -178,7 +178,7 @@ Number of entries returned 1
 ----------------------------
 ```
 
-Users cannot be issued a certificate via the default profile, that
+Users cannot be issued a certificate via the default profile, and
 that makes perfect sense.  But to be able to use the `userCert`
 profile to issue certificates to user principals, you need to add a
 CA ACL for that.

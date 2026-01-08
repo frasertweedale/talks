@@ -13,9 +13,9 @@ application areas:
 The workshop is designed to make it as easy as possible to
 participate.
 
-You will need a computer with an **SSH client and a web browser**.
-You can use **any operating system**—all the exciting stuff happens
-in the workshop environment.
+You will need a computer with an **Internet access, an SSH client
+and a web browser**.  You can use **any operating system**—all the
+exciting stuff happens on the machines in the workshop environment.
 
 Some prior experience with Linux / Unix and using a command shell
 will be helpful, but it is not a strict requirement.
@@ -91,7 +91,8 @@ Now that you're here, here is some info about the machines.
 - You are in the `fedora` user account
 - You have full `sudo` access for performing actions as `root` (when
   needed)
-- **Editors**: `vi` (Vim) and `nano` are available
+- **Editors**: `vi` (Vim) and `nano` are available.  The default
+  `EDITOR` is `nano`.
 - The shell is Bash version 5.3.0
 - `tmux` is installed
 

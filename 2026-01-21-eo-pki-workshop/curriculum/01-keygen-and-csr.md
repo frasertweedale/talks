@@ -25,14 +25,14 @@ ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au
 :::
 
 
-## 1. Service CSR with RSA key
+## Service CSR with RSA key
 
 Let's prepare a CSR suitable for a network service, such as an HTTP
 server.  We will use a strong RSA key and include the DNS hostname
 in both the Common Name (CN) field and the Subject Alternative Name
 (SAN) extension.
 
-### A. Generate the RSA Private Key
+### Generate the RSA Private Key
 
 We will use the **RSA 3072-bit** key size, which is the minimum RSA
 key size currently recommended by NIST for secure services.
@@ -65,7 +65,7 @@ and memorable (e.g. `hunter2`).  Note that you will not see any
 output as you type the passphrase.
 
 
-### B. Create config file for service CSR
+### Create config file for service CSR
 
 Create a configuration file to tell `openssl` what content to
 include in the CSR.  The certificate binds a public key to some
@@ -97,7 +97,7 @@ subjectAltName = @alt_names
 DNS.1 = client.$DOMAIN
 ```
 
-### C. Generate the service CSR
+### Generate the service CSR
 
 Execute the `openssl req` command below to build a CSR according to
 the config file and sign it with the private key.  Note that it will
@@ -111,7 +111,7 @@ prompt you for the encryption passphrase you set previously.
 Enter pass phrase for service.key:
 ```
 
-### D. Verify the service CSR
+### Verify the service CSR
 
 Always verify your CSRs before submission to ensure the required
 extensions and names are correctly included.
@@ -140,7 +140,7 @@ Look for the following in the output:
 ```
 
 
-## 2. CSR for user certificate with ECC key
+## CSR for user certificate with ECC key
 
 X.509 certificates can be used for a variety of **user
 authentication** scenarios (e.g. Kerberos, VPN access, email
@@ -152,7 +152,7 @@ is faster than RSA, and keys and signatures are smaller.  We'll
 generate an elliptic curve key and use it to sign a CSR that
 includes the user's **username** and **email address**.
 
-### A. Generate the ECC Private Key
+### Generate the ECC Private Key
 
 We will use the **secp384r1** curve, which is recommended for high
 security with efficient performance.  
@@ -169,7 +169,7 @@ Again, choose a simple encryption passphrase for the purposes of
 this workshop.
 
 
-### B. Create config file for user CSR
+### Create config file for user CSR
 
 For user authentication certificates, the primary identifiers are
 usually the username (in CN) and the email address (in the SAN).
@@ -195,7 +195,7 @@ subjectAltName = @alt_names
 email = user1@$DOMAIN
 ```
 
-### C. Generate the User CSR
+### Generate the User CSR
 
 ```
 [fedora@client ~]$ openssl req -new \
@@ -204,7 +204,7 @@ email = user1@$DOMAIN
     -out user.csr \
 ```
 
-### D. Verify user CSR
+### Verify user CSR
 
 ```
 [fedora@client ~]$ openssl req -in user.csr -text -noout
