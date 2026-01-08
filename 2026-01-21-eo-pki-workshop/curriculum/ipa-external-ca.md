@@ -115,20 +115,22 @@ Use `ipa ca-show` to confirm that the FreeIPA CA certificate is
 signed by the external CA:
 
 ```
+[fedora@ipa ~]$ echo Secret.123 | kinit admin
+
 [fedora@ipa ~]$ ipa ca-show ipa --raw |grep dn
   ipacasubjectdn: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
   ipacaissuerdn: O=PKI.FRASE.ID.AU,CN=PKI Workshop CA
 ```
 
-
-## Renewing an externally signed CA
-
 ::: note
 
-This section is informational only.  There are no more workshop
-exercises in this module.
+You have completed the exercises for this module.  The sections that
+follow are informational.
 
 :::
+
+
+## Renewing an externally signed CA
 
 Certmonger cannot automatically renew an externally-signed CA.
 Administrators must anticipate and manually initiate renewal.  The

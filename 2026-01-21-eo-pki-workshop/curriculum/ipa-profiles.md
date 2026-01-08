@@ -133,7 +133,7 @@ Open `userCert.cfg` in an editor and perform the following changes:
 3. *Set "Extended Key Usage" values suitable for Smart Card login.*
    - Set the value of
      `policyset.serverCertSet.7.default.params.exKeyUsageOIDs` to
-     `1.3.6.1.5.2.3.4,1.3.6.1.4.1.311.20.2.2`.
+     `1.3.6.1.5.2.3.4,1.3.6.1.4.1.311.20.2.2`
 
 4. Delete the `profileId=caIPAserviceCert` line.
 

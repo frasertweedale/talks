@@ -175,7 +175,8 @@ For user authentication certificates, the primary identifiers are
 usually the username (in CN) and the email address (in the SAN).
 
 Create a file named `user_csr.cnf` with the following content.
-**Replace `$DOMAIN` with your environment's domain.**
+**Replace `$DOMAIN` with your environment's domain (not the machine
+hostname).**
 
 ```
 [ req ]
@@ -201,7 +202,7 @@ email = user1@$DOMAIN
 [fedora@client ~]$ openssl req -new \
     -key user.key \
     -config user_csr.cnf \
-    -out user.csr \
+    -out user.csr
 ```
 
 ### Verify user CSR
