@@ -5,7 +5,7 @@ variable "region" {
 variable "workshop_ami_id" {
   description = "The ID of your Golden AMI (Fedora + Packages)"
   type        = string
-  default     = "ami-076c9905b60d22ae0" # v2
+  default     = "ami-041912532f2fc3f1b" # pki-workshop-f43-v3
 }
 
 variable "base_domain" {
