@@ -40,7 +40,7 @@ Enterprise PKI modules:
 
 - [Service certificates with FreeIPA and Certmonger](ipa-certmonger.md)
 - [FreeIPA certificate profiles and user certificates](ipa-profiles.md)
-- External signing of the FreeIPA CA (TODO)
+- [External signing of the FreeIPA CA](ipa-external-ca.md)
 - [Smart Card login](ipa-smart-cards.md) (TODO)
 
 
