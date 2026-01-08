@@ -34,7 +34,7 @@ Foundational modules:
 
 Public PKI modules:
 
-- ACME (TODO)
+- [ACME certificate for Apache httpd with `mod_md`](acme-httpd-mod_md.md)
 
 Enterprise PKI modules:
 
