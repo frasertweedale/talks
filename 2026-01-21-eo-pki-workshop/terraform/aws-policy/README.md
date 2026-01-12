@@ -20,9 +20,12 @@ the AWS managed `AmazonEC2FullAccess` policy.
 management of DNS records in the specified *Hosted Zone*.  The ID in
 the hosted zone ARN must be changed to the relevant value.
 
-Alternatively, use `arn:aws:route53:::hostedzone/*` to allow
-management of records in all hosted zones.  This is more general,
-but not appropriate for shared accounts.
+The workshop also requires a *Private* Hosted Zone for configuring
+"split horizon DNS".  The Terraform spec sets the "Owner" tag of the
+created Hosted Zone to the user ID of the account that creates it.
+The IAM policy uses policy variables to ensure that only *owned*
+hosted zones can be managed, in addition to the nominated public
+hosted zone.
 
 
 ## Other services

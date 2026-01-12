@@ -2,7 +2,7 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "ManageHostedZoneRecords",
+            "Sid": "ManagePublicHostedZoneRecords",
             "Effect": "Allow",
             "Action": [
                 "route53:GetHostedZone",
@@ -11,6 +11,40 @@
             ],
             "Resource":
                 "arn:aws:route53:::hostedzone/Z07020222557K96HMZHF8"
+        },
+        {
+            "Sid": "AllowHostedZoneCreation",
+            "Effect": "Allow",
+            "Action": "route53:CreateHostedZone",
+            "Resource": "*"
+        },
+        {
+            "Sid": "ClaimOwnershipOfUntaggedHostedZone",
+            "Effect": "Allow",
+            "Action": "route53:ChangeTagsForResource",
+            "Resource": "arn:aws:route53:::hostedzone/*",
+            "Condition": {
+                "Null": {
+                    "aws:ResourceTag/Owner": "true"
+                }
+            }
+        },
+        {
+            "Sid": "ManageOwnedZones",
+            "Effect": "Allow",
+            "Action": [
+                "route53:GetHostedZone",
+                "route53:DeleteHostedZone",
+                "route53:ListResourceRecordSets",
+                "route53:ChangeResourceRecordSets",
+                "route53:ChangeTagsForResource"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Owner": "${aws:userid}"
+                }
+            }
         },
         {
             "Sid": "MonitorChange",

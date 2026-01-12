@@ -11,6 +11,8 @@ provider "aws" {
   region = var.region
 }
 
+data "aws_caller_identity" "current" {}
+
 # --- NETWORK (Shared Infrastructure) ---
 resource "aws_vpc" "workshop_vpc" {
   cidr_block           = "10.0.0.0/16"
@@ -204,6 +206,7 @@ resource "aws_route53_zone" "private" {
 
   tags = {
     Name = "PKI-Workshop-Private-Zone"
+    Owner = data.aws_caller_identity.current.user_id
   }
 }
 
