@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Practical PKI - ipa-certmonger</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Practical PKI</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <div id="postContent">
+    <h1 id="module-service-certificates-with-freeipa-and-certmonger">Module ???: Service certificates with FreeIPA and Certmonger</h1>
+<p>The <strong>FreeIPA</strong> identity management system (also available in RHEL
+as <strong>Red Hat Identity Management</strong>) provides an enterprise PKI for
+issuing and managing host, service and user certificates.</p>
+<p>In this module you’ll use the <strong><em>Certmonger</em></strong> program to request
+and manage (renew) a certificate for an enrolled host from the
+FreeIPA CA. A real world use case for this might be to enable
+802.1X network authentication.</p>
+<div class="note">
+<p>All steps in this module are to be performed on <code>client.$DOMAIN</code>,
+where you generated keys and CSRs. If you are not already there,
+SSH into this machine now.</p>
+</div>
+<h2 id="environment-overview">Environment overview <a href="#environment-overview" class="section">§</a></h2>
+<p><code>client.$DOMAIN</code> already enrolled as a client in the FreeIPA domain.
+That means it has a corresponding <em>host principal</em> object in the
+domain (if you’re familiar with Microsoft Active Directory, <em>machine
+account</em> is the equivalent). Before proceeding, let’s inspect this
+entry.</p>
+<p>FreeIPA uses the <strong>Kerberos</strong> protocol for authentication.
+Authenticate as user <code>user1</code> (initial password = `Secret.123). You
+will be prompted to set a new password when authenticating for the
+first time (you can use the same password).</p>
+<pre><code>[fedora@client ~]$ kinit user1
+Password for user1@E1.PKI.FRASE.ID.AU:
+Password expired.  You must change it now.
+Enter new password:
+Enter it again:
+
+[fedora@client ~]$ ipa host-show $(hostname)
+  Host name: client.e1.pki.frase.id.au
+  Platform: x86_64
+  Operating system: 6.17.1-300.fc43.x86_64
+  Principal name: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
+  Principal alias: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
+  SSH public key fingerprint: ...
+  Password: False
+  Keytab: True
+  Managed by: client.e1.pki.frase.id.au</code></pre>
+<p>(Some details elided. Also, your domain and realm names will differ
+from the above).</p>
+<p>For the user certificate, you will submit the <code>user.csr</code> you created
+in the <strong>Key generation and CSR creation</strong> module. The <code>user1</code> user
+account already exists in the FreeIPA domain&gt;</p>
+<p>You will use the <code>admin</code> account to perform administrative actions
+in the FreeIPA domain. The password of the <code>admin</code> account is
+<code>Secret.123</code>.</p>
+<h2 id="preparation">Preparation <a href="#preparation" class="section">§</a></h2>
+<p>Enable and start Certmonger:</p>
+<pre><code>[fedora@client ~]$ sudo systemctl enable --now certmonger
+  Created symlink /etc/systemd/system/multi-user.target.wants/certmonger.service → /usr/lib/systemd/system/certmonger.service.</code></pre>
+<h2 id="request-certificate">Request certificate <a href="#request-certificate" class="section">§</a></h2>
+<p>Use the <code>ipa-getcert</code> command, which is part of Certmonger, to
+request a certificate. Certmonger will automatically perform the
+following steps:</p>
+<ol type="1">
+<li>Generate a private key</li>
+<li>Sign a CSR (ephemeral)</li>
+<li>Submit the CSR to the FreeIPA CA for signing</li>
+<li>Save the issued certificate</li>
+<li>Monitor the certificate and renew it before expiry</li>
+</ol>
+<pre><code>[fedora@client ~]$ sudo ipa-getcert request \
+    -f /etc/pki/tls/certs/host.crt \
+    -k /etc/pki/tls/private/host.key \
+    -K host/$(hostname) \
+    -D $(hostname)
+  New signing request &quot;{TRACKING_ID}&quot; added.</code></pre>
+<div class="note">
+<p>Record the signing request identifier that appears in the command
+output. You will need it later. For example:</p>
+<pre><code>[fedora@client ~]$ TRACKING_ID=20260107053408</code></pre>
+</div>
+<p>Let’s break down some of those command arguments.</p>
+<dl>
+<dt><code>-k &lt;path&gt;</code></dt>
+<dd>
+Path to private key (Certmonger will generate it)
+<code>-f &lt;path&gt;</code>
+</dd>
+<dd>
+Path to certificate (where it will be saved after being issued)
+<code>-K &lt;principal&gt;</code>
+</dd>
+<dd>
+Kerberos host or service principal; because different kinds of
+services may be accessed at one hostname, this argument tells
+Certmonger which service principal is the certificate subject
+<code>-D &lt;dnsname&gt;</code>
+</dd>
+<dd>
+Requests the given domain name to appear in the <em>Subject
+Alternative Name (SAN)</em> extension; today the <em>Common Name (CN)</em>
+field is no longer used by browsers so the SAN value is essential
+</dd>
+</dl>
+<p>Another important option is <code>-N &lt;subject-name&gt;</code>. It defaults to the
+system hostname, which is appropriate for our use case.</p>
+<p>Check the status of the Certmonger request using tracking ID
+from the <code>ipa-getcert request</code> output:</p>
+<pre><code>[fedora@client ~]$ sudo getcert list -i $TRACKING_ID
+Number of certificates and requests being tracked: 1.
+Request ID '{TRACKING_ID}':
+  status: MONITORING
+  stuck: no
+  key pair storage: type=FILE,location='/etc/pki/tls/private/host.key'
+  certificate: type=FILE,location='/etc/pki/tls/certs/host.crt'
+  CA: IPA
+  issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
+  subject: CN=client.ipademo.local,O=E1.PKI.FRASE.ID.AU
+  issued: 2026-01-07 05:34:08 UTC
+  expires: 2028-01-08 05:34:08 UTC
+  dns: client.e1.pki.frase.id.au
+  principal name: host/client.ipademo.local@IPADEMO.LOCAL
+  key usage: digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment
+  eku: id-kp-serverAuth,id-kp-clientAuth
+  pre-save command:
+  post-save command:
+  track: yes
+  auto-renew: yes</code></pre>
+<p>Review the output to confirm that:</p>
+<ul>
+<li>The certificate was issued and that Certmonger is now
+<code>MONITORING</code>.</li>
+<li>Certmonger will <code>auto-renew</code> the certificate when it is
+close to expiring.</li>
+</ul>
+<p>FreeIPA adds the issued certificate to the service entry (technical
+detail: it is in the LDAP <code>userCertificate</code> attribute). It now
+appears in the <code>ipa host-show</code> output:</p>
+<pre><code>[fedora@client ~]$ ipa host-show $(hostname)
+  Host name: client.e1.pki.frase.id.au
+  Platform: x86_64
+  Operating system: 6.17.1-300.fc43.x86_64
+  Certificate: MIIFgDCCA+igAwIBAgIQOJ... (it's big!)
+  Subject: CN=client.e1.pki.frase.id.au,O=E1.PKI.FRASE.ID.AU
+  Serial Number: 75212939205584776743200657781018594668
+  Serial Number (hex): 0x38957C34E5953F0FB537BB73C7440D6C
+  Issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
+  Not Before: Wed Jan 07 05:34:08 2026 UTC
+  Not After: Sat Jan 08 05:34:08 2028 UTC
+  Fingerprint (SHA1): 27:92:a6:69:64:c5:ec:7a:88:11:46:ea:ad:cd:64:74:50:4b:51:1e
+  Fingerprint (SHA256): 75:a1:d5:b1:ab:79:65:79:88:4a:a5:87:c5:d2:54:c6:4f:02:d1:3c:ad:9f:ab:54:26:70:57:e8:53:df:10:c9
+  Principal name: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
+  Principal alias: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
+  ...</code></pre>
+<h2 id="what-is-actually-happening">What is actually happening? <a href="#what-is-actually-happening" class="section">§</a></h2>
+<p>Under the hood, Certmonger uses the <em>host keytab</em> (acquired upon
+joining the FreeIPA domain) to issue an <code>ipa cert-request</code> command
+to the FreeIPA management API. FreeIPA authorises the request
+(hosts can <strong>self-service</strong> certificate requests) and if everything
+looks good, it passes the CSR along to the <strong>Dogtag CA</strong> for
+signing. It stores the signed certificate in the <code>userCertificate</code>
+attribute on the subject principal LDAP entry, and also returns the
+certificate to the client that performed the request.</p>
+<p>The <em>operator</em> who executes the <code>cert-request</code> is not necessarily
+the subject. Host principals can also request certificates for
+<em>service principals</em> managed by that host.</p>
+<h2 id="forcing-renewal">Forcing renewal <a href="#forcing-renewal" class="section">§</a></h2>
+<p>Certmonger will automatically renew the certificate when it is close
+to expiry. But you can use the <code>getcert resubmit</code> command if you
+want to renew it immediately:</p>
+<pre><code>[fedora@client ~]$ sudo getcert resubmit -i $TRACKING_ID
+Resubmitting &quot;20260107053408&quot; to &quot;IPA&quot;.</code></pre>
+<p>After a moment, the renewal will be complete. <code>getcert list</code> shows
+the updated validity period:</p>
+<pre><code>[fedora@client ~]$ sudo getcert list -i $TRACKING_ID
+Number of certificates and requests being tracked: 1.
+Request ID '20260107053408':
+        status: MONITORING
+        subject: CN=client.e1.pki.frase.id.au,O=E1.PKI.FRASE.ID.AU
+        issued: 2026-01-07 05:44:20 UTC
+        expires: 2028-01-08 05:44:20 UTC
+        dns: client.e1.pki.frase.id.au
+        ...</code></pre>
+</div>
+<div id="postFooter">
+    <div id="license">
+    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+        <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
+    </a>
+    <br />
+    Except where otherwise noted, this work is licensed under a
+    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+        Creative Commons Attribution 4.0 International License
+    </a>.
+</div>
+
+</div>
+
+        </div>
+        <div class="clear"></div>
+        <div id="footer">
+            Generated by
+            <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>

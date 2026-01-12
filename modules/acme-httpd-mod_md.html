@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Practical PKI - acme-httpd-mod_md</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Practical PKI</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <div id="postContent">
+    <h1 id="acme---apache-and-mod_md">ACME - Apache and mod_md</h1>
+<p>In this module you’ll use the <code>mod_md</code> module of <strong>Apache httpd</strong> to
+automatically acquire TLS server certificates from a
+publicly-trusted CA.</p>
+<div class="note">
+<p>All steps in this module are to be performed on <code>web.$DOMAIN</code>.
+SSH into this machine now:</p>
+<pre><code>ssh -i path/to/key.pem fedora@web.e$N.pki.frase.id.au</code></pre>
+</div>
+<h2 id="start-the-server">Start the server <a href="#start-the-server" class="section">§</a></h2>
+<pre class="command web"><code>sudo systemctl enable --now httpd</code></pre>
+<pre class="output"><code>Created symlink '/etc/systemd/system/multi-user.target.wants/httpd.service' → '/usr/lib/systemd/system/httpd.service'.</code></pre>
+<p>If you point a web browser at <code>https://$DOMAIN</code>, or try to retrieve
+the cert via <code>curl(1)</code>, the TLS connection fails. This is because
+httpd automatically generated a self-signed CA and used it to sign
+the certificate for the web domain. The browser or HTTP client does
+not trust the unknown CA.</p>
+<p>The <code>openssl s_client</code> command is useful for diagnosing TLS
+connection issues:</p>
+<pre class="command web"><code>openssl s_client \
+    -connect $(hostname):443 \
+    -verify_return_error</code></pre>
+<pre class="output"><code>Connecting to fe80::85d:bbff:feda:7911%ens5
+CONNECTED(00000003)
+depth=1 C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.pki.frase.id.au
+verify error:num=19:self-signed certificate in certificate chain
+C0D265F5407F0000:error:0A000086:SSL routines:tls_post_process_server_certificate:certificate verify failed:ssl/statem/statem_clnt.c:2123:
+---
+Certificate chain
+ 0 s:C=US, O=Unspecified, CN=web, emailAddress=root@web.e2.pki.frase.id.au
+   i:C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.pki.frase.id.au
+   a:PKEY: RSA, 2048 (bit); sigalg: sha256WithRSAEncryption
+   v:NotBefore: Jan  8 01:31:02 2026 GMT; NotAfter: Jan  8 01:31:02 2027 GMT
+ 1 s:C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.pki.frase.id.au
+   i:C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.pki.frase.id.au
+   a:PKEY: RSA, 2048 (bit); sigalg: sha256WithRSAEncryption
+   v:NotBefore: Jan  8 01:31:02 2026 GMT; NotAfter: Jan  8 01:31:02 2027 GMT
+---
+no peer certificate available
+---
+No client certificate CA names sent
+Negotiated TLS1.3 group: X25519MLKEM768
+---
+SSL handshake has read 3333 bytes and written 1575 bytes
+Verification error: self-signed certificate in certificate chain
+---
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+Protocol: TLSv1.3
+This TLS version forbids renegotiation.
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+Early data was not sent
+Verify return code: 19 (self-signed certificate in certificate chain)
+---</code></pre>
+<p>In the transcript above you can see a summary of the certificate
+chain, the negotiated cipher suite, and an error message explaining
+that the server’s certificate is untrusted.</p>
+<h2 id="configuring-mod_md">Configuring <code>mod_md</code> <a href="#configuring-mod_md" class="section">§</a></h2>
+<p><code>mod_md</code> is a module for Apache httpd that uses the ACME protocol to
+automatically acquire and renew certificates for <strong><em>M</em></strong><em>anaged</em>
+<strong><em>D</em></strong><em>omains</em>. By default it obtains certificates from <strong><em>Let’s
+Encrypt</em></strong>, a publicly-trusted CA.</p>
+<p>The <code>mod_md</code> package is already installed on this machine.</p>
+<div class="note">
+<p><code>mod_md</code> wants to talk to an ACME server, but default SELinux policy
+prevents httpd from making outbound network connections. Run the
+following command to allow these connections:</p>
+<pre class="command web"><code>sudo setsebool httpd_can_network_connect 1</code></pre>
+</div>
+<p>Now create the file <code>/etc/httpd/conf.d/md.conf</code>:</p>
+<pre class="command web"><code>sudo tee /etc/httpd/conf.d/md.conf &gt;/dev/null &lt;&lt;EOF
+LogLevel warn md:notice
+MDCertificateAgreement accepted
+MDContactEmail yeahnah@mailinator.com
+MDomain $(hostname)
+EOF</code></pre>
+<p>Restart the server:</p>
+<pre class="command web"><code>sudo systemctl restart httpd</code></pre>
+<p>Check the httpd error log for ACME-related messages. The message
+that indicates success will look like:</p>
+<pre class="output"><code>[Thu Jan 08 06:44:32.452115 2026] [md:notice] [pid 4358:tid 4361]
+AH10059: The Managed Domain web.e2.pki.frase.id.au has been setup
+and changes will be activated on next (graceful) server restart.</code></pre>
+<p>Now preform a graceful restart to pick up the new certificate:</p>
+<pre class="command web"><code>sudo systemctl reload httpd</code></pre>
+<p>Now you will be able to reload the site (a basic test page) in your
+browser or retrieve it via <code>curl</code>:</p>
+<pre class="command web"><code>curl https://$(hostname) --silent | head -n 6</code></pre>
+<pre class="output"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset='utf-8'&gt;
+    &lt;meta name='viewport' content='width=device-width, initial-scale=1'&gt;
+    &lt;title&gt;Test Page for the HTTP Server on Fedora&lt;/title&gt;</code></pre>
+<p>Success!</p>
+<div class="note">
+<p>You have completed the exercises for this module. The sections that
+follow are informational.</p>
+</div>
+<h2 id="renewal">Renewal <a href="#renewal" class="section">§</a></h2>
+<p>By default, <code>mod_md</code> initiates certificate renewal when 33% of the
+certificate lifetime remains. However, graceful restart is still
+required to pick up new certificates.</p>
+<p>Therefore, you should set up a cron job to restart the server on a
+regular schedule. Daily is reasonable—but the next section
+describes a scenario where more frequent restarts are appropriate.</p>
+<h2 id="ocsp-stapling-and-revocation">OCSP stapling and revocation <a href="#ocsp-stapling-and-revocation" class="section">§</a></h2>
+<p><code>mod_md</code> can also perform <em>OCSP stapling</em>—retrieving OCSP responses
+from the CA and including them in the handshake. This gives
+performance and privacy benefits for TLS clients.</p>
+<p>To turn on OCSP stapling, add the following directive to the config:</p>
+<pre><code>MDStapling on</code></pre>
+<p>When this feature is turned on, <code>mod_md</code> also inspects the OCSP
+responses to confirm that the certificate has not been revoked. But
+if it <em>has</em> been revoked for some reason, <code>mod_md</code> will immediately
+initiate renewal.</p>
+<p>Again, graceful restart is needed to pick up the new certificate.
+So if you are using this feature, consider a shorter restart
+interval to minimise the time the server is presenting an expired
+certificate (e.g. hourly).</p>
+<p><code>mod_md</code> additionally supports the <em>ACME Renewal Information (ARI)</em>
+extension (RFC 9773), and this behaviour is enabled by default. If
+the ACME server supports it, <code>mod_md</code> will query the renewal
+resource each <code>MDCheckInterval</code> (default = 12 hours) and renew if
+the server indicates it.</p>
+</div>
+<div id="postFooter">
+    <div id="license">
+    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+        <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
+    </a>
+    <br />
+    Except where otherwise noted, this work is licensed under a
+    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+        Creative Commons Attribution 4.0 International License
+    </a>.
+</div>
+
+</div>
+
+        </div>
+        <div class="clear"></div>
+        <div id="footer">
+            Generated by
+            <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>

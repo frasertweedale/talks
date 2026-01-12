@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Practical PKI - ipa-profiles</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Practical PKI</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <div id="postContent">
+    <h1 id="module-freeipa-certificate-profiles-and-user-certificates">Module ???: FreeIPA certificate profiles and user certificates</h1>
+<p>A <em>certificate profile</em> is a set of rules that defines and
+constrains what data appears in a certificate. Different
+certificate use cases often require specific profiles. The profile
+controls things like:</p>
+<ul>
+<li>Duration of the certificate validity period</li>
+<li>The <em>Key Usage</em> and <em>Extended Key Usage</em> values</li>
+<li>Which subject name types are required, or allowed</li>
+</ul>
+<p>Different CA implementations have their own ways of defining
+certificate profiles.</p>
+<div class="note">
+<p>Certificate profiles are called <em>templates</em> in some contexts,
+including Microsoft Active Directory Certificate Services (AD-CS).</p>
+</div>
+<p>In this scenario you will:</p>
+<ol type="1">
+<li>Learn about FreeIPA certificate profiles.</li>
+<li>Create a profile suitable for issuing user certificates for Smart
+Card login.</li>
+<li>Define <em>CA ACL</em> rules to allow certain users to request
+certificates using this profile.</li>
+<li>Confirm that the <em>CA ACL</em> is set up properly.</li>
+<li>Issue a user certificate using the new profile.</li>
+</ol>
+<div class="note">
+<p>All steps in this module are to be performed on <code>client.$DOMAIN</code>.
+SSH in, then authenticate as FreeIPA <code>admin</code> user:</p>
+<pre><code>[fedora@client ~]$ echo Secret.123 | kinit admin</code></pre>
+</div>
+<h2 id="freeipa-certificate-profiles">FreeIPA certificate profiles <a href="#freeipa-certificate-profiles" class="section">§</a></h2>
+<p>Execute <code>ipa certprofile-find</code> to list the existing profiles:</p>
+<pre><code>[fedora@client ~]$ ipa certprofile-find
+------------------
+4 profiles matched
+------------------
+  Profile ID: acmeIPAServerCert
+  Profile description: ACME IPA service certificate profile
+  Store issued certificates: False
+
+  Profile ID: caIPAserviceCert
+  Profile description: Standard profile for network services
+  Store issued certificates: True
+
+  Profile ID: IECUserRoles
+  Profile description: User profile that includes IECUserRoles extension from
+                       request
+  Store issued certificates: True
+
+  Profile ID: KDCs_PKINIT_Certs
+  Profile description: Profile for PKINIT support by KDCs
+  Store issued certificates: False
+----------------------------
+Number of entries returned 4
+----------------------------</code></pre>
+<p>The default profile is <code>caIPAserviceCert</code>. It is suitable for most
+TLS server use cases.</p>
+<p>The actual profile configuration is stored in the Dogtag CA’s
+database. The FreeIPA database has stub entries to indicate which
+profiles are “owned by” FreeIPA, and provide minimal additional
+configuration. The <em>“Store issued certificates”</em> flag controls
+whether FreeIPA adds newly issued certificates to the subject
+principal’s LDAP entry.</p>
+<p>As a starting point for defining a user certificate, retrieve and
+save the configuration of the <code>caIPAserviceCert</code> profile:</p>
+<pre><code>[fedora@client ~]$ ipa certprofile-show caIPAserviceCert \
+    --out userCert.cfg
+---------------------------------------------------
+Profile configuration stored in file 'userCert.cfg'
+---------------------------------------------------
+  Profile ID: caIPAserviceCert
+  Profile description: Standard profile for network services
+  Store issued certificates: True</code></pre>
+<p>Examine the file using <code>less</code>. You will see it is quite convoluted.
+Don’t worry, we’ll step through the required changes in the next
+section. In the meantime, here’s a quick overview:</p>
+<ul>
+<li><p>The file mainly consists of a list of <em>policy objects</em>, which are
+introduced by the <code>policyset.serverCertSet.list</code> parameter.</p></li>
+<li><p>Each policy object has a <code>default</code> section, which specifies how to
+populate some attribute or extension of the certificate, and a
+<code>constraint</code> section, which specifies some validation of the data
+(or the <code>noConstraintImpl</code> no-op).</p></li>
+<li><p>The <code>input.i1.class_id=certReqInputImpl</code> parameter specifies that
+this profile handles ordinary PKCS #10 CSR inputs.</p></li>
+<li><p><code>auth.instance_id=raCertAuth</code> means that only the IPA
+<em>registration authority</em> can use this profile to issue
+certificates.</p></li>
+</ul>
+<h2 id="defining-the-user-certificate-profile">Defining the user certificate profile <a href="#defining-the-user-certificate-profile" class="section">§</a></h2>
+<p>Open <code>userCert.cfg</code> in an editor and perform the following changes:</p>
+<ol type="1">
+<li><em>The <code>commonNameToSANDefaultImpl</code> component is not suitable for
+user certificates.</em>
+<ul>
+<li>Remove all lines beginning with <code>policyset.serverCertSet.12</code>.</li>
+<li>Delete <code>,12</code> from the <code>policyset.serverCertSet.list</code> parameter.</li>
+</ul></li>
+<li><em>Allow elliptic curve keys.</em>
+<ul>
+<li>Set <code>policyset.serverCertSet.3.constraint.params.keyType=-</code></li>
+<li>Add <code>,nistp256,nistp384,nistp521</code> to the
+<code>policyset.serverCertSet.3.constraint.params.keyParameters</code>
+parameter.</li>
+</ul></li>
+<li><em>Set “Extended Key Usage” values suitable for Smart Card login.</em>
+<ul>
+<li>Set the value of
+<code>policyset.serverCertSet.7.default.params.exKeyUsageOIDs</code> to
+<code>1.3.6.1.5.2.3.4,1.3.6.1.4.1.311.20.2.2</code></li>
+</ul></li>
+<li>Delete the <code>profileId=caIPAserviceCert</code> line.</li>
+</ol>
+<h2 id="creating-the-user-certificate-profile">Creating the user certificate profile <a href="#creating-the-user-certificate-profile" class="section">§</a></h2>
+<p>After performing the required edits, create the profile:</p>
+<pre><code>[fedora@client ~]$ ipa certprofile-import userCert \
+    --file userCert.cfg \
+    --store true \
+    --desc &quot;User PKINIT certs&quot;
+---------------------------
+Imported profile &quot;userCert&quot;
+---------------------------
+  Profile ID: userCert
+  Profile description: User PKINIT certs
+  Store issued certificates: True</code></pre>
+<h2 id="ca-acls---authorising-use-of-a-profile">CA ACLs - authorising use of a profile <a href="#ca-acls---authorising-use-of-a-profile" class="section">§</a></h2>
+<p>Use of particular profiles can be restricted to particular
+principals—by name, group, or class. The <strong><em>CA ACL</em></strong> objects
+define these access rules. By default there is a single CA ACL; it
+restricts use of the <code>caIPAserviceCert</code> profile to host and service
+subject principals:</p>
+<pre><code>[fedora@client ~]$ ipa caacl-find
+----------------
+1 CA ACL matched
+----------------
+  ACL name: hosts_services_caIPAserviceCert
+  Enabled: True
+  Host category: all
+  Service category: all
+----------------------------
+Number of entries returned 1
+----------------------------</code></pre>
+<p>Users cannot be issued a certificate via the default profile, and
+that makes perfect sense. But to be able to use the <code>userCert</code>
+profile to issue certificates to user principals, you need to add a
+CA ACL for that.</p>
+<p>We <em>could</em> define an ACL that allows <em>all users</em> (<code>--usercat=all</code>).
+But we’ll be a bit more restrictive: the only allowed subjects will
+be members of the <code>sclogin</code> user group. Execute the commands as
+below:</p>
+<pre><code>[fedora@client ~]$ ipa caacl-add userCert_sclogin
+-------------------------------
+Added CA ACL &quot;userCert_sclogin&quot;
+-------------------------------
+  ACL name: userCert_sclogin
+  Enabled: True
+
+[fedora@client ~]$ ipa caacl-add-profile userCert_sclogin \
+    --certprofiles userCert
+  ACL name: userCert_sclogin
+  Enabled: True
+  Profiles: userCert
+  User Groups: sclogin
+-------------------------
+Number of members added 1
+-------------------------
+
+[fedora@client ~]$ ipa caacl-add-user userCert_sclogin \
+    --groups sclogin
+  ACL name: userCert_sclogin
+  Enabled: True
+  User Groups: sclogin
+-------------------------
+Number of members added 1
+-------------------------</code></pre>
+<h2 id="confirm-the-ca-acl-rejects-invalid-subjects">Confirm the CA ACL rejects invalid subjects <a href="#confirm-the-ca-acl-rejects-invalid-subjects" class="section">§</a></h2>
+<p>The <code>user1</code> account is <em>not</em> in the <code>sclogin</code> group. Using the
+<code>user.csr</code> <em>certificate signing request</em> you created previously,
+request the certificate.</p>
+<div class="note">
+<p>The FreeIPA <code>admin</code> account is highly privileged and bypasses CA
+ACLs. Switch to the <code>user1</code> account and perform a <em>self-service</em>
+certificate request. Self-service requests are allowed, subject to
+CA ACLs.</p>
+<pre><code>[fedora@client ~]$ echo Secret.123 | kinit user1
+Password for user1@E1.PKI.FRASE.ID.AU:</code></pre>
+</div>
+<pre><code>[fedora@client ~]$ ipa cert-request user.csr \
+    --profile-id userCert \
+    --principal user1 \
+    --certificate-out user.crt
+ipa: ERROR: Insufficient access: Principal
+  'user1@E1.PKI.FRASE.ID.AU' is not permitted to use CA 'ipa'
+  with profile 'userCert' for certificate issuance.</code></pre>
+<h2 id="issue-a-user-certificate">Issue a user certificate <a href="#issue-a-user-certificate" class="section">§</a></h2>
+<p><code>kinit</code> as <code>admin</code> once more, and add <code>user1</code> to the <code>sclogin</code> user
+group:</p>
+<pre><code>[fedora@client ~]$ echo Secret.123 | kinit admin
+Password for admin@E1.PKI.FRASE.ID.AU:
+
+[fedora@client ~]$ ipa group-add-member sclogin --users user1
+  Group name: sclogin
+  GID: 1789600004
+  Member users: user1
+-------------------------
+Number of members added 1
+-------------------------</code></pre>
+<p>Now become <code>user1</code> (again) and retry the <code>cert-request</code>.</p>
+<pre><code>[fedora@client ~]$ ipa cert-request user.csr \
+    --profile-id userCert \
+    --principal user1 \
+    --certificate-out user.crt
+  Issuing CA: ipa
+  Certificate: MIIEJjCCAo6gAwIBAgIQRmeQcXH3o/...
+  Subject: CN=user1,O=E1.PKI.FRASE.ID.AU
+  Subject email address: user1@e1.pki.frase.id.au
+  Issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
+  Not Before: Wed Jan 07 08:00:16 2026 UTC
+  Not After: Sat Jan 08 08:00:16 2028 UTC
+  Serial number: 93583695936409673461838374248291191549
+  Serial number (hex): 0x4667907171F7A3FADA78A182C4EF4AFD
+  Request status: complete</code></pre>
+<p>Hooray! Now that you have the user certificate, you can move on to
+the Smart Card login module.</p>
+</div>
+<div id="postFooter">
+    <div id="license">
+    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+        <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
+    </a>
+    <br />
+    Except where otherwise noted, this work is licensed under a
+    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+        Creative Commons Attribution 4.0 International License
+    </a>.
+</div>
+
+</div>
+
+        </div>
+        <div class="clear"></div>
+        <div id="footer">
+            Generated by
+            <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
