@@ -30,18 +30,24 @@ free to explore the branches that interest you.
 
 Foundational modules:
 
-- [Key generation and CSR creation with OpenSSL](01-keygen-and-csr.md)
+- [Key generation and CSR creation with OpenSSL](
+    modules/01-keygen-and-csr.html)
 
 Public PKI modules:
 
-- [ACME certificate for Apache httpd with `mod_md`](acme-httpd-mod_md.md)
+- [ACME certificate for Apache httpd with `mod_md`](
+    modules/acme-httpd-mod_md.html)
 
 Enterprise PKI modules:
 
-- [Service certificates with FreeIPA and Certmonger](ipa-certmonger.md)
-- [FreeIPA certificate profiles and user certificates](ipa-profiles.md)
-- [External signing of the FreeIPA CA](ipa-external-ca.md)
-- [Smart Card login](ipa-smart-cards.md) (TODO)
+- [Service certificates with FreeIPA and Certmonger](
+    modules/ipa-certmonger.html)
+- [FreeIPA certificate profiles and user certificates](
+    modules/ipa-profiles.html)
+- [External signing of the FreeIPA CA](
+    modules/ipa-external-ca.html)
+- [Smart Card login](
+    modules/ipa-smart-cards.html) (TODO)
 
 
 ## Your unique workshop environment
@@ -77,7 +83,7 @@ you can log into any of the machines in your environment, using the
 
 If you use OpenSSH, the login command is:
 
-```
+```command
 ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au
 ```
 

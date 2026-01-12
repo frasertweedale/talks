@@ -1,0 +1,266 @@
+body {
+    color: black;
+    font-size: 16px;
+    font-family: sans-serif;
+    margin: 0px auto 0px auto;
+    width: 600px;
+    line-height: 1.5;
+}
+
+div#header {
+    font-family: serif;
+    border-bottom: 2px solid black;
+    margin-bottom: 12px;
+    padding: 12px 0px 12px 0px;
+}
+
+div#logo a {
+    color: black;
+    float: left;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+div#header #navigation {
+    text-align: right;
+}
+
+div#header #navigation a {
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+    margin-left: 12px;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+#postFooter {
+    border-top: solid 2px black;
+    color: #555;
+    font-size: 12px;
+    margin-top: 20px;
+    padding: 12px 0px 12px 0px;
+}
+
+#postFooter #recent {
+    width: 50%;
+    float: left;
+    padding-right: 10px;
+}
+
+#recent ul {
+    padding-left: 20px;
+}
+
+#postFooter #recentLinks {
+    text-align: center;
+}
+
+#postFooter #license {
+    margin-left: 50%;
+    width: 50%;
+    text-align: center;
+    padding: 10px;
+}
+
+.clear {
+    clear: both;
+}
+
+#footer {
+    border-top: solid 2px black;
+    color: #555;
+    font-size: 12px;
+    margin-top: 12px;
+    padding: 12px 0px 12px 0px;
+    text-align: right;
+}
+
+#content img {
+    max-width: 100%;
+}
+
+#postContent li {
+    padding: 2px;
+}
+
+#postContent > p:last-child::after {
+    content: " ∎";
+}
+
+h1 {
+    font-size: 24px;
+}
+h2 {
+    font-size: 20px;
+}
+h3 {
+    font-size: 16px;
+}
+h4 {
+    color: grey;
+    font-size: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: serif;
+}
+
+a.section {
+    text-decoration: none;
+    color: grey;
+    visibility: hidden;
+}
+
+:hover > a.section {
+    visibility: visible;
+}
+
+div.info {
+    color: #555;
+    font-size: 14px;
+    font-style: italic;
+}
+
+table {
+    margin: auto;
+    border-collapse: collapse;
+}
+
+td, th {
+    padding: 5px;
+    border-bottom: 1px solid lightgrey;
+}
+
+th {
+    border-top: 1px solid lightgrey;
+}
+
+p {
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+div p:first-child {
+    margin-top: 0;
+}
+
+.note :last-child, .note :last-child :last-child {
+    margin-bottom: 0;
+}
+
+li:last-child :last-child {
+    margin-bottom: 0;
+}
+
+blockquote {
+    font-style: italic;
+}
+
+code {
+    background: #f7f7ff;
+    color: #3f3f3f;
+    border: solid 1px #d0d0f0;
+    padding: 2px;
+    hyphens: none;
+    white-space: nowrap;
+}
+
+pre code {
+    border: none;
+    padding: 0px;
+    white-space: pre;
+}
+
+pre.command, pre.output {
+    background: black;
+}
+
+pre.command code {
+    background: black;
+    color: lime;
+}
+
+pre.output code {
+    background: black;
+    color: grey;
+}
+
+pre.command code::before {
+    content: "$ ";
+}
+
+pre.command.web code::before {
+    content: "[web]$ ";
+}
+
+pre.command.ipa code::before {
+    content: "[ipa]$ ";
+}
+
+pre.command.client code::before {
+    content: "[client]$ ";
+}
+
+pre.command.workstation code::before {
+    content: "[client]$ ";
+}
+
+/* delete the margin between command and output */
+pre.command:has(+ pre.output) {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+pre.command + pre.output {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+
+pre {
+    border: solid 1px #d0d0f0;
+    background: #f7f7ff;
+    padding: 10px 15px;
+    overflow: auto;
+}
+
+.note {
+    border: solid 1px gold;
+    border-radius: 10px;
+    background: lightyellow;
+    padding: 15px;
+    overflow: auto;
+}
+
+.sourceCode .im { color: mediumvioletred; } /* import */
+.sourceCode .kw { color: mediumvioletred; } /* keyword */
+.sourceCode .fu { color: mediumvioletred; } /* function */
+.sourceCode .cf { color: mediumvioletred; } /* control flow token */
+.sourceCode .op { color: mediumvioletred; } /* operator */
+.sourceCode .dt { color: blue; } /* data type */
+.sourceCode .va { color: blue; } /* variable */
+.sourceCode .bu { color: blue; } /* built-in */
+.sourceCode .ex { color: blue; } /* extension */
+.sourceCode .at { color: blue; } /* attribute token */
+.sourceCode .pp { color: brown; } /* preprocessor directive */
+.sourceCode .st { color: brown; } /* string */
+.sourceCode .vs { color: brown; } /* verbatim string */
+.sourceCode .ss { color: brown; } /* special string */
+.sourceCode .dv { color: brown; } /* decimal value */
+.sourceCode .bn { color: brown; } /* base n */
+.sourceCode .fl { color: brown; } /* float literal */
+.sourceCode .ch { color: brown; } /* char */
+.sourceCode .sc { color: red; } /* special char */
+.sourceCode .cn { color: brown; } /* constant */
+.sourceCode .co { color: darkgreen; } /* comment */
+.sourceCode .cv { color: green; } /* comment variable */
+.sourceCode .ot { color: blue; } /* other token */
+.sourceCode .do { color: darkgreen; } /* documentation token */
+.sourceCode .re { color: red; } /* region marker */
+.sourceCode .er { color: red; } /* error token */
+.sourceCode .an { color: red; } /* annotation */
+.sourceCode .wa { color: red; } /* warning */
+.sourceCode .in { color: red; } /* info */

@@ -1,0 +1,17 @@
+<div id="recent">
+Recent posts:
+<ul>
+    $for(posts)$
+        <li>
+            <a href="$url0$">$fancyTitle$</a>
+        </li>
+    $endfor$
+</ul>
+
+<div id="recentLinks">
+    <a type="application/atom+xml" href="/atom.xml">Atom feed</a>
+     <!-- em space -->
+    <a href="/archive.html">All posts…</a>
+</div>
+
+</div>

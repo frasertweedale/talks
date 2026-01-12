@@ -18,8 +18,10 @@ ssh -i path/to/key.pem fedora@web.e$N.pki.frase.id.au
 
 ## Start the server
 
+```command {.web}
+sudo systemctl enable --now httpd
 ```
-[fedora@web ~]$ sudo systemctl enable --now httpd
+```output
 Created symlink '/etc/systemd/system/multi-user.target.wants/httpd.service' → '/usr/lib/systemd/system/httpd.service'.
 ```
 
@@ -32,10 +34,12 @@ not trust the unknown CA.
 The `openssl s_client` command is useful for diagnosing TLS
 connection issues:
 
-```
-[fedora@web ~]$ openssl s_client \
+```command {.web}
+openssl s_client \
     -connect $(hostname):443 \
     -verify_return_error
+```
+```output
 Connecting to fe80::85d:bbff:feda:7911%ens5
 CONNECTED(00000003)
 depth=1 C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.pki.frase.id.au
@@ -91,16 +95,16 @@ The `mod_md` package is already installed on this machine.
 prevents httpd from making outbound network connections.  Run the
 following command to allow these connections:
 
-```
-[fedora@web conf.d]$ sudo setsebool httpd_can_network_connect 1
+```command {.web}
+sudo setsebool httpd_can_network_connect 1
 ```
 
 :::
 
 Now create the file `/etc/httpd/conf.d/md.conf`:
 
-```
-[fedora@web conf.d]$ sudo tee /etc/httpd/conf.d/md.conf >/dev/null <<EOF
+```command {.web}
+sudo tee /etc/httpd/conf.d/md.conf >/dev/null <<EOF
 LogLevel warn md:notice
 MDCertificateAgreement accepted
 MDContactEmail yeahnah@mailinator.com
@@ -110,14 +114,14 @@ EOF
 
 Restart the server:
 
-```
-[fedora@web conf.d]$ sudo systemctl restart httpd
+```command {.web}
+sudo systemctl restart httpd
 ```
 
 Check the httpd error log for ACME-related messages.  The message
 that indicates success will look like:
 
-```
+```output
 [Thu Jan 08 06:44:32.452115 2026] [md:notice] [pid 4358:tid 4361]
 AH10059: The Managed Domain web.e2.pki.frase.id.au has been setup
 and changes will be activated on next (graceful) server restart.
@@ -125,15 +129,17 @@ and changes will be activated on next (graceful) server restart.
 
 Now preform a graceful restart to pick up the new certificate:
 
-```
-[fedora@web conf.d]$ sudo systemctl reload httpd
+```command {.web}
+sudo systemctl reload httpd
 ```
 
 Now you will be able to reload the site (a basic test page) in your
 browser or retrieve it via `curl`:
 
+```command {.web}
+curl https://$(hostname) --silent | head -n 6
 ```
-[fedora@web conf.d]$ curl https://$(hostname) --silent | head -n 6
+```output
 <!doctype html>
 <html>
   <head>
