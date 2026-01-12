@@ -16,16 +16,15 @@ the AWS managed `AmazonEC2FullAccess` policy.
 
 ## Route53
 
-`route53.json` contains a recommended Route53 policy which allows
-management of DNS records in the specified *Hosted Zone*.  The ID in
-the hosted zone ARN must be changed to the relevant value.
+The workshop refers to an existing *Public* Hosted Zone for
+modifying publicly accessible DNS records to access the services.
 
 The workshop also requires a *Private* Hosted Zone for configuring
-"split horizon DNS".  The Terraform spec sets the "Owner" tag of the
-created Hosted Zone to the user ID of the account that creates it.
-The IAM policy uses policy variables to ensure that only *owned*
-hosted zones can be managed, in addition to the nominated public
-hosted zone.
+"split horizon DNS".  As a consequence, the account needs
+permissions to create hosted zones as well as update records.
+Route53 does not expose resource tags to IAM for policy evaluation
+so the options for access control are limited.  The example policy
+is qute broad as a result.
 
 
 ## Other services
