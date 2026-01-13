@@ -1,6 +1,32 @@
 <div id="postContent">
     $body$
 </div>
-<div id="postFooter">
-    $partial("templates/license.html")$
+<div id="nav" class="footer">
+    <div class="back">
+        $if(back-href)$
+        <a href="$back-href$">
+            <
+            <br />
+            $back-text$
+        </a>
+        $endif$
+    </div>
+    <div class="up">
+        $if(up-href)$
+        <a href="$up-href$">
+            ^
+            <br />
+            $up-text$
+        </a>
+        $endif$
+    </div>
+    <div class="next">
+        $if(next-href)$
+        <a href="$next-href$">
+            >
+            <br />
+            $next-text$
+        </a>
+        $endif$
+    </div>
 </div>

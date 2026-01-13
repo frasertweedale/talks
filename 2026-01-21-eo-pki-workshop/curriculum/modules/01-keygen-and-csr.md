@@ -1,3 +1,10 @@
+---
+next-href: 01-keygen-and-csr.html
+next-text: ACME certificates for Apache httpd with <code>mod_md</code>
+up-href: "../index.html#toc"
+up-text: Up to index
+---
+
 # Key generation and CSR creation with OpenSSL
 
 ## Introduction

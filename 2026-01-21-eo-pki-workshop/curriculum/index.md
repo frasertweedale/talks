@@ -1,3 +1,10 @@
+---
+next-href: modules/01-keygen-and-csr.html
+next-text: Key generation and CSR creation with OpenSSL
+up-href: "#toc"
+up-text: Go to index
+---
+
 # Practical PKI - a hands-on workshop
 
 The Practical PKI workshop is designed to introduce you to PKI and
@@ -21,7 +28,7 @@ Some prior experience with Linux / Unix and using a command shell
 will be helpful, but it is not a strict requirement.
 
 
-## Workshop modules
+## Workshop modules {#toc}
 
 The workshop activities are organised into modules.  Some are
 prerequisites of others, but these dependencies should be fairly
@@ -35,7 +42,7 @@ Foundational modules:
 
 Public PKI modules:
 
-- [ACME certificate for Apache httpd with `mod_md`](
+- [ACME certificates for Apache httpd with `mod_md`](
     modules/acme-httpd-mod_md.html)
 
 Enterprise PKI modules:
@@ -44,7 +51,7 @@ Enterprise PKI modules:
     modules/ipa-certmonger.html)
 - [FreeIPA certificate profiles and user certificates](
     modules/ipa-profiles.html)
-- [External signing of the FreeIPA CA](
+- [Externally signing the FreeIPA CA](
     modules/ipa-external-ca.html)
 - [Smart Card login](
     modules/ipa-smart-cards.html) (TODO)

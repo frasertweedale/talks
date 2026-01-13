@@ -1,3 +1,12 @@
+---
+back-href: ipa-certmonger.html
+back-text: Service certificates with FreeIPA and Certmonger
+up-href: "../index.html#toc"
+up-text: Up to index
+next-href: ipa-external-ca.html
+next-text: Externally signing the FreeIPA CA
+---
+
 # FreeIPA certificate profiles and user certificates
 
 A *certificate profile* is a set of rules that defines and

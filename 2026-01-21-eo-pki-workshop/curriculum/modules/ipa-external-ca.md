@@ -1,4 +1,13 @@
-# External signing of the FreeIPA CA
+---
+back-href: ipa-profiles.html
+back-text: FreeIPA certificate profiles and user certificates
+up-href: "../index.html#toc"
+up-text: Up to index
+next-href-TODO: .
+next-text-TODO: .
+---
+
+# Externally signing the FreeIPA CA
 
 By default, FreeIPA installations use a **self-signed CA**.  Many
 organisations, especially large ones, require their FreeIPA CA to be

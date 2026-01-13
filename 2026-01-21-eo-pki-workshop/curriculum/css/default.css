@@ -35,53 +35,52 @@ div#header #navigation a {
     text-transform: uppercase;
 }
 
-#postFooter {
-    border-top: solid 2px black;
-    color: #555;
-    font-size: 12px;
-    margin-top: 20px;
-    padding: 12px 0px 12px 0px;
-}
-
-#postFooter #recent {
-    width: 50%;
-    float: left;
-    padding-right: 10px;
-}
-
 #recent ul {
     padding-left: 20px;
-}
-
-#postFooter #recentLinks {
-    text-align: center;
-}
-
-#postFooter #license {
-    margin-left: 50%;
-    width: 50%;
-    text-align: center;
-    padding: 10px;
 }
 
 .clear {
     clear: both;
 }
 
-#footer {
+.footer {
     border-top: solid 2px black;
     color: #555;
     font-size: 12px;
     margin-top: 12px;
     padding: 12px 0px 12px 0px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#nav .back {
+    width: 40%;
+    text-align: left;
+}
+
+#nav .up {
+    width: 20%;
+    text-align: center;
+}
+
+#nav .next {
+    width: 40%;
     text-align: right;
+}
+
+#license {
+    width: 70%;
+}
+#license img {
+    margin: 2px;
+    margin-right: 5px;
 }
 
 #content img {
     max-width: 100%;
 }
 
-#postContent li {
+li {
     padding: 2px;
 }
 

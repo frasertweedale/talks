@@ -1,4 +1,11 @@
-# Module ???: Service certificates with FreeIPA and Certmonger
+---
+up-href: "../index.html#toc"
+up-text: Up to index
+next-href: ipa-profiles.html
+next-text: FreeIPA certificate profiles and user certificates
+---
+
+# Service certificates with FreeIPA and Certmonger
 
 The **FreeIPA** identity management system (also available in RHEL
 as **Red Hat Identity Management**) provides an enterprise PKI for
