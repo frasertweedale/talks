@@ -32,14 +32,20 @@ Authenticate as user `user1` (initial password = `Secret.123).  You
 will be prompted to set a new password when authenticating for the
 first time (you can use the same password).
 
+```command {.client}
+kinit user1
 ```
-[fedora@client ~]$ kinit user1
+```output
 Password for user1@E1.PKI.FRASE.ID.AU:
 Password expired.  You must change it now.
 Enter new password:
 Enter it again:
+```
 
-[fedora@client ~]$ ipa host-show $(hostname)
+```command {.client}
+ipa host-show $(hostname)
+```
+```output
   Host name: client.e1.pki.frase.id.au
   Platform: x86_64
   Operating system: 6.17.1-300.fc43.x86_64
@@ -67,9 +73,12 @@ in the FreeIPA domain.  The password of the `admin` account is
 
 Enable and start Certmonger:
 
+```command {.client}
+sudo systemctl enable --now certmonger
 ```
-[fedora@client ~]$ sudo systemctl enable --now certmonger
-  Created symlink /etc/systemd/system/multi-user.target.wants/certmonger.service → /usr/lib/systemd/system/certmonger.service.
+```output
+  Created symlink /etc/systemd/system/multi-user.target.wants/certmonger.service
+    → /usr/lib/systemd/system/certmonger.service.
 ```
 
 
@@ -85,12 +94,14 @@ following steps:
 4. Save the issued certificate
 5. Monitor the certificate and renew it before expiry
 
-```
-[fedora@client ~]$ sudo ipa-getcert request \
+```command {.client}
+sudo ipa-getcert request \
     -f /etc/pki/tls/certs/host.crt \
     -k /etc/pki/tls/private/host.key \
     -K host/$(hostname) \
     -D $(hostname)
+```
+```output
   New signing request "{TRACKING_ID}" added.
 ```
 
@@ -99,8 +110,8 @@ following steps:
 Record the signing request identifier that appears in the command
 output.  You will need it later.  For example:
 
-```
-[fedora@client ~]$ TRACKING_ID=20260107053408
+```command {.client}
+TRACKING_ID=20260107053408
 ```
 
 :::
@@ -126,8 +137,10 @@ system hostname, which is appropriate for our use case.
 Check the status of the Certmonger request using tracking ID
 from the `ipa-getcert request` output:
 
+```command {.client}
+sudo getcert list -i $TRACKING_ID
 ```
-[fedora@client ~]$ sudo getcert list -i $TRACKING_ID
+```output
 Number of certificates and requests being tracked: 1.
 Request ID '{TRACKING_ID}':
   status: MONITORING
@@ -160,8 +173,10 @@ FreeIPA adds the issued certificate to the service entry (technical
 detail: it is in the LDAP `userCertificate` attribute).  It now
 appears in the `ipa host-show` output:
 
+```command {.client}
+ipa host-show $(hostname)
 ```
-[fedora@client ~]$ ipa host-show $(hostname)
+```output
   Host name: client.e1.pki.frase.id.au
   Platform: x86_64
   Operating system: 6.17.1-300.fc43.x86_64
@@ -201,16 +216,20 @@ Certmonger will automatically renew the certificate when it is close
 to expiry.  But you can use the `getcert resubmit` command if you
 want to renew it immediately:
 
+```command {.client}
+sudo getcert resubmit -i $TRACKING_ID
 ```
-[fedora@client ~]$ sudo getcert resubmit -i $TRACKING_ID
+```output
 Resubmitting "20260107053408" to "IPA".
 ```
 
 After a moment, the renewal will be complete.  `getcert list` shows
 the updated validity period:
 
+```command {.client}
+sudo getcert list -i $TRACKING_ID
 ```
-[fedora@client ~]$ sudo getcert list -i $TRACKING_ID
+```output
 Number of certificates and requests being tracked: 1.
 Request ID '20260107053408':
         status: MONITORING

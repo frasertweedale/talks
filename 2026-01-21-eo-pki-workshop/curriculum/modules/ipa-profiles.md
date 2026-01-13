@@ -1,4 +1,4 @@
-# Module ???: FreeIPA certificate profiles and user certificates
+# FreeIPA certificate profiles and user certificates
 
 A *certificate profile* is a set of rules that defines and
 constrains what data appears in a certificate.  Different
@@ -34,8 +34,8 @@ In this scenario you will:
 All steps in this module are to be performed on `client.$DOMAIN`.
 SSH in, then authenticate as FreeIPA `admin` user:
 
-```
-[fedora@client ~]$ echo Secret.123 | kinit admin
+```command {.client}
+echo Secret.123 | kinit admin
 ```
 
 :::
@@ -45,8 +45,10 @@ SSH in, then authenticate as FreeIPA `admin` user:
 
 Execute `ipa certprofile-find` to list the existing profiles:
 
+```command {.client}
+ipa certprofile-find
 ```
-[fedora@client ~]$ ipa certprofile-find
+```output
 ------------------
 4 profiles matched
 ------------------
@@ -59,8 +61,8 @@ Execute `ipa certprofile-find` to list the existing profiles:
   Store issued certificates: True
 
   Profile ID: IECUserRoles
-  Profile description: User profile that includes IECUserRoles extension from
-                       request
+  Profile description: User profile that includes
+                       IECUserRoles extension from request
   Store issued certificates: True
 
   Profile ID: KDCs_PKINIT_Certs
@@ -84,9 +86,11 @@ principal's LDAP entry.
 As a starting point for defining a user certificate, retrieve and
 save the configuration of the `caIPAserviceCert` profile:
 
-```
-[fedora@client ~]$ ipa certprofile-show caIPAserviceCert \
+```command {.client}
+ipa certprofile-show caIPAserviceCert \
     --out userCert.cfg
+```
+```output
 ---------------------------------------------------
 Profile configuration stored in file 'userCert.cfg'
 ---------------------------------------------------
@@ -142,11 +146,13 @@ Open `userCert.cfg` in an editor and perform the following changes:
 
 After performing the required edits, create the profile:
 
-```
-[fedora@client ~]$ ipa certprofile-import userCert \
+```command {.client}
+ipa certprofile-import userCert \
     --file userCert.cfg \
     --store true \
     --desc "User PKINIT certs"
+```
+```output
 ---------------------------
 Imported profile "userCert"
 ---------------------------
@@ -164,8 +170,10 @@ define these access rules.  By default there is a single CA ACL; it
 restricts use of the `caIPAserviceCert` profile to host and service
 subject principals:
 
+```command {.client}
+ipa caacl-find
 ```
-[fedora@client ~]$ ipa caacl-find
+```output
 ----------------
 1 CA ACL matched
 ----------------
@@ -188,16 +196,22 @@ But we'll be a bit more restrictive: the only allowed subjects will
 be members of the `sclogin` user group.  Execute the commands as
 below:
 
+```command {.client}
+ipa caacl-add userCert_sclogin
 ```
-[fedora@client ~]$ ipa caacl-add userCert_sclogin
+```output
 -------------------------------
 Added CA ACL "userCert_sclogin"
 -------------------------------
   ACL name: userCert_sclogin
   Enabled: True
+```
 
-[fedora@client ~]$ ipa caacl-add-profile userCert_sclogin \
+```command {.client}
+ipa caacl-add-profile userCert_sclogin \
     --certprofiles userCert
+```
+```output
   ACL name: userCert_sclogin
   Enabled: True
   Profiles: userCert
@@ -205,9 +219,13 @@ Added CA ACL "userCert_sclogin"
 -------------------------
 Number of members added 1
 -------------------------
+```
 
-[fedora@client ~]$ ipa caacl-add-user userCert_sclogin \
+```command {.client}
+ipa caacl-add-user userCert_sclogin \
     --groups sclogin
+```
+```output
   ACL name: userCert_sclogin
   Enabled: True
   User Groups: sclogin
@@ -229,21 +247,25 @@ ACLs.  Switch to the `user1` account and perform a *self-service*
 certificate request.  Self-service requests are allowed, subject to
 CA ACLs.
 
+```command {.client}
+echo Secret.123 | kinit user1
 ```
-[fedora@client ~]$ echo Secret.123 | kinit user1
+```output
 Password for user1@E1.PKI.FRASE.ID.AU:
 ```
 
 :::
 
-```
-[fedora@client ~]$ ipa cert-request user.csr \
+```command {.client}
+ipa cert-request user.csr \
     --profile-id userCert \
     --principal user1 \
     --certificate-out user.crt
+```
+```output
 ipa: ERROR: Insufficient access: Principal
-  'user1@E1.PKI.FRASE.ID.AU' is not permitted to use CA 'ipa'
-  with profile 'userCert' for certificate issuance.
+  'user1@E1.PKI.FRASE.ID.AU' is not permitted to use CA
+  'ipa' with profile 'userCert' for certificate issuance.
 ```
 
 
@@ -252,11 +274,17 @@ ipa: ERROR: Insufficient access: Principal
 `kinit` as `admin` once more, and add `user1` to the `sclogin` user
 group:
 
+```command {.client}
+echo Secret.123 | kinit admin
 ```
-[fedora@client ~]$ echo Secret.123 | kinit admin
+```output
 Password for admin@E1.PKI.FRASE.ID.AU:
+```
 
-[fedora@client ~]$ ipa group-add-member sclogin --users user1
+```command {.client}
+ipa group-add-member sclogin --users user1
+```
+```output
   Group name: sclogin
   GID: 1789600004
   Member users: user1
@@ -267,11 +295,13 @@ Number of members added 1
 
 Now become `user1` (again) and retry the `cert-request`.
 
-```
-[fedora@client ~]$ ipa cert-request user.csr \
+```command {.client}
+ipa cert-request user.csr \
     --profile-id userCert \
     --principal user1 \
     --certificate-out user.crt
+```
+```output
   Issuing CA: ipa
   Certificate: MIIEJjCCAo6gAwIBAgIQRmeQcXH3o/...
   Subject: CN=user1,O=E1.PKI.FRASE.ID.AU

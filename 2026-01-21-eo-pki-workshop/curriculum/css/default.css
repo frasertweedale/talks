@@ -3,7 +3,7 @@ body {
     font-size: 16px;
     font-family: sans-serif;
     margin: 0px auto 0px auto;
-    width: 600px;
+    width: 650px;
     line-height: 1.5;
 }
 
@@ -83,10 +83,6 @@ div#header #navigation a {
 
 #postContent li {
     padding: 2px;
-}
-
-#postContent > p:last-child::after {
-    content: " ∎";
 }
 
 h1 {
@@ -175,6 +171,7 @@ pre code {
 
 pre.command, pre.output {
     background: black;
+    box-shadow: 0 0 5px black;
 }
 
 pre.command code {
@@ -189,6 +186,7 @@ pre.output code {
 
 pre.command code::before {
     content: "$ ";
+    color: pink;
 }
 
 pre.command.web code::before {
@@ -223,7 +221,7 @@ pre.command + pre.output {
 pre {
     border: solid 1px #d0d0f0;
     background: #f7f7ff;
-    padding: 10px 15px;
+    padding: 5px 10px;
     overflow: auto;
 }
 

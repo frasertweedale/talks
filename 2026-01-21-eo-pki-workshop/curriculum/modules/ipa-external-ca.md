@@ -15,7 +15,7 @@ steps:
 
 1. Generate a CSR.
 2. Submit the CSR for signing by the external CA.
-3. Install the new CSR
+3. Install the new CSR.
 
 ::: note
 
@@ -31,8 +31,10 @@ The `ipa-cacert-manage(1)` command renews the FreeIPA CA
 certificate.  To switch a self-signed installation to
 externally-signed, use the `--external-ca` option:
 
+```command {.ipa}
+sudo ipa-cacert-manage renew --external-ca
 ```
-[fedora@ipa ~]$ sudo ipa-cacert-manage renew --external-ca
+```output
 Exporting CA certificate signing request, please wait
 
 The next step is to get /var/lib/ipa/ca.csr signed by your CA and
@@ -63,14 +65,16 @@ The "external" CA key and certificate, and an OpenSSL config file,
 are in the `/root/ca` directory.  Execute the following command to
 sign the CSR:
 
-```
-[fedora@ipa ~]$ sudo openssl x509 \
+```command {.ipa}
+sudo openssl x509 \
     -req -in /var/lib/ipa/ca.csr \
     -CAkey /root/ca/ca.key \
     -CA /root/ca/ca.crt \
     -extfile /root/ca/ca.cnf -extensions exts \
     -days 740 \
     -out ipa-new.crt
+```
+```output
 Certificate request self-signature ok
 subject=O=E1.PKI.FRASE.ID.AU, CN=Certificate Authority
 ```
@@ -81,10 +85,12 @@ subject=O=E1.PKI.FRASE.ID.AU, CN=Certificate Authority
 Run `ipa-cacert-manage renew` again, and point it to the issued
 certificate, as well as the external issuer certificate:
 
-```
-[fedora@ipa ~]$ sudo ipa-cacert-manage renew \
+```command {.ipa}
+sudo ipa-cacert-manage renew \
     --external-cert-file ipa-new.crt \
     --external-cert-file /root/ca/ca.crt
+```
+```output
 Importing the renewed CA certificate, please wait
 CA certificate successfully renewed
 The ipa-cacert-manage command was successful
@@ -104,8 +110,10 @@ still contain the original, self-signed certificate.  Run
 `ipa-certupdate` **on all server replicas** (none in our case) **and
 all client machines** to import the new CA certificate.
 
+```command {.ipa}
+sudo ipa-certupdate
 ```
-[fedora@ipa ~]$ sudo ipa-certupdate
+```output
 Systemwide CA database updated.
 Systemwide CA database updated.
 The ipa-certupdate command was successful
@@ -114,10 +122,14 @@ The ipa-certupdate command was successful
 Use `ipa ca-show` to confirm that the FreeIPA CA certificate is
 signed by the external CA:
 
+```command {.ipa}
+echo Secret.123 | kinit admin
 ```
-[fedora@ipa ~]$ echo Secret.123 | kinit admin
 
-[fedora@ipa ~]$ ipa ca-show ipa --raw |grep dn
+```command {.ipa}
+ipa ca-show ipa --raw |grep dn
+```
+```output
   ipacasubjectdn: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
   ipacaissuerdn: O=PKI.FRASE.ID.AU,CN=PKI Workshop CA
 ```

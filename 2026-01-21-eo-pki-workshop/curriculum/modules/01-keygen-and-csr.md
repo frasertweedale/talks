@@ -1,4 +1,4 @@
-# Module 1: Key generation and CSR creation with OpenSSL
+# Key generation and CSR creation with OpenSSL
 
 ## Introduction
 
@@ -18,7 +18,7 @@ generate keys and create CSRs.
 All steps in this module are to be performed on `client.$DOMAIN`.
 SSH into this machine now:
 
-```
+```command
 ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au
 ```
 
@@ -37,8 +37,8 @@ in both the Common Name (CN) field and the Subject Alternative Name
 We will use the **RSA 3072-bit** key size, which is the minimum RSA
 key size currently recommended by NIST for secure services.
 
-```
-[fedora@client ~]$ openssl genpkey \
+```command {.client}
+openssl genpkey \
     -aes256 \
     -algorithm RSA \
     -pkeyopt rsa_keygen_bits:3072 \
@@ -53,7 +53,7 @@ generated key.
 `-aes256` option selects AES-256 for key encryption.  The command
 will prompt you for a passphrase:
 
-```
+```output
 Enter PEM pass phrase:
 Verifying - Enter PEM pass phrase:
 ```
@@ -85,15 +85,15 @@ req_extensions      = req_ext
 distinguished_name  = dn
 
 [ dn ]
-# NOTE: In real-world use cases, you may need to include other
-# attributes (Country, Organization, etc.)
+# NOTE: In real-world use cases, you may need to include
+# other attributes (Country, Organization, etc.)
 commonName = client.$DOMAIN
 
 [ req_ext ]
 subjectAltName = @alt_names
 
 [ alt_names ]
-# The DNS name MUST match the Common Name for best practice.  
+# The DNS name MUST match the Common Name for best practice.
 DNS.1 = client.$DOMAIN
 ```
 
@@ -103,11 +103,13 @@ Execute the `openssl req` command below to build a CSR according to
 the config file and sign it with the private key.  Note that it will
 prompt you for the encryption passphrase you set previously.
 
-```
-[fedora@client ~]$ openssl req -new \
+```command {.client}
+openssl req -new \
     -key service.key \
     -config service_csr.cnf \
     -out service.csr
+```
+```output
 Enter pass phrase for service.key:
 ```
 
@@ -118,25 +120,24 @@ extensions and names are correctly included.
 
 Check the SAN and key parameters for the service request.
 
-```
-[fedora@client ~]$ openssl req -in service.csr -text -noout
+```command {.client}
+openssl req -in service.csr -text -noout
 ```
 
 Look for the following in the output:
 
-```
-        Subject Public Key Info:
-            Public Key Algorithm: rsaEncryption
-                Public-Key: (3072 bit)
-
+```output
+  Subject Public Key Info:
+      Public Key Algorithm: rsaEncryption
+          Public-Key: (3072 bit)
 ```
 
 …and…
 
-```
-            Requested Extensions:
-                X509v3 Subject Alternative Name:
-                    DNS:client.$DOMAIN  -- your env's domain here
+```output
+    Requested Extensions:
+        X509v3 Subject Alternative Name:
+            DNS:client.$DOMAIN  -- your env's domain here
 ```
 
 
@@ -157,8 +158,8 @@ includes the user's **username** and **email address**.
 We will use the **secp384r1** curve, which is recommended for high
 security with efficient performance.  
 
-```
-[fedora@client ~]$ openssl genpkey \
+```command {.client}
+openssl genpkey \
     -aes256 \
     -algorithm EC \
     -pkeyopt ec_paramgen_curve:secp384r1 \
@@ -198,8 +199,8 @@ email = user1@$DOMAIN
 
 ### Generate the User CSR
 
-```
-[fedora@client ~]$ openssl req -new \
+```command {.client}
+openssl req -new \
     -key user.key \
     -config user_csr.cnf \
     -out user.csr
@@ -207,8 +208,8 @@ email = user1@$DOMAIN
 
 ### Verify user CSR
 
-```
-[fedora@client ~]$ openssl req -in user.csr -text -noout
+```command {.client}
+openssl req -in user.csr -text -noout
 ```
 
 Verify the elliptic curve parameters in the *Subject Public Key
