@@ -5,6 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Practical PKI - 01-keygen-and-csr</title>
         <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <script src="../js/copy-button.js"></script>
     </head>
     <body>
         <div id="header">
@@ -18,7 +19,7 @@
 
         <div id="content">
             <div id="postContent">
-    <h1 id="module-1-key-generation-and-csr-creation-with-openssl">Module 1: Key generation and CSR creation with OpenSSL</h1>
+    <h1 id="key-generation-and-csr-creation-with-openssl">Key generation and CSR creation with OpenSSL</h1>
 <h2 id="introduction">Introduction <a href="#introduction" class="section">§</a></h2>
 <p>Before a Certificate Authority (CA) can issue you an X.509
 certificate, you must first create a <strong>Public/Private Key Pair</strong> and
@@ -32,7 +33,7 @@ generate keys and create CSRs.</p>
 <div class="note">
 <p>All steps in this module are to be performed on <code>client.$DOMAIN</code>.
 SSH into this machine now:</p>
-<pre><code>ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au</code></pre>
+<pre class="command"><code>ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au</code></pre>
 </div>
 <h2 id="service-csr-with-rsa-key">Service CSR with RSA key <a href="#service-csr-with-rsa-key" class="section">§</a></h2>
 <p>Let’s prepare a CSR suitable for a network service, such as an HTTP
@@ -42,7 +43,7 @@ in both the Common Name (CN) field and the Subject Alternative Name
 <h3 id="generate-the-rsa-private-key">Generate the RSA Private Key <a href="#generate-the-rsa-private-key" class="section">§</a></h3>
 <p>We will use the <strong>RSA 3072-bit</strong> key size, which is the minimum RSA
 key size currently recommended by NIST for secure services.</p>
-<pre><code>[fedora@client ~]$ openssl genpkey \
+<pre class="command client"><code>openssl genpkey \
     -aes256 \
     -algorithm RSA \
     -pkeyopt rsa_keygen_bits:3072 \
@@ -53,7 +54,7 @@ generated key.</p>
 <p><strong>When storing keys in disk you should encrypt them.</strong> The
 <code>-aes256</code> option selects AES-256 for key encryption. The command
 will prompt you for a passphrase:</p>
-<pre><code>Enter PEM pass phrase:
+<pre class="output"><code>Enter PEM pass phrase:
 Verifying - Enter PEM pass phrase:</code></pre>
 <p>In real world use you should choose a secure passphrase (or store
 keys in a <em>hardware security module (HSM)</em>, <em>secure element</em> or
@@ -76,39 +77,38 @@ req_extensions      = req_ext
 distinguished_name  = dn
 
 [ dn ]
-# NOTE: In real-world use cases, you may need to include other
-# attributes (Country, Organization, etc.)
+# NOTE: In real-world use cases, you may need to include
+# other attributes (Country, Organization, etc.)
 commonName = client.$DOMAIN
 
 [ req_ext ]
 subjectAltName = @alt_names
 
 [ alt_names ]
-# The DNS name MUST match the Common Name for best practice.  
+# The DNS name MUST match the Common Name for best practice.
 DNS.1 = client.$DOMAIN</code></pre>
 <h3 id="generate-the-service-csr">Generate the service CSR <a href="#generate-the-service-csr" class="section">§</a></h3>
 <p>Execute the <code>openssl req</code> command below to build a CSR according to
 the config file and sign it with the private key. Note that it will
 prompt you for the encryption passphrase you set previously.</p>
-<pre><code>[fedora@client ~]$ openssl req -new \
+<pre class="command client"><code>openssl req -new \
     -key service.key \
     -config service_csr.cnf \
-    -out service.csr
-Enter pass phrase for service.key:</code></pre>
+    -out service.csr</code></pre>
+<pre class="output"><code>Enter pass phrase for service.key:</code></pre>
 <h3 id="verify-the-service-csr">Verify the service CSR <a href="#verify-the-service-csr" class="section">§</a></h3>
 <p>Always verify your CSRs before submission to ensure the required
 extensions and names are correctly included.</p>
 <p>Check the SAN and key parameters for the service request.</p>
-<pre><code>[fedora@client ~]$ openssl req -in service.csr -text -noout</code></pre>
+<pre class="command client"><code>openssl req -in service.csr -text -noout</code></pre>
 <p>Look for the following in the output:</p>
-<pre><code>        Subject Public Key Info:
-            Public Key Algorithm: rsaEncryption
-                Public-Key: (3072 bit)
-</code></pre>
+<pre class="output"><code>  Subject Public Key Info:
+      Public Key Algorithm: rsaEncryption
+          Public-Key: (3072 bit)</code></pre>
 <p>…and…</p>
-<pre><code>            Requested Extensions:
-                X509v3 Subject Alternative Name:
-                    DNS:client.$DOMAIN  -- your env's domain here</code></pre>
+<pre class="output"><code>    Requested Extensions:
+        X509v3 Subject Alternative Name:
+            DNS:client.$DOMAIN  -- your env's domain here</code></pre>
 <h2 id="csr-for-user-certificate-with-ecc-key">CSR for user certificate with ECC key <a href="#csr-for-user-certificate-with-ecc-key" class="section">§</a></h2>
 <p>X.509 certificates can be used for a variety of <strong>user
 authentication</strong> scenarios (e.g. Kerberos, VPN access, email
@@ -121,7 +121,7 @@ includes the user’s <strong>username</strong> and <strong>email address</stron
 <h3 id="generate-the-ecc-private-key">Generate the ECC Private Key <a href="#generate-the-ecc-private-key" class="section">§</a></h3>
 <p>We will use the <strong>secp384r1</strong> curve, which is recommended for high
 security with efficient performance.</p>
-<pre><code>[fedora@client ~]$ openssl genpkey \
+<pre class="command client"><code>openssl genpkey \
     -aes256 \
     -algorithm EC \
     -pkeyopt ec_paramgen_curve:secp384r1 \
@@ -150,12 +150,12 @@ subjectAltName = @alt_names
 [ alt_names ]
 email = user1@$DOMAIN</code></pre>
 <h3 id="generate-the-user-csr">Generate the User CSR <a href="#generate-the-user-csr" class="section">§</a></h3>
-<pre><code>[fedora@client ~]$ openssl req -new \
+<pre class="command client"><code>openssl req -new \
     -key user.key \
     -config user_csr.cnf \
     -out user.csr</code></pre>
 <h3 id="verify-user-csr">Verify user CSR <a href="#verify-user-csr" class="section">§</a></h3>
-<pre><code>[fedora@client ~]$ openssl req -in user.csr -text -noout</code></pre>
+<pre class="command client"><code>openssl req -in user.csr -text -noout</code></pre>
 <p>Verify the elliptic curve parameters in the <em>Subject Public Key
 Info</em> section, and the inclusion of the user’s email address in the
 <em>X509v3 Subject Alternative Name</em> extension.</p>
@@ -178,25 +178,55 @@ servers accessed directly by IP).</p></li>
 these CSRs to our FreeIPA CA and receiving signed X.509
 certificates!</p>
 </div>
-<div id="postFooter">
-    <div id="license">
-    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
-        <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
-    </a>
-    <br />
-    Except where otherwise noted, this work is licensed under a
-    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
-        Creative Commons Attribution 4.0 International License
-    </a>.
-</div>
-
+<div id="nav" class="footer">
+    <div class="back">
+        
+    </div>
+    <div class="up">
+        
+        <a href="../index.html#toc">
+            ^
+            <br />
+            Up to index
+        </a>
+        
+    </div>
+    <div class="next">
+        
+        <a href="01-keygen-and-csr.html">
+            >
+            <br />
+            ACME certificates for Apache httpd with <code>mod_md</code>
+        </a>
+        
+    </div>
 </div>
 
         </div>
         <div class="clear"></div>
-        <div id="footer">
-            Generated by
-            <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+
+        <div class="footer">
+
+<div id="license">
+    <div style="float: left">
+        <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
+        </a>
+    </div>
+    <div>
+        <p>
+        Except where otherwise noted, this work is licensed under a
+        <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+            Creative Commons Attribution 4.0 International License</a>.
+        </p>
+    </div>
+</div>
+
+<div id="hakyll">
+    Generated by
+    <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+</div>
+
         </div>
     </body>
 </html>

@@ -5,6 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Practical PKI - ipa-profiles</title>
         <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <script src="../js/copy-button.js"></script>
     </head>
     <body>
         <div id="header">
@@ -18,7 +19,7 @@
 
         <div id="content">
             <div id="postContent">
-    <h1 id="module-freeipa-certificate-profiles-and-user-certificates">Module ???: FreeIPA certificate profiles and user certificates</h1>
+    <h1 id="freeipa-certificate-profiles-and-user-certificates">FreeIPA certificate profiles and user certificates</h1>
 <p>A <em>certificate profile</em> is a set of rules that defines and
 constrains what data appears in a certificate. Different
 certificate use cases often require specific profiles. The profile
@@ -47,12 +48,12 @@ certificates using this profile.</li>
 <div class="note">
 <p>All steps in this module are to be performed on <code>client.$DOMAIN</code>.
 SSH in, then authenticate as FreeIPA <code>admin</code> user:</p>
-<pre><code>[fedora@client ~]$ echo Secret.123 | kinit admin</code></pre>
+<pre class="command client"><code>echo Secret.123 | kinit admin</code></pre>
 </div>
 <h2 id="freeipa-certificate-profiles">FreeIPA certificate profiles <a href="#freeipa-certificate-profiles" class="section">§</a></h2>
 <p>Execute <code>ipa certprofile-find</code> to list the existing profiles:</p>
-<pre><code>[fedora@client ~]$ ipa certprofile-find
-------------------
+<pre class="command client"><code>ipa certprofile-find</code></pre>
+<pre class="output"><code>------------------
 4 profiles matched
 ------------------
   Profile ID: acmeIPAServerCert
@@ -64,8 +65,8 @@ SSH in, then authenticate as FreeIPA <code>admin</code> user:</p>
   Store issued certificates: True
 
   Profile ID: IECUserRoles
-  Profile description: User profile that includes IECUserRoles extension from
-                       request
+  Profile description: User profile that includes
+                       IECUserRoles extension from request
   Store issued certificates: True
 
   Profile ID: KDCs_PKINIT_Certs
@@ -84,9 +85,9 @@ whether FreeIPA adds newly issued certificates to the subject
 principal’s LDAP entry.</p>
 <p>As a starting point for defining a user certificate, retrieve and
 save the configuration of the <code>caIPAserviceCert</code> profile:</p>
-<pre><code>[fedora@client ~]$ ipa certprofile-show caIPAserviceCert \
-    --out userCert.cfg
----------------------------------------------------
+<pre class="command client"><code>ipa certprofile-show caIPAserviceCert \
+    --out userCert.cfg</code></pre>
+<pre class="output"><code>---------------------------------------------------
 Profile configuration stored in file 'userCert.cfg'
 ---------------------------------------------------
   Profile ID: caIPAserviceCert
@@ -134,11 +135,11 @@ parameter.</li>
 </ol>
 <h2 id="creating-the-user-certificate-profile">Creating the user certificate profile <a href="#creating-the-user-certificate-profile" class="section">§</a></h2>
 <p>After performing the required edits, create the profile:</p>
-<pre><code>[fedora@client ~]$ ipa certprofile-import userCert \
+<pre class="command client"><code>ipa certprofile-import userCert \
     --file userCert.cfg \
     --store true \
-    --desc &quot;User PKINIT certs&quot;
----------------------------
+    --desc &quot;User PKINIT certs&quot;</code></pre>
+<pre class="output"><code>---------------------------
 Imported profile &quot;userCert&quot;
 ---------------------------
   Profile ID: userCert
@@ -150,8 +151,8 @@ principals—by name, group, or class. The <strong><em>CA ACL</em></strong> obje
 define these access rules. By default there is a single CA ACL; it
 restricts use of the <code>caIPAserviceCert</code> profile to host and service
 subject principals:</p>
-<pre><code>[fedora@client ~]$ ipa caacl-find
-----------------
+<pre class="command client"><code>ipa caacl-find</code></pre>
+<pre class="output"><code>----------------
 1 CA ACL matched
 ----------------
   ACL name: hosts_services_caIPAserviceCert
@@ -169,26 +170,24 @@ CA ACL for that.</p>
 But we’ll be a bit more restrictive: the only allowed subjects will
 be members of the <code>sclogin</code> user group. Execute the commands as
 below:</p>
-<pre><code>[fedora@client ~]$ ipa caacl-add userCert_sclogin
--------------------------------
+<pre class="command client"><code>ipa caacl-add userCert_sclogin</code></pre>
+<pre class="output"><code>-------------------------------
 Added CA ACL &quot;userCert_sclogin&quot;
 -------------------------------
   ACL name: userCert_sclogin
-  Enabled: True
-
-[fedora@client ~]$ ipa caacl-add-profile userCert_sclogin \
-    --certprofiles userCert
-  ACL name: userCert_sclogin
+  Enabled: True</code></pre>
+<pre class="command client"><code>ipa caacl-add-profile userCert_sclogin \
+    --certprofiles userCert</code></pre>
+<pre class="output"><code>  ACL name: userCert_sclogin
   Enabled: True
   Profiles: userCert
   User Groups: sclogin
 -------------------------
 Number of members added 1
--------------------------
-
-[fedora@client ~]$ ipa caacl-add-user userCert_sclogin \
-    --groups sclogin
-  ACL name: userCert_sclogin
+-------------------------</code></pre>
+<pre class="command client"><code>ipa caacl-add-user userCert_sclogin \
+    --groups sclogin</code></pre>
+<pre class="output"><code>  ACL name: userCert_sclogin
   Enabled: True
   User Groups: sclogin
 -------------------------
@@ -203,35 +202,34 @@ request the certificate.</p>
 ACLs. Switch to the <code>user1</code> account and perform a <em>self-service</em>
 certificate request. Self-service requests are allowed, subject to
 CA ACLs.</p>
-<pre><code>[fedora@client ~]$ echo Secret.123 | kinit user1
-Password for user1@E1.PKI.FRASE.ID.AU:</code></pre>
+<pre class="command client"><code>echo Secret.123 | kinit user1</code></pre>
+<pre class="output"><code>Password for user1@E1.PKI.FRASE.ID.AU:</code></pre>
 </div>
-<pre><code>[fedora@client ~]$ ipa cert-request user.csr \
+<pre class="command client"><code>ipa cert-request user.csr \
     --profile-id userCert \
     --principal user1 \
-    --certificate-out user.crt
-ipa: ERROR: Insufficient access: Principal
-  'user1@E1.PKI.FRASE.ID.AU' is not permitted to use CA 'ipa'
-  with profile 'userCert' for certificate issuance.</code></pre>
+    --certificate-out user.crt</code></pre>
+<pre class="output"><code>ipa: ERROR: Insufficient access: Principal
+  'user1@E1.PKI.FRASE.ID.AU' is not permitted to use CA
+  'ipa' with profile 'userCert' for certificate issuance.</code></pre>
 <h2 id="issue-a-user-certificate">Issue a user certificate <a href="#issue-a-user-certificate" class="section">§</a></h2>
 <p><code>kinit</code> as <code>admin</code> once more, and add <code>user1</code> to the <code>sclogin</code> user
 group:</p>
-<pre><code>[fedora@client ~]$ echo Secret.123 | kinit admin
-Password for admin@E1.PKI.FRASE.ID.AU:
-
-[fedora@client ~]$ ipa group-add-member sclogin --users user1
-  Group name: sclogin
+<pre class="command client"><code>echo Secret.123 | kinit admin</code></pre>
+<pre class="output"><code>Password for admin@E1.PKI.FRASE.ID.AU:</code></pre>
+<pre class="command client"><code>ipa group-add-member sclogin --users user1</code></pre>
+<pre class="output"><code>  Group name: sclogin
   GID: 1789600004
   Member users: user1
 -------------------------
 Number of members added 1
 -------------------------</code></pre>
 <p>Now become <code>user1</code> (again) and retry the <code>cert-request</code>.</p>
-<pre><code>[fedora@client ~]$ ipa cert-request user.csr \
+<pre class="command client"><code>ipa cert-request user.csr \
     --profile-id userCert \
     --principal user1 \
-    --certificate-out user.crt
-  Issuing CA: ipa
+    --certificate-out user.crt</code></pre>
+<pre class="output"><code>  Issuing CA: ipa
   Certificate: MIIEJjCCAo6gAwIBAgIQRmeQcXH3o/...
   Subject: CN=user1,O=E1.PKI.FRASE.ID.AU
   Subject email address: user1@e1.pki.frase.id.au
@@ -244,25 +242,61 @@ Number of members added 1
 <p>Hooray! Now that you have the user certificate, you can move on to
 the Smart Card login module.</p>
 </div>
-<div id="postFooter">
-    <div id="license">
-    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
-        <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
-    </a>
-    <br />
-    Except where otherwise noted, this work is licensed under a
-    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
-        Creative Commons Attribution 4.0 International License
-    </a>.
-</div>
-
+<div id="nav" class="footer">
+    <div class="back">
+        
+        <a href="ipa-certmonger.html">
+            <
+            <br />
+            Service certificates with FreeIPA and Certmonger
+        </a>
+        
+    </div>
+    <div class="up">
+        
+        <a href="../index.html#toc">
+            ^
+            <br />
+            Up to index
+        </a>
+        
+    </div>
+    <div class="next">
+        
+        <a href="ipa-external-ca.html">
+            >
+            <br />
+            Externally signing the FreeIPA CA
+        </a>
+        
+    </div>
 </div>
 
         </div>
         <div class="clear"></div>
-        <div id="footer">
-            Generated by
-            <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+
+        <div class="footer">
+
+<div id="license">
+    <div style="float: left">
+        <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
+        </a>
+    </div>
+    <div>
+        <p>
+        Except where otherwise noted, this work is licensed under a
+        <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+            Creative Commons Attribution 4.0 International License</a>.
+        </p>
+    </div>
+</div>
+
+<div id="hakyll">
+    Generated by
+    <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+</div>
+
         </div>
     </body>
 </html>

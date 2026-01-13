@@ -5,6 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Practical PKI - ipa-external-ca</title>
         <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <script src="../js/copy-button.js"></script>
     </head>
     <body>
         <div id="header">
@@ -18,7 +19,7 @@
 
         <div id="content">
             <div id="postContent">
-    <h1 id="external-signing-of-the-freeipa-ca">External signing of the FreeIPA CA</h1>
+    <h1 id="externally-signing-the-freeipa-ca">Externally signing the FreeIPA CA</h1>
 <p>By default, FreeIPA installations use a <strong>self-signed CA</strong>. Many
 organisations, especially large ones, require their FreeIPA CA to be
 subordinated to some other CA operated by the organisation. In
@@ -32,7 +33,7 @@ steps:</p>
 <ol type="1">
 <li>Generate a CSR.</li>
 <li>Submit the CSR for signing by the external CA.</li>
-<li>Install the new CSR</li>
+<li>Install the new CSR.</li>
 </ol>
 <div class="note">
 <p>This module must be performed on <code>ipa.$DOMAIN</code>, except where noted
@@ -42,8 +43,8 @@ below.</p>
 <p>The <code>ipa-cacert-manage(1)</code> command renews the FreeIPA CA
 certificate. To switch a self-signed installation to
 externally-signed, use the <code>--external-ca</code> option:</p>
-<pre><code>[fedora@ipa ~]$ sudo ipa-cacert-manage renew --external-ca
-Exporting CA certificate signing request, please wait
+<pre class="command ipa"><code>sudo ipa-cacert-manage renew --external-ca</code></pre>
+<pre class="output"><code>Exporting CA certificate signing request, please wait
 
 The next step is to get /var/lib/ipa/ca.csr signed by your CA and
 re-run ipa-cacert-manage as:
@@ -64,22 +65,22 @@ much less bureaucracy.</p>
 <p>The “external” CA key and certificate, and an OpenSSL config file,
 are in the <code>/root/ca</code> directory. Execute the following command to
 sign the CSR:</p>
-<pre><code>[fedora@ipa ~]$ sudo openssl x509 \
+<pre class="command ipa"><code>sudo openssl x509 \
     -req -in /var/lib/ipa/ca.csr \
     -CAkey /root/ca/ca.key \
     -CA /root/ca/ca.crt \
     -extfile /root/ca/ca.cnf -extensions exts \
     -days 740 \
-    -out ipa-new.crt
-Certificate request self-signature ok
+    -out ipa-new.crt</code></pre>
+<pre class="output"><code>Certificate request self-signature ok
 subject=O=E1.PKI.FRASE.ID.AU, CN=Certificate Authority</code></pre>
 <h2 id="completing-the-renewal">Completing the renewal <a href="#completing-the-renewal" class="section">§</a></h2>
 <p>Run <code>ipa-cacert-manage renew</code> again, and point it to the issued
 certificate, as well as the external issuer certificate:</p>
-<pre><code>[fedora@ipa ~]$ sudo ipa-cacert-manage renew \
+<pre class="command ipa"><code>sudo ipa-cacert-manage renew \
     --external-cert-file ipa-new.crt \
-    --external-cert-file /root/ca/ca.crt
-Importing the renewed CA certificate, please wait
+    --external-cert-file /root/ca/ca.crt</code></pre>
+<pre class="output"><code>Importing the renewed CA certificate, please wait
 CA certificate successfully renewed
 The ipa-cacert-manage command was successful</code></pre>
 <div class="note">
@@ -91,16 +92,15 @@ you can provide a PKCS #7 file with the complete chain.</p>
 still contain the original, self-signed certificate. Run
 <code>ipa-certupdate</code> <strong>on all server replicas</strong> (none in our case) <strong>and
 all client machines</strong> to import the new CA certificate.</p>
-<pre><code>[fedora@ipa ~]$ sudo ipa-certupdate
-Systemwide CA database updated.
+<pre class="command ipa"><code>sudo ipa-certupdate</code></pre>
+<pre class="output"><code>Systemwide CA database updated.
 Systemwide CA database updated.
 The ipa-certupdate command was successful</code></pre>
 <p>Use <code>ipa ca-show</code> to confirm that the FreeIPA CA certificate is
 signed by the external CA:</p>
-<pre><code>[fedora@ipa ~]$ echo Secret.123 | kinit admin
-
-[fedora@ipa ~]$ ipa ca-show ipa --raw |grep dn
-  ipacasubjectdn: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
+<pre class="command ipa"><code>echo Secret.123 | kinit admin</code></pre>
+<pre class="command ipa"><code>ipa ca-show ipa --raw |grep dn</code></pre>
+<pre class="output"><code>  ipacasubjectdn: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
   ipacaissuerdn: O=PKI.FRASE.ID.AU,CN=PKI Workshop CA</code></pre>
 <div class="note">
 <p>You have completed the exercises for this module. The sections that
@@ -117,25 +117,55 @@ process, similar to renewal. The <code>ipa-server-install(1)</code> command
 accepts the same <code>--external-ca</code> and <code>--external-cert-file</code>
 arguments as <code>ipa-cacert-manage(1)</code>.</p>
 </div>
-<div id="postFooter">
-    <div id="license">
-    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
-        <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
-    </a>
-    <br />
-    Except where otherwise noted, this work is licensed under a
-    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
-        Creative Commons Attribution 4.0 International License
-    </a>.
-</div>
-
+<div id="nav" class="footer">
+    <div class="back">
+        
+        <a href="ipa-profiles.html">
+            <
+            <br />
+            FreeIPA certificate profiles and user certificates
+        </a>
+        
+    </div>
+    <div class="up">
+        
+        <a href="../index.html#toc">
+            ^
+            <br />
+            Up to index
+        </a>
+        
+    </div>
+    <div class="next">
+        
+    </div>
 </div>
 
         </div>
         <div class="clear"></div>
-        <div id="footer">
-            Generated by
-            <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+
+        <div class="footer">
+
+<div id="license">
+    <div style="float: left">
+        <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
+        </a>
+    </div>
+    <div>
+        <p>
+        Except where otherwise noted, this work is licensed under a
+        <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+            Creative Commons Attribution 4.0 International License</a>.
+        </p>
+    </div>
+</div>
+
+<div id="hakyll">
+    Generated by
+    <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+</div>
+
         </div>
     </body>
 </html>

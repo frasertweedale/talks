@@ -5,6 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Practical PKI - ipa-certmonger</title>
         <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <script src="../js/copy-button.js"></script>
     </head>
     <body>
         <div id="header">
@@ -18,7 +19,7 @@
 
         <div id="content">
             <div id="postContent">
-    <h1 id="module-service-certificates-with-freeipa-and-certmonger">Module ???: Service certificates with FreeIPA and Certmonger</h1>
+    <h1 id="service-certificates-with-freeipa-and-certmonger">Service certificates with FreeIPA and Certmonger</h1>
 <p>The <strong>FreeIPA</strong> identity management system (also available in RHEL
 as <strong>Red Hat Identity Management</strong>) provides an enterprise PKI for
 issuing and managing host, service and user certificates.</p>
@@ -41,14 +42,13 @@ entry.</p>
 Authenticate as user <code>user1</code> (initial password = `Secret.123). You
 will be prompted to set a new password when authenticating for the
 first time (you can use the same password).</p>
-<pre><code>[fedora@client ~]$ kinit user1
-Password for user1@E1.PKI.FRASE.ID.AU:
+<pre class="command client"><code>kinit user1</code></pre>
+<pre class="output"><code>Password for user1@E1.PKI.FRASE.ID.AU:
 Password expired.  You must change it now.
 Enter new password:
-Enter it again:
-
-[fedora@client ~]$ ipa host-show $(hostname)
-  Host name: client.e1.pki.frase.id.au
+Enter it again:</code></pre>
+<pre class="command client"><code>ipa host-show $(hostname)</code></pre>
+<pre class="output"><code>  Host name: client.e1.pki.frase.id.au
   Platform: x86_64
   Operating system: 6.17.1-300.fc43.x86_64
   Principal name: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
@@ -67,8 +67,9 @@ in the FreeIPA domain. The password of the <code>admin</code> account is
 <code>Secret.123</code>.</p>
 <h2 id="preparation">Preparation <a href="#preparation" class="section">§</a></h2>
 <p>Enable and start Certmonger:</p>
-<pre><code>[fedora@client ~]$ sudo systemctl enable --now certmonger
-  Created symlink /etc/systemd/system/multi-user.target.wants/certmonger.service → /usr/lib/systemd/system/certmonger.service.</code></pre>
+<pre class="command client"><code>sudo systemctl enable --now certmonger</code></pre>
+<pre class="output"><code>  Created symlink /etc/systemd/system/multi-user.target.wants/certmonger.service
+    → /usr/lib/systemd/system/certmonger.service.</code></pre>
 <h2 id="request-certificate">Request certificate <a href="#request-certificate" class="section">§</a></h2>
 <p>Use the <code>ipa-getcert</code> command, which is part of Certmonger, to
 request a certificate. Certmonger will automatically perform the
@@ -80,16 +81,16 @@ following steps:</p>
 <li>Save the issued certificate</li>
 <li>Monitor the certificate and renew it before expiry</li>
 </ol>
-<pre><code>[fedora@client ~]$ sudo ipa-getcert request \
+<pre class="command client"><code>sudo ipa-getcert request \
     -f /etc/pki/tls/certs/host.crt \
     -k /etc/pki/tls/private/host.key \
     -K host/$(hostname) \
-    -D $(hostname)
-  New signing request &quot;{TRACKING_ID}&quot; added.</code></pre>
+    -D $(hostname)</code></pre>
+<pre class="output"><code>  New signing request &quot;{TRACKING_ID}&quot; added.</code></pre>
 <div class="note">
 <p>Record the signing request identifier that appears in the command
 output. You will need it later. For example:</p>
-<pre><code>[fedora@client ~]$ TRACKING_ID=20260107053408</code></pre>
+<pre class="command client no-copy"><code>TRACKING_ID=20260107053408</code></pre>
 </div>
 <p>Let’s break down some of those command arguments.</p>
 <dl>
@@ -118,8 +119,8 @@ field is no longer used by browsers so the SAN value is essential
 system hostname, which is appropriate for our use case.</p>
 <p>Check the status of the Certmonger request using tracking ID
 from the <code>ipa-getcert request</code> output:</p>
-<pre><code>[fedora@client ~]$ sudo getcert list -i $TRACKING_ID
-Number of certificates and requests being tracked: 1.
+<pre class="command client"><code>sudo getcert list -i $TRACKING_ID</code></pre>
+<pre class="output"><code>Number of certificates and requests being tracked: 1.
 Request ID '{TRACKING_ID}':
   status: MONITORING
   stuck: no
@@ -148,8 +149,8 @@ close to expiring.</li>
 <p>FreeIPA adds the issued certificate to the service entry (technical
 detail: it is in the LDAP <code>userCertificate</code> attribute). It now
 appears in the <code>ipa host-show</code> output:</p>
-<pre><code>[fedora@client ~]$ ipa host-show $(hostname)
-  Host name: client.e1.pki.frase.id.au
+<pre class="command client"><code>ipa host-show $(hostname)</code></pre>
+<pre class="output"><code>  Host name: client.e1.pki.frase.id.au
   Platform: x86_64
   Operating system: 6.17.1-300.fc43.x86_64
   Certificate: MIIFgDCCA+igAwIBAgIQOJ... (it's big!)
@@ -180,12 +181,12 @@ the subject. Host principals can also request certificates for
 <p>Certmonger will automatically renew the certificate when it is close
 to expiry. But you can use the <code>getcert resubmit</code> command if you
 want to renew it immediately:</p>
-<pre><code>[fedora@client ~]$ sudo getcert resubmit -i $TRACKING_ID
-Resubmitting &quot;20260107053408&quot; to &quot;IPA&quot;.</code></pre>
+<pre class="command client"><code>sudo getcert resubmit -i $TRACKING_ID</code></pre>
+<pre class="output"><code>Resubmitting &quot;20260107053408&quot; to &quot;IPA&quot;.</code></pre>
 <p>After a moment, the renewal will be complete. <code>getcert list</code> shows
 the updated validity period:</p>
-<pre><code>[fedora@client ~]$ sudo getcert list -i $TRACKING_ID
-Number of certificates and requests being tracked: 1.
+<pre class="command client"><code>sudo getcert list -i $TRACKING_ID</code></pre>
+<pre class="output"><code>Number of certificates and requests being tracked: 1.
 Request ID '20260107053408':
         status: MONITORING
         subject: CN=client.e1.pki.frase.id.au,O=E1.PKI.FRASE.ID.AU
@@ -194,25 +195,55 @@ Request ID '20260107053408':
         dns: client.e1.pki.frase.id.au
         ...</code></pre>
 </div>
-<div id="postFooter">
-    <div id="license">
-    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
-        <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
-    </a>
-    <br />
-    Except where otherwise noted, this work is licensed under a
-    <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
-        Creative Commons Attribution 4.0 International License
-    </a>.
-</div>
-
+<div id="nav" class="footer">
+    <div class="back">
+        
+    </div>
+    <div class="up">
+        
+        <a href="../index.html#toc">
+            ^
+            <br />
+            Up to index
+        </a>
+        
+    </div>
+    <div class="next">
+        
+        <a href="ipa-profiles.html">
+            >
+            <br />
+            FreeIPA certificate profiles and user certificates
+        </a>
+        
+    </div>
 </div>
 
         </div>
         <div class="clear"></div>
-        <div id="footer">
-            Generated by
-            <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+
+        <div class="footer">
+
+<div id="license">
+    <div style="float: left">
+        <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
+        </a>
+    </div>
+    <div>
+        <p>
+        Except where otherwise noted, this work is licensed under a
+        <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+            Creative Commons Attribution 4.0 International License</a>.
+        </p>
+    </div>
+</div>
+
+<div id="hakyll">
+    Generated by
+    <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+</div>
+
         </div>
     </body>
 </html>
