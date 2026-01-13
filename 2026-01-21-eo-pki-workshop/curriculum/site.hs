@@ -22,6 +22,10 @@ main = hakyll $ do
     route idRoute
     compile compressCssCompiler
 
+  match "js/*" $ do
+    route idRoute
+    compile copyFileCompiler
+
   match "index.md" $ do
     route $ setExtension "html"
     compile $ do

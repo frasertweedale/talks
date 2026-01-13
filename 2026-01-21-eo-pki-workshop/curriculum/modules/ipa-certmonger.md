@@ -117,7 +117,7 @@ sudo ipa-getcert request \
 Record the signing request identifier that appears in the command
 output.  You will need it later.  For example:
 
-```command {.client}
+```command {.client .no-copy}
 TRACKING_ID=20260107053408
 ```
 

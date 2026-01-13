@@ -217,6 +217,41 @@ pre.command + pre.output {
 }
 
 
+/*** CODE FOR COPY BUTTONS ***/
+
+pre.command, pre.copy {
+    position: relative;
+    overflow: visible;
+}
+
+.copy-button {
+    top: -8px;
+    right: -8px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 3px 6px;
+    background-color: white;
+    color: #333;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    position: absolute;
+}
+
+.copy-button:hover {
+    background: #f0f0f0;
+    border-color: #999;
+}
+
+.copy-btn.copied {
+    background: #4caf50;
+    color: white;
+    border-color: #4caf50;
+    content: "Copied!";
+}
+
+
 pre {
     border: solid 1px #d0d0f0;
     background: #f7f7ff;
