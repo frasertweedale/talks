@@ -12,6 +12,11 @@ siteTitle = "Practical PKI"
 
 main :: IO ()
 main = hakyll $ do
+
+  match "CNAME" $ do  -- GitHub Pages boilerplate
+    route idRoute
+    compile copyFileCompiler
+
   {-
   match "images/**" $ do
     route idRoute
