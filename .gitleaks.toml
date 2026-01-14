@@ -1,0 +1,6 @@
+[allowlist]
+  description = "global allow list"
+  paths = [
+    '''pki-workshop/ca/ca.key$''',
+    '''acme/talk.rst$''',
+  ]
