@@ -2,10 +2,14 @@ variable "region" {
   default = "ap-southeast-2"
 }
 
-variable "workshop_ami_id" {
-  description = "The ID of your Golden AMI (Fedora + Packages)"
+variable "workshop_ami_id_main" {
   type        = string
-  default     = "ami-055d3fa221a1523d0" # pki-workshop-f43-v4
+  default     = "ami-00688f06e94d76a7b" # pki-workshop-f43-v4-tpm
+}
+
+variable "workshop_ami_id_workstation" {
+  type        = string
+  default     = "ami-0b411eb7a789cdb65" # pki-workshop-f43-workstation-v1
 }
 
 variable "base_domain" {
