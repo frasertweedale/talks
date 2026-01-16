@@ -39,11 +39,11 @@ physical security benefits.</p>
 <p>In this module you will use a TPM like a smart card and walk through
 some real world scenarios:</p>
 <ul>
-<li><p>Generate a key on the device and sign a CSR</p></li>
-<li><p>Install the issued certifiate on the device</p></li>
-<li><p>Configure a FreeIPA domain and enrolled workstation to enable
-smart card login</p></li>
-<li><p>Configure <em>GNOME Remote Desktop</em> to enable remote graphical login</p></li>
+<li>Generate a key on the device and sign a CSR</li>
+<li>Install the issued certifiate on the device</li>
+<li>Configure a FreeIPA domain and enrolled workstation to enable
+smart card login</li>
+<li>Configure <em>GNOME Remote Desktop</em> to enable remote graphical login</li>
 </ul>
 <div class="note">
 <p>Most activities in this module are to be performed on
@@ -114,7 +114,7 @@ Object 0:
         ID: 31:30:32:37:30:33:32:38:31:33:62:36:34:36:62:32</code></pre>
 <p>Copy the value of the <code>URL:</code> field and save it in a shell variable.
 <strong>Be sure to wrap the value in quotes (<code>"</code>).</strong> For example:</p>
-<p><code>command {.workstation no-copy} PKCS11_URI="pkcs11:model=NitroTPMv1.0%00%00%00%00;manufacturer=AMZN;serial=0000000000000000;token=TPM-Token;id=%31%30%32%37%30%33%32%38%31%33%62%36%34%36%62%32;object=ipa-key;type=public"</code></p>
+<pre class="command workstation no-copy"><code>PKCS11_URI=&quot;pkcs11:model=NitroTPMv1.0%00%00%00%00;...&quot;</code></pre>
 <p>Now generate the CSR. <strong>You will be prompted for the user PIN</strong>.</p>
 <pre class="command workstation"><code>sudo openssl req -new \
   -engine pkcs11 -keyform engine -key $PKCS11_URI \
@@ -156,7 +156,11 @@ for the RDP server to use:</p>
     --cert-owner gnome-remote-desktop \
     -K host/$(hostname) \
     -D $(hostname)</code></pre>
-<p>Now tell GNOME Remote Desktop about the key and certificate:</p>
+<p>The <code>--key-owner</code> and <code>--cert-owner</code> options tell Certmonger to
+change the ownership of the files it creates, so the server process
+can read them. There are also options to change the mode (file
+permissions), if you need that.</p>
+<p>Now, tell GNOME Remote Desktop about the key and certificate:</p>
 <pre class="command workstation"><code>sudo grdctl --system rdp \
   set-tls-key  /etc/pki/tls/private/rdp.key</code></pre>
 <pre class="command workstation"><code>sudo grdctl --system rdp \
