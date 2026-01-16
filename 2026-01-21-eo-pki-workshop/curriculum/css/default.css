@@ -244,13 +244,6 @@ pre.command, pre.copy {
     border-color: #999;
 }
 
-.copy-btn.copied {
-    background: #4caf50;
-    color: white;
-    border-color: #4caf50;
-    content: "Copied!";
-}
-
 
 pre {
     border: solid 1px #d0d0f0;

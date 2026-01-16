@@ -3,8 +3,8 @@ back-href: ipa-certmonger.html
 back-text: Service certificates with FreeIPA and Certmonger
 up-href: "../index.html#toc"
 up-text: Up to index
-next-href: ipa-external-ca.html
-next-text: Externally signing the FreeIPA CA
+next-href: ipa-smart-cards.html
+next-text: Smart cards and workstation login
 ---
 
 # FreeIPA certificate profiles and user certificates
@@ -134,8 +134,10 @@ Open `userCert.cfg` in an editor and perform the following changes:
 
 1. *The `commonNameToSANDefaultImpl` component is not suitable for
    user certificates.*
-   - Remove all lines beginning with `policyset.serverCertSet.12`.
-   - Delete `,12` from the `policyset.serverCertSet.list` parameter.
+   - Remove all **four lines** beginning with
+     `policyset.serverCertSet.12`.
+   - Delete `,12` from the end of the `policyset.serverCertSet.list`
+     parameter.
 
 2. *Allow elliptic curve keys.*
    - Set `policyset.serverCertSet.3.constraint.params.keyType=-`
@@ -169,6 +171,19 @@ Imported profile "userCert"
   Profile description: User PKINIT certs
   Store issued certificates: True
 ```
+
+The new profile has been created.
+
+::: note
+
+If you need to update the profile configuration later,
+here's how:
+
+```command
+ipa certprofile-mod userCert --file userCert.cfg
+```
+
+:::
 
 
 ## CA ACLs - authorising use of a profile

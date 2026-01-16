@@ -21,11 +21,22 @@ The workshop is designed to make it as easy as possible to
 participate.
 
 You will need a computer with an **Internet access, an SSH client
-and a web browser**.  You can use **any operating system**—all the
-exciting stuff happens on the machines in the workshop environment.
+and a web browser**.  You can use **any operating system**—most of
+the exciting stuff happens on the machines in the workshop
+environment.
 
 Some prior experience with Linux / Unix and using a command shell
 will be helpful, but it is not a strict requirement.
+
+The smart card module has an **optional** remote graphical login
+scenario, using *Remote Desktop Protocol (RDP)*.  Suitable clients
+include:
+
+- **Linux**: `gnome-connections` or `remmina` (install via your
+  package manager)
+- **Mac**: FreeRDP ([download](https://www.freerdp.com/) or
+  `brew install freerdp`)
+- **Windows**: mRemoteNG ([download](https://mremoteng.org/))
 
 
 ## Workshop modules {#toc}
@@ -51,10 +62,10 @@ Enterprise PKI modules:
     modules/ipa-certmonger.html)
 - [FreeIPA certificate profiles and user certificates](
     modules/ipa-profiles.html)
+- [Smart cards and workstation login](
+    modules/ipa-smart-cards.html)
 - [Externally signing the FreeIPA CA](
     modules/ipa-external-ca.html)
-- [Smart Card login](
-    modules/ipa-smart-cards.html) (TODO)
 
 
 ## Your unique workshop environment
