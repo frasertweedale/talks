@@ -19,16 +19,193 @@
 
         <div id="content">
             <div id="postContent">
-    
+    <h1 id="smart-cards-and-workstation-login">Smart cards and workstation login</h1>
+<p><em>Smart cards</em> are cryptographic devices that can securely store keys
+and certificates to enable a variety of authentication and
+encryption applications. Common use cases include:</p>
+<ul>
+<li>Physical access badges</li>
+<li>Workstation login (maybe you’ve seen this at a bank)</li>
+<li>Storing OpenPGP or SSH keys</li>
+</ul>
+<p>Smart cards offer a common interface through the PKCS #11 standard.
+TPMs and smartphone <em>secure elements</em> also provide this interface
+and can behave like smart cards. The principle is that keys cannot
+be extracted from the hardware.</p>
+<div class="note">
+<p>Software implementations are also possible, but offer none of the
+physical security benefits.</p>
+</div>
+<p>In this module you will use a TPM like a smart card and walk through
+some real world scenarios:</p>
+<ul>
+<li><p>Generate a key on the device and sign a CSR</p></li>
+<li><p>Install the issued certifiate on the device</p></li>
+<li><p>Configure a FreeIPA domain and enrolled workstation to enable
+smart card login</p></li>
+<li><p>Configure <em>GNOME Remote Desktop</em> to enable remote graphical login</p></li>
+</ul>
+<div class="note">
+<p>Most activities in this module are to be performed on
+<code>workstation.$DOMAIN</code>. SSH into this machine now.</p>
+<p><strong>You will also need an RDP client to perform the graphical
+workstation login.</strong> You can still do most of the activities
+without it, but you will miss out on some of the payoff.</p>
+</div>
+<h2 id="setting-up-the-smart-card">Setting up the smart card <a href="#setting-up-the-smart-card" class="section">§</a></h2>
+<div class="note">
+<p><strong>TODO TODO TODO</strong> update the machine image to include the following
+packages (and until Fraser does that, install them NOW)</p>
+<pre class="command"><code>sudo dnf install tpm2-pkcs11 tpm2-pkcs11-tools openssl-pkcs11</code></pre>
+</div>
+<div class="note">
+<p>On Fedora and RHEL, you will need the following packages:</p>
+<ul>
+<li><code>tpm2-pkcs11</code></li>
+<li><code>tpm2-pkcs11-tools</code></li>
+<li><code>openssl-pkcs11</code></li>
+</ul>
+<p>These are already installed on the <code>workstation</code> VM. Other
+distributions may require different packages.</p>
+</div>
+<p>The exact commands for initialising and configuring a smart card
+will differ by vendor. In this workshop we are using the TPM as a
+smart card. Some of the commands are TPM specific, and some are
+generic. Despite this, you should gain an understanding of the
+general procedure required to use smart cards for X.509
+applications.</p>
+<h3 id="initialise-a-smart-card-interface-to-the-tpm">Initialise a smart card interface to the TPM <a href="#initialise-a-smart-card-interface-to-the-tpm" class="section">§</a></h3>
+<p>The first step is to initialise the TPM as a “smart card”.</p>
+<pre class="command workstation"><code>sudo tpm2_ptool init</code></pre>
+<pre class="output"><code>action: Created
+id: 1</code></pre>
+<p>That command creates a local database to track the tokens and keys
+created in the TPM-backed smart card. Next create a <em>token</em>:</p>
+<pre class="command workstation"><code>sudo tpm2_ptool addtoken --pid=1 \
+  --sopin=AdminPIN123 \
+  --userpin=UserPIN123 \
+  --label=&quot;TPM-Token&quot;</code></pre>
+<h3 id="generate-key-pair">Generate key pair <a href="#generate-key-pair" class="section">§</a></h3>
+<p>Now generate a private key (in this case, a NIST P-256 ECC key):</p>
+<pre class="command workstation"><code>sudo tpm2_ptool addkey \
+  --label=&quot;TPM-Token&quot; --userpin=UserPIN123 \
+  --algorithm=ecc256 --key-label=&quot;ipa-key&quot;</code></pre>
+<pre class="output"><code>action: add
+private:
+  CKA_ID: '31303237303332383133623634366232'
+public:
+  CKA_ID: '31303237303332383133623634366232'</code></pre>
+<p><code>--label</code> identifies the token and <code>--userpin</code> unlocks it to enable
+the operation. The output shows the <code>CKA_ID</code>, which is an identifer
+that will link the public key, private key, and (yet to be issued)
+certificate.</p>
+<h3 id="create-csr">Create CSR <a href="#create-csr" class="section">§</a></h3>
+<p>So far we have used commands specific to the TPM PKCS #11
+implementation to set up our “smart card”. To create the CSR we
+will use <code>openssl</code>. But we must first find out the PKCS #11 URI for
+our key, so that <code>openssl</code> can see it:</p>
+<pre class="command workstation"><code>sudo TPM2_PKCS11_BACKEND=esysdb p11tool \
+  --list-all &quot;pkcs11:token=TPM-Token&quot;</code></pre>
+<pre class="output"><code>... some warnings (ignore them) ...
+Object 0:
+        URL: pkcs11:model=NitroTPMv1.0%00%00%00%00;manufacturer=AMZN;serial=0000000000000000;token=TPM-Token;id=%31%30%32%37%30%33%32%38%31%33%62%36%34%36%62%32;object=ipa-key;type=public
+        Type: Public key (EC/ECDSA-SECP256R1)
+        Label: ipa-key
+        ID: 31:30:32:37:30:33:32:38:31:33:62:36:34:36:62:32</code></pre>
+<p>Copy the value of the <code>URL:</code> field and save it in a shell variable.
+<strong>Be sure to wrap the value in quotes (<code>"</code>).</strong> For example:</p>
+<p><code>command {.workstation no-copy} PKCS11_URI="pkcs11:model=NitroTPMv1.0%00%00%00%00;manufacturer=AMZN;serial=0000000000000000;token=TPM-Token;id=%31%30%32%37%30%33%32%38%31%33%62%36%34%36%62%32;object=ipa-key;type=public"</code></p>
+<p>Now generate the CSR. <strong>You will be prompted for the user PIN</strong>.</p>
+<pre class="command workstation"><code>sudo openssl req -new \
+  -engine pkcs11 -keyform engine -key $PKCS11_URI \
+  -config user_csr.cnf -out tpm-user.csr</code></pre>
+<pre class="output"><code>Engine &quot;pkcs11&quot; set.
+... some warnings (ignore them) ...
+Enter PKCS#11 token PIN for TPM-Token:</code></pre>
+<h3 id="request-and-import-certificate">Request and import certificate <a href="#request-and-import-certificate" class="section">§</a></h3>
+<p>Request the certificate from the CA. Given the context, this might
+also be referred to as <em>enrolment</em>.</p>
+<pre class="command workstation"><code>ipa cert-request user.csr \
+    --profile-id userCert \
+    --principal user1 \
+    --certificate-out tpm-user.crt</code></pre>
+<p>Now use the <code>tpm2_ptool</code> command to import the certificate into the
+smart card:</p>
+<pre class="command workstation"><code>sudo tpm2_ptool addcert \
+  --label=&quot;TPM-Token&quot; --key-label=&quot;ipa-key&quot; tpm-user.crt</code></pre>
+<pre class="output"><code>action: add
+cert:
+  CKA_ID: '31303237303332383133623634366232'</code></pre>
+<p>The PIN is not required for this operation. Note the <code>CKA_ID</code>
+matches that of the keypair.</p>
+<h2 id="enable-smart-card-login-on-the-workstation">Enable smart card login on the workstation <a href="#enable-smart-card-login-on-the-workstation" class="section">§</a></h2>
+<p>TODO</p>
+<h2 id="enable-smart-card-login-for-freeipa-users">Enable smart card login for FreeIPA users <a href="#enable-smart-card-login-for-freeipa-users" class="section">§</a></h2>
+<p>TODO</p>
+<h2 id="enabling-graphical-login-via-rdp">Enabling graphical login via RDP <a href="#enabling-graphical-login-via-rdp" class="section">§</a></h2>
+<p>To simulate a workstation smart card login experience, we will
+enable <a href="https://en.wikipedia.org/wiki/Remote_Desktop_Protocol"><em>Remote Desktop Protocol (RDP)</em></a> login, using
+<strong><em>GNOME Remote Desktop</em></strong>.</p>
+<p>Wouldn’t you know it, RDP uses TLS to secure the traffic between
+client and server. Using Certmonger, request a service certificate
+for the RDP server to use:</p>
+<pre class="command client"><code>sudo ipa-getcert request \
+    -f /etc/pki/tls/certs/rdp.crt \
+    -k /etc/pki/tls/private/rdp.key \
+    --key-owner gnome-remote-desktop \
+    --cert-owner gnome-remote-desktop \
+    -K host/$(hostname) \
+    -D $(hostname)</code></pre>
+<p>Now tell GNOME Remote Desktop about the key and certificate:</p>
+<pre class="command workstation"><code>sudo grdctl --system rdp \
+  set-tls-key  /etc/pki/tls/private/rdp.key</code></pre>
+<pre class="command workstation"><code>sudo grdctl --system rdp \
+  set-tls-cert /etc/pki/tls/certs/rdp.crt</code></pre>
+<div class="note">
+<p>You can ignore error messages that mention TPM credentials.</p>
+</div>
+<p>We have to configure an RDP username and password. These
+credentials are unrelated to FreeIPA or system accounts:</p>
+<pre class="command workstation"><code>sudo grdctl --system rdp
+  set-credentials rdp hunter2</code></pre>
+<p>Allow RDP traffic through the firewall:</p>
+<pre class="command workstation"><code>sudo firewall-cmd --permanent --add-service=rdp</code></pre>
+<pre class="command workstation"><code>sudo firewall-cmd --reload</code></pre>
+<p>Finally, enable the service:</p>
+<pre class="command workstation"><code>sudo grdctl --system rdp enable</code></pre>
+<h2 id="connecting-to-rdp">Connecting to RDP <a href="#connecting-to-rdp" class="section">§</a></h2>
+<p>Use your RDP client to connect to
+<code>workstation.env$N.pki.frase.id.au</code>. You may need to prefix the
+domain name with <code>rdp://</code>. The TCP port is <code>3389</code>.</p>
+<p>You may need to accept the server’s certificate—which you issued and
+configured!</p>
 </div>
 <div id="nav" class="footer">
     <div class="back">
         
+        <a href="ipa-profiles.html">
+            <
+            <br />
+            FreeIPA certificate profiles and user certificates
+        </a>
+        
     </div>
     <div class="up">
         
+        <a href="../index.html#toc">
+            ^
+            <br />
+            Up to index
+        </a>
+        
     </div>
     <div class="next">
+        
+        <a href="ipa-external-ca.html">
+            >
+            <br />
+            Externally signing the FreeIPA CA
+        </a>
         
     </div>
 </div>

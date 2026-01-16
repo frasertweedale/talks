@@ -115,8 +115,10 @@ certificates.</p></li>
 <li><em>The <code>commonNameToSANDefaultImpl</code> component is not suitable for
 user certificates.</em>
 <ul>
-<li>Remove all lines beginning with <code>policyset.serverCertSet.12</code>.</li>
-<li>Delete <code>,12</code> from the <code>policyset.serverCertSet.list</code> parameter.</li>
+<li>Remove all <strong>four lines</strong> beginning with
+<code>policyset.serverCertSet.12</code>.</li>
+<li>Delete <code>,12</code> from the end of the <code>policyset.serverCertSet.list</code>
+parameter.</li>
 </ul></li>
 <li><em>Allow elliptic curve keys.</em>
 <ul>
@@ -145,6 +147,12 @@ Imported profile &quot;userCert&quot;
   Profile ID: userCert
   Profile description: User PKINIT certs
   Store issued certificates: True</code></pre>
+<p>The new profile has been created.</p>
+<div class="note">
+<p>If you need to update the profile configuration later,
+here’s how:</p>
+<pre class="command"><code>ipa certprofile-mod userCert --file userCert.cfg</code></pre>
+</div>
 <h2 id="ca-acls---authorising-use-of-a-profile">CA ACLs - authorising use of a profile <a href="#ca-acls---authorising-use-of-a-profile" class="section">§</a></h2>
 <p>Use of particular profiles can be restricted to particular
 principals—by name, group, or class. The <strong><em>CA ACL</em></strong> objects
@@ -263,10 +271,10 @@ the Smart Card login module.</p>
     </div>
     <div class="next">
         
-        <a href="ipa-external-ca.html">
+        <a href="ipa-smart-cards.html">
             >
             <br />
-            Externally signing the FreeIPA CA
+            Smart cards and workstation login
         </a>
         
     </div>
