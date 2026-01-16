@@ -33,12 +33,9 @@ In this module you will use a TPM like a smart card and walk through
 some real world scenarios:
 
 - Generate a key on the device and sign a CSR
-
 - Install the issued certifiate on the device
-
 - Configure a FreeIPA domain and enrolled workstation to enable
   smart card login
-
 - Configure *GNOME Remote Desktop* to enable remote graphical login
 
 ::: note
@@ -156,8 +153,8 @@ Object 0:
 Copy the value of the `URL: ` field and save it in a shell variable.
 **Be sure to wrap the value in quotes (`"`).**  For example:
 
-```command {.workstation no-copy}
-PKCS11_URI="pkcs11:model=NitroTPMv1.0%00%00%00%00;manufacturer=AMZN;serial=0000000000000000;token=TPM-Token;id=%31%30%32%37%30%33%32%38%31%33%62%36%34%36%62%32;object=ipa-key;type=public"
+```command {.workstation .no-copy}
+PKCS11_URI="pkcs11:model=NitroTPMv1.0%00%00%00%00;..."
 ```
 
 Now generate the CSR.  **You will be prompted for the user PIN**.
@@ -235,7 +232,12 @@ sudo ipa-getcert request \
     -D $(hostname)
 ```
 
-Now tell GNOME Remote Desktop about the key and certificate:
+The `--key-owner` and `--cert-owner` options tell Certmonger to
+change the ownership of the files it creates, so the server process
+can read them.  There are also options to change the mode (file
+permissions), if you need that.
+
+Now, tell GNOME Remote Desktop about the key and certificate:
 
 ```command {.workstation}
 sudo grdctl --system rdp \
