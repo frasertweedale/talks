@@ -55,6 +55,8 @@ Public PKI modules:
 
 - [ACME certificates for Apache httpd with `mod_md`](
     modules/acme-httpd-mod_md.html)
+- [Using Certificate Transparency logs](
+    modules/certificate-transparency.html)
 
 Enterprise PKI modules:
 
