@@ -289,6 +289,23 @@ sudo sh -c 'chmod 775 /var/lib/softhsm/tokens/*'
 sudo sh -c 'chmod 664 /var/lib/softhsm/tokens/*/*'
 ```
 
+One more thing: PKCS #11 tokens have a flag that indicates whether
+the device is **removable** or not.  SSSD unconditionally ignores
+non-removable tokens.  Fortunately, we can configure SoftHSM to make
+it pretend that its tokens are removable.
+
+Edit `/etc/softhsm2.conf`.  Change the line that says:
+
+```
+slots.removable = false
+```
+
+to say:
+
+```
+slots.removable = true
+```
+
 
 ### Enable smart card login in SSSD and GDM
 
