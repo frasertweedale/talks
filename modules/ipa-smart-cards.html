@@ -192,6 +192,14 @@ don’t need these hacks.</p>
 are randomly generated UUIDs; the wildcards match them.</p>
 <pre class="command workstation"><code>sudo sh -c 'chmod 775 /var/lib/softhsm/tokens/*'</code></pre>
 <pre class="command workstation"><code>sudo sh -c 'chmod 664 /var/lib/softhsm/tokens/*/*'</code></pre>
+<p>One more thing: PKCS #11 tokens have a flag that indicates whether
+the device is <strong>removable</strong> or not. SSSD unconditionally ignores
+non-removable tokens. Fortunately, we can configure SoftHSM to make
+it pretend that its tokens are removable.</p>
+<p>Edit <code>/etc/softhsm2.conf</code>. Change the line that says:</p>
+<pre><code>slots.removable = false</code></pre>
+<p>to say:</p>
+<pre><code>slots.removable = true</code></pre>
 <h3 id="enable-smart-card-login-in-sssd-and-gdm">Enable smart card login in SSSD and GDM <a href="#enable-smart-card-login-in-sssd-and-gdm" class="section">§</a></h3>
 <p>Use <code>authselect</code> to configure the PAM stack to enable smart card
 login:</p>
