@@ -361,7 +361,7 @@ Configure an RDP username and password.  These credentials are
 unrelated to FreeIPA or system accounts.
 
 ```command {.workstation}
-sudo grdctl --system rdp
+sudo grdctl --system rdp \
   set-credentials rdp hunter2
 ```
 
