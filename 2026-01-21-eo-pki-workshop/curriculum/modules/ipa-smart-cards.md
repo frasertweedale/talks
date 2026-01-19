@@ -56,13 +56,13 @@ without it, but you will miss out on some of the payoff.
 ## Setting up the smart card
 
 The exact commands for initialising and configuring a smart card
-differ by vendor.  In this workshop we are sing the *SoftHSM*
+differ by vendor.  In this workshop we are using the *SoftHSM*
 software token implementation.  Because it is not a physical device,
 SoftHSM is **not recommended for real world use**.  But it is
 perfect for developing an understanding of the general procedure
 required to use smart cards for X.509 applications.
 
-The first step is the create a token.  This is the only
+The first step is to create a token.  This is the only
 SoftHSM-specific operation.  Later steps will use the PKCS #11
 interface to interact with the token.
 
