@@ -98,8 +98,9 @@ MDomain $(hostname)
 EOF</code></pre>
 <p>Restart the server:</p>
 <pre class="command web"><code>sudo systemctl restart httpd</code></pre>
-<p>Check the httpd error log for ACME-related messages. The message
-that indicates success will look like:</p>
+<p>Check the httpd error log for ACME-related messages.</p>
+<pre class="command web"><code>sudo tail -f /var/log/httpd/error_log</code></pre>
+<p>The message that indicates success will look like:</p>
 <pre class="output"><code>[Thu Jan 08 06:44:32.452115 2026] [md:notice] [pid 4358:tid 4361]
 AH10059: The Managed Domain web.e2.pki.frase.id.au has been setup
 and changes will be activated on next (graceful) server restart.</code></pre>

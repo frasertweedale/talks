@@ -257,9 +257,12 @@ unrelated to FreeIPA or system accounts.</p>
 <p>Finally, enable the RDP service:</p>
 <pre class="command workstation"><code>sudo grdctl --system rdp enable</code></pre>
 <h2 id="bringing-it-all-together">Bringing it all together <a href="#bringing-it-all-together" class="section">§</a></h2>
-<p>Use your RDP client to connect to
-<code>workstation.e$N.pki.frase.id.au</code>. You may need to prefix the
-domain name with <code>rdp://</code>. The TCP port is <code>3389</code>.</p>
+<div class="note">
+<p>You need a RDP client on your local machine for these final steps.</p>
+</div>
+<p>Use your RDP client to connect to <code>workstation.e$N.pki.frase.id.au</code>.
+You may need to prefix the domain name with <code>rdp://</code>. The TCP port
+is <code>3389</code>.</p>
 <p>You may need to accept the server’s certificate—which you issued and
 configured!</p>
 <p>Authenticate the RDP session with the RDP username and password
