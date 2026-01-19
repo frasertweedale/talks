@@ -382,7 +382,7 @@ sudo grdctl --system rdp enable
 ## Bringing it all together
 
 Use your RDP client to connect to
-`workstation.env$N.pki.frase.id.au`.  You may need to prefix the
+`workstation.e$N.pki.frase.id.au`.  You may need to prefix the
 domain name with `rdp://`.  The TCP port is `3389`.
 
 You may need to accept the server's certificate—which you issued and
