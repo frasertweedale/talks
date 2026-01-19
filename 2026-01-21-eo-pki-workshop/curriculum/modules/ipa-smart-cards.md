@@ -17,10 +17,12 @@ encryption applications.  Common use cases include:
 - Workstation login (maybe you've seen this at a bank)
 - Storing OpenPGP or SSH keys
 
-Smart cards offer a common interface through the PKCS #11 standard.
-TPMs and smartphone *secure elements* also provide this interface
-and can behave like smart cards.  The principle is that keys cannot
-be extracted from the hardware.
+Smart cards use a variety of physical interfaces including USB, NFC,
+and the classic plastic card with contact pad.  TPMs and smartphone
+*secure elements* can also be configured as smart cards.  The **PKCS
+#11** standard provides a common interface to access smart card
+crytpographic operations, including key generation and signing.  The
+principle is that keys cannot be extracted from the hardware.
 
 ::: note
 
@@ -29,14 +31,15 @@ physical security benefits.
 
 :::
 
-In this module you will use a TPM like a smart card and walk through
-some real world scenarios:
+In this module you will configure a *software* smart card token and
+walk through some real world scenarios:
 
-- Generate a key on the device and sign a CSR
+- Generate a key on the token and sign a CSR
 - Install the issued certifiate on the device
-- Configure a FreeIPA domain and enrolled workstation to enable
-  smart card login
-- Configure *GNOME Remote Desktop* to enable remote graphical login
+- Configure a FreeIPA domain for smart card authentication
+- Authenticate to Kerberos using the smart card
+- Configure a workstation for smart card based login
+- Set up *GNOME Remote Desktop* to enable remote graphical login
 
 ::: note
 
@@ -52,122 +55,84 @@ without it, but you will miss out on some of the payoff.
 
 ## Setting up the smart card
 
-
-::: note
-
-**TODO TODO TODO** update the machine image to include the following
-packages (and until Fraser does that, install them NOW)
-
-```command
-sudo dnf install tpm2-pkcs11 tpm2-pkcs11-tools openssl-pkcs11
-```
-
-:::
-
-::: note
-
-On Fedora and RHEL, you will need the following packages:
-
-- `tpm2-pkcs11`
-- `tpm2-pkcs11-tools`
-- `openssl-pkcs11`
-
-These are already installed on the `workstation` VM.  Other
-distributions may require different packages.
-
-:::
-
 The exact commands for initialising and configuring a smart card
-will differ by vendor.  In this workshop we are using the TPM as a
-smart card.  Some of the commands are TPM specific, and some are
-generic.  Despite this, you should gain an understanding of the
-general procedure required to use smart cards for X.509
-applications.
+differ by vendor.  In this workshop we are sing the *SoftHSM*
+software token implementation.  Because it is not a physical device,
+SoftHSM is **not recommended for real world use**.  But it is
+perfect for developing an understanding of the general procedure
+required to use smart cards for X.509 applications.
 
-
-### Initialise a smart card interface to the TPM
-
-The first step is to initialise the TPM as a "smart card".
+The first step is the create a token.  This is the only
+SoftHSM-specific operation.  Later steps will use the PKCS #11
+interface to interact with the token.
 
 ```command {.workstation}
-sudo tpm2_ptool init
+sudo softhsm2-util --init-token --slot 0 \
+  --label "FakeSmartCard" \
+  --pin 1234 \
+  --so-pin 5678
 ```
 ```output
-action: Created
-id: 1
+The token has been initialized and is reassigned to slot 2017281153
 ```
 
-That command creates a local database to track the tokens and keys
-created in the TPM-backed smart card.  Next create a *token*:
+`--label` gives a human-friendly name for the token.  `--pin` and
+`--so-pin` set the codes for user and administrator access to the
+token.
 
-```command {.workstation}
-sudo tpm2_ptool addtoken --pid=1 \
-  --sopin=AdminPIN123 \
-  --userpin=UserPIN123 \
-  --label="TPM-Token"
-```
 
-### Generate key pair
+### Generate key pair and CSR
 
 Now generate a private key (in this case, a NIST P-256 ECC key):
 
 ```command {.workstation}
-sudo tpm2_ptool addkey \
-  --label="TPM-Token" --userpin=UserPIN123 \
-  --algorithm=ecc256 --key-label="ipa-key"
-```
-```output
-action: add
-private:
-  CKA_ID: '31303237303332383133623634366232'
-public:
-  CKA_ID: '31303237303332383133623634366232'
+sudo p11-kit generate-keypair \
+    pkcs11:token=FakeSmartCard --login \
+    --type=ecdsa --curve=secp256r1 \
+    --label ipa-key --id deadbeef
 ```
 
-`--label` identifies the token and `--userpin` unlocks it to enable
-the operation.  The output shows the `CKA_ID`, which is an identifer
-that will link the public key, private key, and (yet to be issued)
-certificate.
-
-
-### Create CSR
-
-So far we have used commands specific to the TPM PKCS #11
-implementation to set up our "smart card".  To create the CSR we
-will use `openssl`.  But we must first find out the PKCS #11 URI for
-our key, so that `openssl` can see it:
+List objects and retrieve the PKCS #11 URI of the key:
 
 ```command {.workstation}
-sudo TPM2_PKCS11_BACKEND=esysdb p11tool \
-  --list-all "pkcs11:token=TPM-Token"
+sudo p11-kit list-objects pkcs11:token=FakeSmartCard
 ```
 ```output
-... some warnings (ignore them) ...
-Object 0:
-        URL: pkcs11:model=NitroTPMv1.0%00%00%00%00;manufacturer=AMZN;serial=0000000000000000;token=TPM-Token;id=%31%30%32%37%30%33%32%38%31%33%62%36%34%36%62%32;object=ipa-key;type=public
-        Type: Public key (EC/ECDSA-SECP256R1)
-        Label: ipa-key
-        ID: 31:30:32:37:30:33:32:38:31:33:62:36:34:36:62:32
+Object: #0
+    uri: pkcs11:model=SoftHSM%20v2;manufacturer=SoftHSM%20project;serial=7c3fca5af83d4481;token=FakeSmartCard;id=%DE%AD%BE%EF;object=ipa-key;type=public
+    class: public-key
+    key-type: ec
+    label: ipa-key
+    id: de:ad:be:ef
+    flags:
+          local
+          token
+          modifiable
+          copyable
+          destroyable
 ```
 
-Copy the value of the `URL: ` field and save it in a shell variable.
-**Be sure to wrap the value in quotes (`"`).**  For example:
+The `uri` field in the output gives the PKCS #11 URI that refers to
+the new key on this specific token.  Save its value; you will need
+it in the next step.  **Make sure you surround the value in quotes
+(`"..."`).**
 
 ```command {.workstation .no-copy}
-PKCS11_URI="pkcs11:model=NitroTPMv1.0%00%00%00%00;..."
+PKCS11_URI="pkcs11:model=…;object=ipa-key;type=public"
 ```
 
-Now generate the CSR.  **You will be prompted for the user PIN**.
+Now create the CSR.  **OpenSSL will prompt for the user PIN** you
+set when creating the token.
 
 ```command {.workstation}
 sudo openssl req -new \
   -engine pkcs11 -keyform engine -key $PKCS11_URI \
-  -config user_csr.cnf -out tpm-user.csr
+  -config user_csr.cnf -out softhsm-user.csr
 ```
 ```output
 Engine "pkcs11" set.
 ... some warnings (ignore them) ...
-Enter PKCS#11 token PIN for TPM-Token:
+Enter PKCS#11 token PIN for FakeSmartCard:
 ```
 
 
@@ -180,34 +145,172 @@ also be referred to as *enrolment*.
 ipa cert-request user.csr \
     --profile-id userCert \
     --principal user1 \
-    --certificate-out tpm-user.crt
+    --certificate-out softhsm-user.crt
 ```
 
-Now use the `tpm2_ptool` command to import the certificate into the
-smart card:
+Import certificate to the token:
 
 ```command {.workstation}
-sudo tpm2_ptool addcert \
-  --label="TPM-Token" --key-label="ipa-key" tpm-user.crt
+sudo p11-kit import-object pkcs11:token=FakeSmartCard \
+  --file softhsm-user.crt \
+  --label ipa-key --id deadbeef
+```
+
+## Enable smart card authentication for FreeIPA users
+
+Smart card authentication requires setting a filter to control which
+certificates are eligible to be matched against domain accounts.
+**SSSD will always verify the certificate and ensure it chains up to
+a trusted CA**.  But these match rules provide an additional filter
+that can be used to further restrict certificate authentication.
+This is often used to ensure that only particular issuers are used.
+
+Let's just add a rule that accepts (valid) certificates from all
+issuers:
+
+```command {.workstation}
+ipa certmaprule-add all-issuers \
+    --matchrule '<ISSUER>.*'
 ```
 ```output
-action: add
-cert:
-  CKA_ID: '31303237303332383133623634366232'
+-----------------------------------------------------
+Added Certificate Identity Mapping Rule "all-issuers"
+-----------------------------------------------------
+  Rule name: all-issuers
+  Matching rule: <ISSUER>.*
+  Enabled: True
 ```
 
-The PIN is not required for this operation.  Note the `CKA_ID`
-matches that of the keypair.
+In addition to the *match rule*, ***mapping rules*** are important
+in some real world scenarios.  For example: when smart cards are
+issued by a trusted third party, and you do not even see the
+certificate until it is presented during login.  Or when certificate
+lifetimes are so short that managing the `userCertificate`
+attributes would be burdensome.
+
+In such cases, the mapping rule lets you use information from the
+certificate to match a user.  For example, the following rule
+**maps** email address values in the *Subject Alternative Name*
+extension to the user's `mail` attribute, but only when the
+certificate issuer **matches** `O=Example Org`:
+
+```command {.no-copy}
+ipa certmaprule-add email-mapping-EXAMPLE-RULE \
+    --matchrule="<ISSUER>O=Example Org" \
+    --maprule="(mail={san_rfc822name})"
+```
 
 
-## Enable smart card login on the workstation
+## Explicit Kerberos authentication with smart card
 
-TODO
+Now that the match rule has been created and the smart card is
+ready, you can perform a Kerberos initial authentication.  Enter the
+PIN when `kinit` prompts for it.
+
+```command {.workstation}
+sudo kinit user1 \
+     -X X509_user_identity=PKCS11:libsofthsm2.so user1
+```
+```output
+FakeSmartCard                    PIN:
+```
+
+Run `klist` to observe that the authentication succeeded:
+
+```command {.workstation}
+sudo klist
+```
+```output
+Ticket cache: KCM:0
+Default principal: user1@E1.PKI.FRASE.ID.AU
+
+Valid starting       Expires              Service principal
+01/18/2026 13:29:42  01/19/2026 12:35:00  krbtgt/E1.PKI.FRASE.ID.AU@E1.PKI.FRASE.ID.AU
+```
+
+The explicit `kinit` is useful to verify the smart card is working
+and Kerberos PKINIT is set up correctly.
 
 
-## Enable smart card login for FreeIPA users
+## Smart card workstation login
 
-TODO
+It is awkward for human users to authenticate using the `kinit`
+command.  Obtaining the TGT during a smart card based workstation
+login would be much nicer.  Let's set that up now!
+
+### Make the token accessible to SSSD
+
+::: note
+
+These steps are only applicable for SoftHSM tokens.
+
+:::
+
+All the SoftHSM token data live under `/var/lib/softhsm/tokens`.  We
+need to make it accessible to SSSD.  Change the ownership of all the
+data to the `ods` group:
+
+```command {.workstation}
+sudo chown -R ods:ods /var/lib/softhsm/tokens
+```
+
+Allow group write access to the token.  The directory and object
+names are randomly generated UUIDs; the wildcards match them.
+
+```command {.workstation}
+sudo sh -c 'chmod 770 /var/lib/softhsm/tokens/*'
+```
+
+```command {.workstation}
+sudo sh -c 'chmod 660 /var/lib/softhsm/tokens/*/*'
+```
+
+Then make the `sssd` user a member of the `ods` group.
+
+```command {.workstation}
+sudo usermod -aG ods sssd
+```
+
+### Enable smart card login in SSSD and GDM
+
+Use `authselect` to configure the PAM stack to enable smart card
+login:
+
+```command {.workstation}
+sudo authselect enable-feature with-smartcard
+```
+```output
+Make sure that SSSD service is configured and enabled.
+See SSSD documentation for more information.
+
+- with-smartcard is selected, make sure smartcard authentication
+  is enabled in sssd.conf:
+  - set "pam_cert_auth = True" in [pam] section
+```
+
+As the command output suggests, you must also edit
+`/etc/sssd/sssd.conf` to enable SSSD to look up user certificates.
+The `[pam]` section must look like:
+
+```
+[pam]
+pam_cert_auth = True
+```
+
+SSSD also needs to know what CAs are trusted for user login.  By
+default, SSSD looks at `/etc/sssd/pki/sssd_auth_ca_db.pem`.  Use a
+symlink to point that location the FreeIPA CA trust store:
+
+```command {.workstation}
+sudo ln -s /etc/ipa/ca.crt \
+    /etc/sssd/pki/sssd_auth_ca_db.pem
+```
+
+Now restart SSSD:
+
+```command {.workstation}
+sudo systemctl restart sssd
+```
 
 
 ## Enabling graphical login via RDP
@@ -218,9 +321,8 @@ enable [*Remote Desktop Protocol (RDP)*][wiki-rdp] login, using
 
 [wiki-rdp]: https://en.wikipedia.org/wiki/Remote_Desktop_Protocol
 
-Wouldn't you know it, RDP uses TLS to secure the traffic between
-client and server.  Using Certmonger, request a service certificate
-for the RDP server to use:
+RDP uses TLS to secure the traffic between client and server.  Using
+Certmonger, request a service certificate for the RDP server to use:
 
 ```command {.client}
 sudo ipa-getcert request \
@@ -255,8 +357,8 @@ You can ignore error messages that mention TPM credentials.
 
 :::
 
-We have to configure an RDP username and password.  These
-credentials are unrelated to FreeIPA or system accounts:
+Configure an RDP username and password.  These credentials are
+unrelated to FreeIPA or system accounts.
 
 ```command {.workstation}
 sudo grdctl --system rdp
@@ -266,21 +368,18 @@ sudo grdctl --system rdp
 Allow RDP traffic through the firewall:
 
 ```command {.workstation}
-sudo firewall-cmd --permanent --add-service=rdp
+sudo firewall-cmd --permanent --add-service=rdp \
+  && sudo firewall-cmd --reload
 ```
 
-```command {.workstation}
-sudo firewall-cmd --reload
-```
-
-Finally, enable the service:
+Finally, enable the RDP service:
 
 ```command {.workstation}
 sudo grdctl --system rdp enable
 ```
 
 
-## Connecting to RDP
+## Bringing it all together
 
 Use your RDP client to connect to
 `workstation.env$N.pki.frase.id.au`.  You may need to prefix the
@@ -288,3 +387,9 @@ domain name with `rdp://`.  The TCP port is `3389`.
 
 You may need to accept the server's certificate—which you issued and
 configured!
+
+The GDM login greeter will prompt you for the smart card pin.  Enter
+the PIN and log in.  Then open the *Terminal* app and run `klist`.
+You will see that the user obtained a Kerberos TGT during login.
+
+All done!  You can log out and close your RDP client.
