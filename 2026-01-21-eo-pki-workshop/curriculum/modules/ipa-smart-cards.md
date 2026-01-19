@@ -56,13 +56,13 @@ without it, but you will miss out on some of the payoff.
 ## Setting up the smart card
 
 The exact commands for initialising and configuring a smart card
-differ by vendor.  In this workshop we are sing the *SoftHSM*
+differ by vendor.  In this workshop we are using the *SoftHSM*
 software token implementation.  Because it is not a physical device,
 SoftHSM is **not recommended for real world use**.  But it is
 perfect for developing an understanding of the general procedure
 required to use smart cards for X.509 applications.
 
-The first step is the create a token.  This is the only
+The first step is to create a token.  This is the only
 SoftHSM-specific operation.  Later steps will use the PKCS #11
 interface to interact with the token.
 
@@ -135,11 +135,29 @@ Engine "pkcs11" set.
 Enter PKCS#11 token PIN for FakeSmartCard:
 ```
 
+::: note
+
+***TODO TODO TODO update image to include `openssl-pkcs11` module.***
+
+The OpenSSL PKCS #11 engine is provided by the `openssl-pkcs11` RPM
+package on Fedora and RHEL.  Other distributions may name it
+differently.
+
+:::
+
 
 ### Request and import certificate
 
-Request the certificate from the CA.  Given the context, this might
-also be referred to as *enrolment*.
+To request the certificate from the FreeIPA CA you need to
+authenticate.  Authenticate as `admin`, because you'll need to use
+that account soon.
+
+```command {.workstation}
+kinit admin
+```
+
+Now request the certificate from the CA.  Given the context, this
+could also be called *enrolling* the smart card.
 
 ```command {.workstation}
 ipa cert-request user.csr \
@@ -148,7 +166,7 @@ ipa cert-request user.csr \
     --certificate-out softhsm-user.crt
 ```
 
-Import certificate to the token:
+Finally, import the certificate into the token:
 
 ```command {.workstation}
 sudo p11-kit import-object pkcs11:token=FakeSmartCard \
@@ -209,7 +227,7 @@ PIN when `kinit` prompts for it.
 
 ```command {.workstation}
 sudo kinit user1 \
-     -X X509_user_identity=PKCS11:libsofthsm2.so user1
+     -X X509_user_identity=PKCS11:libsofthsm2.so
 ```
 ```output
 FakeSmartCard                    PIN:
@@ -232,44 +250,45 @@ The explicit `kinit` is useful to verify the smart card is working
 and Kerberos PKINIT is set up correctly.
 
 
-## Smart card workstation login
+## Enable smart card workstation login
 
 It is awkward for human users to authenticate using the `kinit`
 command.  Obtaining the TGT during a smart card based workstation
 login would be much nicer.  Let's set that up now!
 
+
 ### Make the token accessible to SSSD
 
 ::: note
 
-These steps are only applicable for SoftHSM tokens.
+We are about to make the SoftHSM token usable by all users on the
+system.  This is needed because of how SSSD operates.  **Never** do
+something like this in a real world setting!
+
+Real hardware smart cards use the [OpenSC] system and
+don't need these hacks.
+
+[OpenSC]: https://github.com/OpenSC/OpenSC/wiki
 
 :::
 
-All the SoftHSM token data live under `/var/lib/softhsm/tokens`.  We
-need to make it accessible to SSSD.  Change the ownership of all the
-data to the `ods` group:
+Change the ownership of all the data to `sssd` user and group:
 
 ```command {.workstation}
-sudo chown -R ods:ods /var/lib/softhsm/tokens
+sudo chown -R sssd:sssd /var/lib/softhsm/tokens
 ```
 
-Allow group write access to the token.  The directory and object
-names are randomly generated UUIDs; the wildcards match them.
+Grant all users access to the token.  The directory and object names
+are randomly generated UUIDs; the wildcards match them.
 
 ```command {.workstation}
-sudo sh -c 'chmod 770 /var/lib/softhsm/tokens/*'
+sudo sh -c 'chmod 775 /var/lib/softhsm/tokens/*'
 ```
 
 ```command {.workstation}
-sudo sh -c 'chmod 660 /var/lib/softhsm/tokens/*/*'
+sudo sh -c 'chmod 664 /var/lib/softhsm/tokens/*/*'
 ```
 
-Then make the `sssd` user a member of the `ods` group.
-
-```command {.workstation}
-sudo usermod -aG ods sssd
-```
 
 ### Enable smart card login in SSSD and GDM
 
@@ -313,7 +332,7 @@ sudo systemctl restart sssd
 ```
 
 
-## Enabling graphical login via RDP
+## Enable graphical login via RDP
 
 To simulate a workstation smart card login experience, we will
 enable [*Remote Desktop Protocol (RDP)*][wiki-rdp] login, using
@@ -361,7 +380,7 @@ Configure an RDP username and password.  These credentials are
 unrelated to FreeIPA or system accounts.
 
 ```command {.workstation}
-sudo grdctl --system rdp
+sudo grdctl --system rdp \
   set-credentials rdp hunter2
 ```
 
@@ -382,14 +401,18 @@ sudo grdctl --system rdp enable
 ## Bringing it all together
 
 Use your RDP client to connect to
-`workstation.env$N.pki.frase.id.au`.  You may need to prefix the
+`workstation.e$N.pki.frase.id.au`.  You may need to prefix the
 domain name with `rdp://`.  The TCP port is `3389`.
 
 You may need to accept the server's certificate—which you issued and
 configured!
 
-The GDM login greeter will prompt you for the smart card pin.  Enter
-the PIN and log in.  Then open the *Terminal* app and run `klist`.
-You will see that the user obtained a Kerberos TGT during login.
+Authenticate the RDP session with the RDP username and password
+(`rdp`:`hunter2`).  If there is a *Domain* field, leave it blank.
+
+The GDM login screen will greet you.  It will prompt you for the
+smart card pin.  Enter the PIN and log in.  Then open the *Terminal*
+app and run `klist`.  You will see that the user obtained a Kerberos
+TGT during login.
 
 All done!  You can log out and close your RDP client.
