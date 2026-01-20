@@ -182,23 +182,6 @@ this workshop.
 For user authentication certificates, the primary identifiers are
 usually the username (in CN) and the email address (in the SAN).
 
-::: note
-
-Set the `DOMAIN` shell variable, so that substitutions in shell
-commands work:
-
-```command {.client .no-copy}
-DOMAIN=e17.pki.frase.id.au
-```
-
-Also set the `REALM` shell variable (based on `$DOMAIN`):
-
-```command {.client}
-REALM=$(echo $DOMAIN | tr '[:lower:]' '[:upper:]')
-```
-
-:::
-
 Create a file named `user_csr.cnf` with an OpenSSL configuration
 suitable for requesting an authentication certificate for `user1`:
 

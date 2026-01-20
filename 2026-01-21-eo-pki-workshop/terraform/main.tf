@@ -123,7 +123,8 @@ resource "aws_instance" "ipa" {
     #!/bin/bash
     DOMAIN="e${count.index + 1}.${var.base_domain}"
     REALM=$(echo $DOMAIN | tr '[:lower:]' '[:upper:]')
-
+    echo export DOMAIN=$DOMAIN >> /etc/profile.d/workshop.sh
+    echo export REALM=$REALM   >> /etc/profile.d/workshop.sh
     hostnamectl set-hostname ipa.$DOMAIN
 
     ipa-server-install -U \
@@ -156,6 +157,9 @@ resource "aws_instance" "client" {
   user_data = <<-EOF
     #!/bin/bash
     DOMAIN="e${count.index + 1}.${var.base_domain}"
+    REALM=$(echo $DOMAIN | tr '[:lower:]' '[:upper:]')
+    echo export DOMAIN=$DOMAIN >> /etc/profile.d/workshop.sh
+    echo export REALM=$REALM   >> /etc/profile.d/workshop.sh
     hostnamectl set-hostname client.$DOMAIN
 
     # Wait for IPA server to come up
@@ -192,6 +196,10 @@ resource "aws_instance" "web" {
 
   user_data = <<-EOF
     #!/bin/bash
+    DOMAIN="e${count.index + 1}.${var.base_domain}"
+    REALM=$(echo $DOMAIN | tr '[:lower:]' '[:upper:]')
+    echo export DOMAIN=$DOMAIN >> /etc/profile.d/workshop.sh
+    echo export REALM=$REALM   >> /etc/profile.d/workshop.sh
     hostnamectl set-hostname web.e${count.index + 1}.${var.base_domain}
   EOF
 

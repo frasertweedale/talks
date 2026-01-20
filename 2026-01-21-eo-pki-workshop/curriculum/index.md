@@ -91,11 +91,18 @@ There are several machines in the environment:
 - `client.e$N.pki.frase.id.au`: an enrolled client machine
 - `web.e$N.pki.frase.id.au`: a web server
 
-::: note
+### Environment variables
 
-Do not access or interfere with other participants' environments.
+On all three machines, login shells will automatically set the
+`DOMAIN` and `REALM` environment variables.  For example:
 
-:::
+```
+export DOMAIN=e17.pki.frase.id.au
+export REALM=E17.PKI.FRASE.ID.AU
+```
+
+You might also find it convenient to set these variables in your
+shell session on your local machine.
 
 
 ### Accessing the environment
@@ -114,6 +121,12 @@ ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au
 ```
 
 Accept the host key prompt and log in.
+
+::: note
+
+Do not access or interfere with other participants' environments!
+
+:::
 
 
 ### *hacker voice*: I'm in.
