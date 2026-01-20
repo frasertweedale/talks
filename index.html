@@ -27,6 +27,9 @@ application areas:</p>
 <li>TLS certificates for public websites and services (via ACME)</li>
 <li>Enterprise PKI for Linx / Unix environments (with FreeIPA)</li>
 </ul>
+<div class="note">
+<p>Please <a href="feedback.html"><strong>give your feedback</strong></a> at the end of the session!</p>
+</div>
 <h2 id="prerequisites">Prerequisites</h2>
 <p>The workshop is designed to make it as easy as possible to
 participate.</p>
@@ -47,27 +50,23 @@ package manager)</li>
 <li><strong>Windows</strong>: mRemoteNG (<a href="https://mremoteng.org/">download</a>)</li>
 </ul>
 <h2 id="toc">Workshop modules</h2>
-<p>The workshop activities are organised into modules. Some are
-prerequisites of others, but these dependencies should be fairly
-clear. You don’t have to do all modules in the listed order; feel
-free to explore the branches that interest you.</p>
-<p>Foundational modules:</p>
-<ul>
-<li><a href="modules/01-keygen-and-csr.html">Key generation and CSR creation with OpenSSL</a></li>
-</ul>
-<p>Public PKI modules:</p>
-<ul>
+<p>The workshop activities are organised into <strong>Public PKI</strong> and
+<strong>Enterprise PKI</strong> sections. Within each section, you should <strong>do
+the modules in order</strong>.</p>
+<p><strong>Public PKI</strong> modules:</p>
+<ol type="1">
 <li><a href="modules/acme-httpd-mod_md.html">ACME certificates for Apache httpd with <code>mod_md</code></a></li>
 <li><a href="modules/certificate-transparency.html">Using Certificate Transparency logs</a></li>
-</ul>
-<p>Enterprise PKI modules:</p>
-<ul>
+</ol>
+<p><strong>Enterprise PKI</strong> modules:</p>
+<ol type="1">
+<li><a href="modules/01-keygen-and-csr.html">Key generation and CSR creation with OpenSSL</a></li>
 <li><a href="modules/ipa-certmonger.html">Service certificates with FreeIPA and Certmonger</a></li>
 <li><a href="modules/ipa-profiles.html">FreeIPA certificate profiles and user certificates</a></li>
 <li><a href="modules/ipa-smart-cards.html">Smart cards and workstation login</a></li>
 <li><a href="modules/ipa-external-ca.html">Externally signing the FreeIPA CA</a></li>
 <li><a href="modules/ipa-acme.html">The FreeIPA ACME server</a></li>
-</ul>
+</ol>
 <h2 id="your-unique-workshop-environment">Your unique workshop environment</h2>
 <p>You will have received a card bearing your participant number and
 some access details. Your workshop environment is hosted under the
@@ -76,23 +75,29 @@ domain <code>e$N.pki.frase.id.au</code> (where <code>$N</code> is your particpan
 environment’s domain.</p>
 <p>There are several machines in the environment:</p>
 <ul>
-<li><code>server.e$N.pki.frase.id.au</code>: the FreeIPA server</li>
-<li><code>client.e$N.pki.frase.id.au</code>: an enrolled client machine</li>
-<li><code>web.e$N.pki.frase.id.au</code>: a web server</li>
+<li><code>server.e$N.pki.frase.id.au</code> - the FreeIPA server</li>
+<li><code>client.e$N.pki.frase.id.au</code> - an enrolled client machine</li>
+<li><code>web.e$N.pki.frase.id.au</code> - a web server</li>
 </ul>
-<div class="note">
-<p>Do not access or interfere with other participants’ environments.</p>
-</div>
+<h3 id="environment-variables">Environment variables</h3>
+<p>On all three machines, login shells will automatically set the
+<code>DOMAIN</code> and <code>REALM</code> environment variables. For example:</p>
+<pre><code>export DOMAIN=e17.pki.frase.id.au
+export REALM=E17.PKI.FRASE.ID.AU</code></pre>
+<p>You might also find it convenient to set these variables in your
+shell session on your local machine.</p>
 <h3 id="accessing-the-environment">Accessing the environment</h3>
 <p>The machines in your environment can be accessed over SSH. The
 unique SSH private key for your environment is available for
-<strong>download at <a href="https://pki-workshop.frase.id.au/envs/$N/" class="uri">https://pki-workshop.frase.id.au/envs/$N/</a></strong>.
-Download your private key and provide it to your SSH client. Then
-you can log into any of the machines in your environment, using the
-<code>fedora</code> user account.</p>
+<a href="keys/"><strong>download here</strong></a>. Download your private key and provide it
+to your SSH client. Then you can log into any of the machines in
+your environment, using the <code>fedora</code> user account.</p>
 <p>If you use OpenSSH, the login command is:</p>
 <pre class="command"><code>ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au</code></pre>
 <p>Accept the host key prompt and log in.</p>
+<div class="note">
+<p>Do not access or interfere with other participants’ environments!</p>
+</div>
 <h3 id="hacker-voice-im-in."><em>hacker voice</em>: I’m in.</h3>
 <p>Now that you’re here, here is some info about the machines.</p>
 <ul>

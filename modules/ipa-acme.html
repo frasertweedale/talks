@@ -54,12 +54,21 @@ The ipa-acme-manage command was successful</code></pre>
 <em>could</em> run <code>sudo ipactl restart</code> to restart the <em>entire</em> FreeIPA
 system. But to restart just the CA, do this:</p>
 <pre class="command ipa"><code>sudo systemctl restart pki-tomcatd@pki-tomcat</code></pre>
-<h2 id="request-a-certificate">Request a certificate <a href="#request-a-certificate" class="section">§</a></h2>
+<h2 id="request-a-certificate-for-client">Request a certificate for <code>client</code> <a href="#request-a-certificate-for-client" class="section">§</a></h2>
 <div class="note">
-<p>Perform the steps in this section on <strong><code>client.$DOMAIN</code></strong>.</p>
+<p><strong>Jump over to <code>client.$DOMAIN</code> for this section!</strong></p>
+</div>
+<p>We’ll use the <a href="https://certbot.eff.org/">Certbot</a> ACME client, which
+is developed by the EFF. Install the package:</p>
+<pre class="command client"><code>sudo dnf install -y certbot</code></pre>
+<div class="note">
+<p>Certbot is an <em>astoundingly</em> versatile program. This module uses it
+in a basic way. Its purpose is to teach you about the FreeIPA ACME
+service, not Certbot wizardry.</p>
 </div>
 <p>By default Certbot wants to read and write system directories. Make
-a user-local directory to store the data instead:</p>
+a user-local directory to store the data instead, so that we can run
+Certbot as an unprivileged process.</p>
 <pre class="command client"><code>mkdir ~/certbot</code></pre>
 <p>Create a config file that will tell Certbot to use the local
 directory:</p>
@@ -135,8 +144,20 @@ If you like Certbot, please consider supporting our work by:
 <div id="nav" class="footer">
     <div class="back">
         
+        <a href="ipa-external-ca.html">
+            <
+            <br />
+            Externally signing the FreeIPA CA
+        </a>
+        
     </div>
     <div class="up">
+        
+        <a href="../index.html#toc">
+            ^
+            <br />
+            Up to index
+        </a>
         
     </div>
     <div class="next">

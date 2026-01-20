@@ -34,11 +34,6 @@ generate keys and create CSRs.</p>
 <p>All steps in this module are to be performed on <code>client.$DOMAIN</code>.
 SSH into this machine now:</p>
 <pre class="command no-copy"><code>ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au</code></pre>
-<p>After logging in, set the <code>DOMAIN</code> shell variable, so that
-substitutions in shell commands work. For example:</p>
-<pre class="command client no-copy"><code>DOMAIN=e17.pki.frase.id.au</code></pre>
-<p>Also set the <code>REALM</code> shell variable (based on <code>$DOMAIN</code>):</p>
-<pre class="command client"><code>REALM=$(echo $DOMAIN | tr '[:lower:]' '[:upper:]')</code></pre>
 </div>
 <h2 id="service-csr-with-rsa-key">Service CSR with RSA key <a href="#service-csr-with-rsa-key" class="section">§</a></h2>
 <p>Let’s prepare a CSR suitable for a network service, such as an HTTP
@@ -214,10 +209,10 @@ certificates!</p>
     </div>
     <div class="next">
         
-        <a href="01-keygen-and-csr.html">
+        <a href="ipa-certmonger.html">
             >
             <br />
-            ACME certificates for Apache httpd with <code>mod_md</code>
+            Service certificates with FreeIPA and Certmonger
         </a>
         
     </div>
