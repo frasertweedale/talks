@@ -3,8 +3,8 @@ back-href: ipa-profiles.html
 back-text: FreeIPA certificate profiles and user certificates
 up-href: "../index.html#toc"
 up-text: Up to index
-next-href-TODO: .
-next-text-TODO: .
+next-href: ipa-acme.html
+next-text: The FreeIPA ACME server
 ---
 
 # Externally signing the FreeIPA CA

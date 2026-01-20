@@ -1,8 +1,8 @@
 ---
-next-href: 01-keygen-and-csr.html
-next-text: ACME certificates for Apache httpd with <code>mod_md</code>
 up-href: "../index.html#toc"
 up-text: Up to index
+next-href: ipa-certmonger.html
+next-text: Service certificates with FreeIPA and Certmonger
 ---
 
 # Key generation and CSR creation with OpenSSL
@@ -25,7 +25,7 @@ generate keys and create CSRs.
 All steps in this module are to be performed on `client.$DOMAIN`.
 SSH into this machine now:
 
-```command
+```command {.no-copy}
 ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au
 ```
 
@@ -56,7 +56,7 @@ The `-algorithm` and `-pkeyopt` arguments specify the public key
 algorithm and key parameters.  `-out` is where to write the
 generated key.
 
-**When storing keys in disk you should encrypt them.**  The
+**When storing keys on disk you should encrypt them.**  The
 `-aes256` option selects AES-256 for key encryption.  The command
 will prompt you for a passphrase:
 
@@ -83,11 +83,10 @@ Open an editor (`vi` or `nano`) and create a file named
 `service_csr.cnf` with the following content.  **Replace `$DOMAIN`
 with your environment's domain.**
 
-```
+```command {.client}
+tee service_csr.cnf >/dev/null <<EOF
 [ req ]
-default_bits        = 3072
 prompt              = no
-default_md          = sha384
 req_extensions      = req_ext
 distinguished_name  = dn
 
@@ -102,6 +101,7 @@ subjectAltName = @alt_names
 [ alt_names ]
 # The DNS name MUST match the Common Name for best practice.
 DNS.1 = client.$DOMAIN
+EOF
 ```
 
 ### Generate the service CSR

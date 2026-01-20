@@ -1,6 +1,8 @@
 ---
 up-href: "../index.html#toc"
 up-text: Up to index
+next-href: certificate-transparency.html
+next-text: Using certificate transparency logs
 ---
 
 # ACME - Apache and mod_md

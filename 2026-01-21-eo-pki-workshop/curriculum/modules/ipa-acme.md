@@ -1,3 +1,10 @@
+---
+back-href: ipa-external-ca.html
+back-text: Externally signing the FreeIPA CA
+up-href: "../index.html#toc"
+up-text: Up to index
+---
+
 # The FreeIPA ACME server
 
 ACME is not only for the public internet.  The protocol can be used

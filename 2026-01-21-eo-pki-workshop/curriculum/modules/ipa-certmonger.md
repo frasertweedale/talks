@@ -1,4 +1,6 @@
 ---
+back-href: 01-keygen-and-csr.html
+back-text: Key generation and CSR creation with OpenSSL
 up-href: "../index.html#toc"
 up-text: Up to index
 next-href: ipa-profiles.html
