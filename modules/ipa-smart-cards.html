@@ -50,7 +50,7 @@ walk through some real world scenarios:</p>
 </ul>
 <div class="note">
 <p>Most activities in this module are to be performed on
-<code>workstation.$DOMAIN</code>. SSH into this machine now.</p>
+<code>client.$DOMAIN</code>. SSH into this machine now.</p>
 <p><strong>You will also need an RDP client to perform the graphical
 workstation login.</strong> You can still do most of the activities
 without it, but you will miss out on some of the payoff.</p>
@@ -65,7 +65,7 @@ required to use smart cards for X.509 applications.</p>
 <p>The first step is to create a token. This is the only
 SoftHSM-specific operation. Later steps will use the PKCS #11
 interface to interact with the token.</p>
-<pre class="command workstation"><code>sudo softhsm2-util --init-token --slot 0 \
+<pre class="command client"><code>sudo softhsm2-util --init-token --slot 0 \
   --label &quot;FakeSmartCard&quot; \
   --pin 1234 \
   --so-pin 5678</code></pre>
@@ -75,12 +75,12 @@ interface to interact with the token.</p>
 token.</p>
 <h3 id="generate-key-pair-and-csr">Generate key pair and CSR <a href="#generate-key-pair-and-csr" class="section">§</a></h3>
 <p>Now generate a private key (in this case, a NIST P-256 ECC key):</p>
-<pre class="command workstation"><code>sudo p11-kit generate-keypair \
+<pre class="command client"><code>sudo p11-kit generate-keypair \
     pkcs11:token=FakeSmartCard --login \
     --type=ecdsa --curve=secp256r1 \
     --label ipa-key --id deadbeef</code></pre>
 <p>List objects and retrieve the PKCS #11 URI of the key:</p>
-<pre class="command workstation"><code>sudo p11-kit list-objects pkcs11:token=FakeSmartCard</code></pre>
+<pre class="command client"><code>sudo p11-kit list-objects pkcs11:token=FakeSmartCard</code></pre>
 <pre class="output"><code>Object: #0
     uri: pkcs11:model=SoftHSM%20v2;manufacturer=SoftHSM%20project;serial=7c3fca5af83d4481;token=FakeSmartCard;id=%DE%AD%BE%EF;object=ipa-key;type=public
     class: public-key
@@ -97,34 +97,42 @@ token.</p>
 the new key on this specific token. Save its value; you will need
 it in the next step. <strong>Make sure you surround the value in quotes
 (<code>"..."</code>).</strong></p>
-<pre class="command workstation no-copy"><code>PKCS11_URI=&quot;pkcs11:model=…;object=ipa-key;type=public&quot;</code></pre>
+<pre class="command client no-copy"><code>PKCS11_URI=&quot;pkcs11:model=…;object=ipa-key;type=public&quot;</code></pre>
 <p>Now create the CSR. <strong>OpenSSL will prompt for the user PIN</strong> you
 set when creating the token.</p>
-<pre class="command workstation"><code>sudo openssl req -new \
+<pre class="command client"><code>sudo openssl req -new \
   -engine pkcs11 -keyform engine -key $PKCS11_URI \
   -config user_csr.cnf -out softhsm-user.csr</code></pre>
 <pre class="output"><code>Engine &quot;pkcs11&quot; set.
 ... some warnings (ignore them) ...
 Enter PKCS#11 token PIN for FakeSmartCard:</code></pre>
 <div class="note">
-<p><strong><em>TODO TODO TODO update image to include <code>openssl-pkcs11</code> module.</em></strong></p>
 <p>The OpenSSL PKCS #11 engine is provided by the <code>openssl-pkcs11</code> RPM
-package on Fedora and RHEL. Other distributions may name it
-differently.</p>
+package on Fedora and RHEL. Other distributions might use a
+different package name.</p>
 </div>
-<h3 id="request-and-import-certificate">Request and import certificate <a href="#request-and-import-certificate" class="section">§</a></h3>
-<p>To request the certificate from the FreeIPA CA you need to
-authenticate. Authenticate as <code>admin</code>, because you’ll need to use
-that account soon.</p>
-<pre class="command workstation"><code>kinit admin</code></pre>
+<h3 id="request-user-certificate-and-import-into-smart-card">Request user certificate and import into smart card <a href="#request-user-certificate-and-import-into-smart-card" class="section">§</a></h3>
+<p>Perform a <em>self-service</em> certificate request. If you are not
+already authenticated as <code>user1</code>, do so now:</p>
+<pre class="command client"><code>echo Secret.123 | kinit user1</code></pre>
 <p>Now request the certificate from the CA. Given the context, this
 could also be called <em>enrolling</em> the smart card.</p>
-<pre class="command workstation"><code>ipa cert-request user.csr \
+<pre class="command client"><code>ipa cert-request user.csr \
     --profile-id userCert \
     --principal user1 \
     --certificate-out softhsm-user.crt</code></pre>
+<pre class="output"><code>  Issuing CA: ipa
+  Certificate: MIIEJjCCAo6gAwIBAgIQRmeQcXH3o/...
+  Subject: CN=user1,O=E1.PKI.FRASE.ID.AU
+  Subject email address: user1@e1.pki.frase.id.au
+  Issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
+  Not Before: Wed Jan 07 08:00:16 2026 UTC
+  Not After: Sat Jan 08 08:00:16 2028 UTC
+  Serial number: 93583695936409673461838374248291191549
+  Serial number (hex): 0x4667907171F7A3FADA78A182C4EF4AFD
+  Request status: complete</code></pre>
 <p>Finally, import the certificate into the token:</p>
-<pre class="command workstation"><code>sudo p11-kit import-object pkcs11:token=FakeSmartCard \
+<pre class="command client"><code>sudo p11-kit import-object pkcs11:token=FakeSmartCard \
   --file softhsm-user.crt \
   --label ipa-key --id deadbeef</code></pre>
 <h2 id="enable-smart-card-authentication-for-freeipa-users">Enable smart card authentication for FreeIPA users <a href="#enable-smart-card-authentication-for-freeipa-users" class="section">§</a></h2>
@@ -135,8 +143,9 @@ a trusted CA</strong>. But these match rules provide an additional filter
 that can be used to further restrict certificate authentication.
 This is often used to ensure that only particular issuers are used.</p>
 <p>Let’s just add a rule that accepts (valid) certificates from all
-issuers:</p>
-<pre class="command workstation"><code>ipa certmaprule-add all-issuers \
+issuers (but first become <code>admin</code>).</p>
+<pre class="command client"><code>echo Secret.123 | kinit admin</code></pre>
+<pre class="command client"><code>ipa certmaprule-add all-issuers \
     --matchrule '&lt;ISSUER&gt;.*'</code></pre>
 <pre class="output"><code>-----------------------------------------------------
 Added Certificate Identity Mapping Rule &quot;all-issuers&quot;
@@ -162,11 +171,11 @@ certificate issuer <strong>matches</strong> <code>O=Example Org</code>:</p>
 <p>Now that the match rule has been created and the smart card is
 ready, you can perform a Kerberos initial authentication. Enter the
 PIN when <code>kinit</code> prompts for it.</p>
-<pre class="command workstation"><code>sudo kinit user1 \
+<pre class="command client"><code>sudo kinit user1 \
      -X X509_user_identity=PKCS11:libsofthsm2.so</code></pre>
 <pre class="output"><code>FakeSmartCard                    PIN:</code></pre>
 <p>Run <code>klist</code> to observe that the authentication succeeded:</p>
-<pre class="command workstation"><code>sudo klist</code></pre>
+<pre class="command client"><code>sudo klist</code></pre>
 <pre class="output"><code>Ticket cache: KCM:0
 Default principal: user1@E1.PKI.FRASE.ID.AU
 
@@ -187,11 +196,11 @@ something like this in a real world setting!</p>
 don’t need these hacks.</p>
 </div>
 <p>Change the ownership of all the data to <code>sssd</code> user and group:</p>
-<pre class="command workstation"><code>sudo chown -R sssd:sssd /var/lib/softhsm/tokens</code></pre>
+<pre class="command client"><code>sudo chown -R sssd:sssd /var/lib/softhsm/tokens</code></pre>
 <p>Grant all users access to the token. The directory and object names
 are randomly generated UUIDs; the wildcards match them.</p>
-<pre class="command workstation"><code>sudo sh -c 'chmod 775 /var/lib/softhsm/tokens/*'</code></pre>
-<pre class="command workstation"><code>sudo sh -c 'chmod 664 /var/lib/softhsm/tokens/*/*'</code></pre>
+<pre class="command client"><code>sudo sh -c 'chmod 775 /var/lib/softhsm/tokens/*'</code></pre>
+<pre class="command client"><code>sudo sh -c 'chmod 664 /var/lib/softhsm/tokens/*/*'</code></pre>
 <p>One more thing: PKCS #11 tokens have a flag that indicates whether
 the device is <strong>removable</strong> or not. SSSD unconditionally ignores
 non-removable tokens. Fortunately, we can configure SoftHSM to make
@@ -203,7 +212,7 @@ it pretend that its tokens are removable.</p>
 <h3 id="enable-smart-card-login-in-sssd-and-gdm">Enable smart card login in SSSD and GDM <a href="#enable-smart-card-login-in-sssd-and-gdm" class="section">§</a></h3>
 <p>Use <code>authselect</code> to configure the PAM stack to enable smart card
 login:</p>
-<pre class="command workstation"><code>sudo authselect enable-feature with-smartcard</code></pre>
+<pre class="command client"><code>sudo authselect enable-feature with-smartcard</code></pre>
 <pre class="output"><code>Make sure that SSSD service is configured and enabled.
 See SSSD documentation for more information.
 
@@ -218,49 +227,39 @@ pam_cert_auth = True</code></pre>
 <p>SSSD also needs to know what CAs are trusted for user login. By
 default, SSSD looks at <code>/etc/sssd/pki/sssd_auth_ca_db.pem</code>. Use a
 symlink to point that location the FreeIPA CA trust store:</p>
-<pre class="command workstation"><code>sudo ln -s /etc/ipa/ca.crt \
+<pre class="command client"><code>sudo ln -s /etc/ipa/ca.crt \
     /etc/sssd/pki/sssd_auth_ca_db.pem</code></pre>
 <p>Now restart SSSD:</p>
-<pre class="command workstation"><code>sudo systemctl restart sssd</code></pre>
+<pre class="command client"><code>sudo systemctl restart sssd</code></pre>
 <h2 id="enable-graphical-login-via-rdp">Enable graphical login via RDP <a href="#enable-graphical-login-via-rdp" class="section">§</a></h2>
 <p>To simulate a workstation smart card login experience, we will
 enable <a href="https://en.wikipedia.org/wiki/Remote_Desktop_Protocol"><em>Remote Desktop Protocol (RDP)</em></a> login, using
 <strong><em>GNOME Remote Desktop</em></strong>.</p>
-<p>RDP uses TLS to secure the traffic between client and server. Using
-Certmonger, request a service certificate for the RDP server to use:</p>
-<pre class="command client"><code>sudo ipa-getcert request \
-    -f /etc/pki/tls/certs/rdp.crt \
-    -k /etc/pki/tls/private/rdp.key \
-    --key-owner gnome-remote-desktop \
-    --cert-owner gnome-remote-desktop \
-    -K host/$(hostname) \
-    -D $(hostname)</code></pre>
-<p>The <code>--key-owner</code> and <code>--cert-owner</code> options tell Certmonger to
-change the ownership of the files it creates, so the server process
-can read them. There are also options to change the mode (file
-permissions), if you need that.</p>
-<p>Now, tell GNOME Remote Desktop about the key and certificate:</p>
-<pre class="command workstation"><code>sudo grdctl --system rdp \
+<p>RDP uses TLS to secure the traffic between client and server.
+Recall that we already requested a suitable certificate in the
+<em>Certmonger</em> module! Configure GNOME Remote Desktop to use the
+Certmonger-managed key and certificate:</p>
+<pre class="command client"><code>sudo grdctl --system rdp \
   set-tls-key  /etc/pki/tls/private/rdp.key</code></pre>
-<pre class="command workstation"><code>sudo grdctl --system rdp \
+<pre class="command client"><code>sudo grdctl --system rdp \
   set-tls-cert /etc/pki/tls/certs/rdp.crt</code></pre>
 <div class="note">
 <p>You can ignore error messages that mention TPM credentials.</p>
 </div>
 <p>Configure an RDP username and password. These credentials are
 unrelated to FreeIPA or system accounts.</p>
-<pre class="command workstation"><code>sudo grdctl --system rdp \
+<pre class="command client"><code>sudo grdctl --system rdp \
   set-credentials rdp hunter2</code></pre>
 <p>Allow RDP traffic through the firewall:</p>
-<pre class="command workstation"><code>sudo firewall-cmd --permanent --add-service=rdp \
+<pre class="command client"><code>sudo firewall-cmd --permanent --add-service=rdp \
   &amp;&amp; sudo firewall-cmd --reload</code></pre>
 <p>Finally, enable the RDP service:</p>
-<pre class="command workstation"><code>sudo grdctl --system rdp enable</code></pre>
+<pre class="command client"><code>sudo grdctl --system rdp enable</code></pre>
 <h2 id="bringing-it-all-together">Bringing it all together <a href="#bringing-it-all-together" class="section">§</a></h2>
 <div class="note">
 <p>You need a RDP client on your local machine for these final steps.</p>
 </div>
-<p>Use your RDP client to connect to <code>workstation.e$N.pki.frase.id.au</code>.
+<p>Use your RDP client to connect to <code>client.e$N.pki.frase.id.au</code>.
 You may need to prefix the domain name with <code>rdp://</code>. The TCP port
 is <code>3389</code>.</p>
 <p>You may need to accept the server’s certificate—which you issued and

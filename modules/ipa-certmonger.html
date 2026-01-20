@@ -25,8 +25,8 @@ as <strong>Red Hat Identity Management</strong>) provides an enterprise PKI for
 issuing and managing host, service and user certificates.</p>
 <p>In this module you’ll use the <strong><em>Certmonger</em></strong> program to request
 and manage (renew) a certificate for an enrolled host from the
-FreeIPA CA. A real world use case for this might be to enable
-802.1X network authentication.</p>
+FreeIPA CA. We’ll consider the real world use case of an RDP
+(<em>Remote Desktop Protocol</em>) server.</p>
 <div class="note">
 <p>All steps in this module are to be performed on <code>client.$DOMAIN</code>,
 where you generated keys and CSRs. If you are not already there,
@@ -75,15 +75,17 @@ in the FreeIPA domain. The password of the <code>admin</code> account is
 request a certificate. Certmonger will automatically perform the
 following steps:</p>
 <ol type="1">
-<li>Generate a private key</li>
+<li>Generate a private key (with specified ownership)</li>
 <li>Sign a CSR (ephemeral)</li>
 <li>Submit the CSR to the FreeIPA CA for signing</li>
-<li>Save the issued certificate</li>
+<li>Save the issued certificate (with specified ownership)</li>
 <li>Monitor the certificate and renew it before expiry</li>
 </ol>
 <pre class="command client"><code>sudo ipa-getcert request \
-    -f /etc/pki/tls/certs/host.crt \
-    -k /etc/pki/tls/private/host.key \
+    -f /etc/pki/tls/certs/rdp.crt \
+    -k /etc/pki/tls/private/rdp.key \
+    --key-owner gnome-remote-desktop \
+    --cert-owner gnome-remote-desktop \
     -K host/$(hostname) \
     -D $(hostname)</code></pre>
 <pre class="output"><code>  New signing request &quot;{TRACKING_ID}&quot; added.</code></pre>
@@ -101,6 +103,12 @@ Path to private key (Certmonger will generate it)
 </dd>
 <dd>
 Path to certificate (where it will be saved after being issued)
+<code>--key-owner</code> and <code>--cert-owner</code>
+</dd>
+<dd>
+When specified, Certmonger will change the ownership of the key or
+certificate to the given user (<code>root</code> by default). There are also
+options to change the mode (file permissions) if needed.
 <code>-K &lt;principal&gt;</code>
 </dd>
 <dd>

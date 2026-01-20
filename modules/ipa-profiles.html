@@ -19,7 +19,7 @@
 
         <div id="content">
             <div id="postContent">
-    <h1 id="freeipa-certificate-profiles-and-user-certificates">FreeIPA certificate profiles and user certificates</h1>
+    <h1 id="freeipa-certificate-profiles">FreeIPA certificate profiles</h1>
 <p>A <em>certificate profile</em> is a set of rules that defines and
 constrains what data appears in a certificate. Different
 certificate use cases often require specific profiles. The profile
@@ -43,14 +43,14 @@ Card login.</li>
 <li>Define <em>CA ACL</em> rules to allow certain users to request
 certificates using this profile.</li>
 <li>Confirm that the <em>CA ACL</em> is set up properly.</li>
-<li>Issue a user certificate using the new profile.</li>
 </ol>
+<p>Actually issuing a user certificate will happen in the next module.</p>
 <div class="note">
 <p>All steps in this module are to be performed on <code>client.$DOMAIN</code>.
 SSH in, then authenticate as FreeIPA <code>admin</code> user:</p>
 <pre class="command client"><code>echo Secret.123 | kinit admin</code></pre>
 </div>
-<h2 id="freeipa-certificate-profiles">FreeIPA certificate profiles <a href="#freeipa-certificate-profiles" class="section">§</a></h2>
+<h2 id="freeipa-certificate-profiles-1">FreeIPA certificate profiles <a href="#freeipa-certificate-profiles-1" class="section">§</a></h2>
 <p>Execute <code>ipa certprofile-find</code> to list the existing profiles:</p>
 <pre class="command client"><code>ipa certprofile-find</code></pre>
 <pre class="output"><code>------------------
@@ -220,7 +220,7 @@ CA ACLs.</p>
 <pre class="output"><code>ipa: ERROR: Insufficient access: Principal
   'user1@E1.PKI.FRASE.ID.AU' is not permitted to use CA
   'ipa' with profile 'userCert' for certificate issuance.</code></pre>
-<h2 id="issue-a-user-certificate">Issue a user certificate <a href="#issue-a-user-certificate" class="section">§</a></h2>
+<h2 id="add-user-to-the-sclogin-group">Add user to the <code>sclogin</code> group <a href="#add-user-to-the-sclogin-group" class="section">§</a></h2>
 <p><code>kinit</code> as <code>admin</code> once more, and add <code>user1</code> to the <code>sclogin</code> user
 group:</p>
 <pre class="command client"><code>echo Secret.123 | kinit admin</code></pre>
@@ -232,23 +232,9 @@ group:</p>
 -------------------------
 Number of members added 1
 -------------------------</code></pre>
-<p>Now become <code>user1</code> (again) and retry the <code>cert-request</code>.</p>
-<pre class="command client"><code>ipa cert-request user.csr \
-    --profile-id userCert \
-    --principal user1 \
-    --certificate-out user.crt</code></pre>
-<pre class="output"><code>  Issuing CA: ipa
-  Certificate: MIIEJjCCAo6gAwIBAgIQRmeQcXH3o/...
-  Subject: CN=user1,O=E1.PKI.FRASE.ID.AU
-  Subject email address: user1@e1.pki.frase.id.au
-  Issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
-  Not Before: Wed Jan 07 08:00:16 2026 UTC
-  Not After: Sat Jan 08 08:00:16 2028 UTC
-  Serial number: 93583695936409673461838374248291191549
-  Serial number (hex): 0x4667907171F7A3FADA78A182C4EF4AFD
-  Request status: complete</code></pre>
-<p>Hooray! Now that you have the user certificate, you can move on to
-the Smart Card login module.</p>
+<p>Now that <code>user1</code> is in the <code>sclogin</code> group, certificate requests
+using the <code>userCert</code> profile should succeed. You will actually
+request the certificate in the Smart Card module.</p>
 </div>
 <div id="nav" class="footer">
     <div class="back">

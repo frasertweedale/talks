@@ -131,13 +131,18 @@ this workshop.</p>
 <h3 id="create-config-file-for-user-csr">Create config file for user CSR <a href="#create-config-file-for-user-csr" class="section">§</a></h3>
 <p>For user authentication certificates, the primary identifiers are
 usually the username (in CN) and the email address (in the SAN).</p>
-<p>Create a file named <code>user_csr.cnf</code> with the following content.
-<strong>Replace <code>$DOMAIN</code> with your environment’s domain (not the machine
-hostname).</strong></p>
-<pre><code>[ req ]
-default_bits        = 384
+<div class="note">
+<p>Set the <code>DOMAIN</code> shell variable, so that substitutions in shell
+commands work:</p>
+<pre class="command client no-copy"><code>DOMAIN=e17.pki.frase.id.au</code></pre>
+<p>Also set the <code>REALM</code> shell variable (based on <code>$DOMAIN</code>):</p>
+<pre class="command client"><code>REALM=$(echo $DOMAIN | tr '[:lower:]' '[:upper:]')</code></pre>
+</div>
+<p>Create a file named <code>user_csr.cnf</code> with an OpenSSL configuration
+suitable for requesting an authentication certificate for <code>user1</code>:</p>
+<pre class="command client"><code>tee user_csr.cnf &gt;/dev/null &lt;&lt;EOF
+[ req ]
 prompt              = no
-default_md          = sha384
 req_extensions      = req_ext
 distinguished_name  = dn
 
@@ -148,7 +153,24 @@ commonName = user1
 subjectAltName = @alt_names
 
 [ alt_names ]
-email = user1@$DOMAIN</code></pre>
+email = user1@$DOMAIN
+otherName = 1.3.6.1.5.2.2;SEQUENCE:krb5principal
+
+[ krb5principal ]
+realm = EXPLICIT:0,GeneralString:$REALM
+principalname = EXPLICIT:1,SEQUENCE:principalname
+
+[ principalname ]
+nametype = EXPLICIT:0,INT:1
+namestring = EXPLICIT:1,SEQUENCE:namestring
+
+[ namestring ]
+part1 = GeneralString:user1
+EOF</code></pre>
+<div class="note">
+<p>The CSR’s SAN extension includes the user’s email address, and a
+representation of their Kerberos principal name.</p>
+</div>
 <h3 id="generate-the-user-csr">Generate the User CSR <a href="#generate-the-user-csr" class="section">§</a></h3>
 <pre class="command client"><code>openssl req -new \
     -key user.key \
