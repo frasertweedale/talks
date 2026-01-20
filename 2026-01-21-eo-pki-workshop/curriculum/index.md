@@ -14,6 +14,12 @@ application areas:
 - TLS certificates for public websites and services (via ACME)
 - Enterprise PKI for Linx / Unix environments (with FreeIPA)
 
+::: note
+
+Please [**give your feedback**](feedback.html) at the end of the session!
+
+:::
+
 
 ## Prerequisites
 
