@@ -74,6 +74,8 @@ Enterprise PKI modules:
     modules/ipa-smart-cards.html)
 - [Externally signing the FreeIPA CA](
     modules/ipa-external-ca.html)
+- [The FreeIPA ACME server](
+    modules/ipa-acme.html)
 
 
 ## Your unique workshop environment
