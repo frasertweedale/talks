@@ -87,7 +87,7 @@ with your environment's domain.**
 [ req ]
 default_bits        = 3072
 prompt              = no
-default_md          = sha256
+default_md          = sha384
 req_extensions      = req_ext
 distinguished_name  = dn
 
@@ -246,6 +246,9 @@ openssl req -new \
     -key user.key \
     -config user_csr.cnf \
     -out user.csr
+```
+```output
+Enter pass phrase for user.key:
 ```
 
 ### Verify user CSR

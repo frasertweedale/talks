@@ -83,13 +83,16 @@ token.
 
 ### Generate key pair and CSR
 
-Now generate a private key (in this case, a NIST P-256 ECC key):
+Now generate a private key (in this case, a NIST P-384 ECC key):
 
 ```command {.client}
 sudo p11-kit generate-keypair \
     pkcs11:token=FakeSmartCard --login \
-    --type=ecdsa --curve=secp256r1 \
+    --type=ecdsa --curve=secp384r1 \
     --label ipa-key --id deadbeef
+```
+```output
+PIN for FakeSmartCard:
 ```
 
 List objects and retrieve the PKCS #11 URI of the key:
@@ -131,7 +134,6 @@ sudo openssl req -new \
 ```
 ```output
 Engine "pkcs11" set.
-... some warnings (ignore them) ...
 Enter PKCS#11 token PIN for FakeSmartCard:
 ```
 
@@ -157,7 +159,7 @@ Now request the certificate from the CA.  Given the context, this
 could also be called *enrolling* the smart card.
 
 ```command {.client}
-ipa cert-request user.csr \
+ipa cert-request softhsm-user.csr \
     --profile-id userCert \
     --principal user1 \
     --certificate-out softhsm-user.crt
@@ -291,15 +293,10 @@ Change the ownership of all the data to `sssd` user and group:
 sudo chown -R sssd:sssd /var/lib/softhsm/tokens
 ```
 
-Grant all users access to the token.  The directory and object names
-are randomly generated UUIDs; the wildcards match them.
+Grant all users access to the token:
 
 ```command {.client}
-sudo sh -c 'chmod 775 /var/lib/softhsm/tokens/*'
-```
-
-```command {.client}
-sudo sh -c 'chmod 664 /var/lib/softhsm/tokens/*/*'
+sudo chmod -R a+rX /var/lib/softhsm
 ```
 
 One more thing: PKCS #11 tokens have a flag that indicates whether
@@ -406,10 +403,17 @@ sudo firewall-cmd --permanent --add-service=rdp \
   && sudo firewall-cmd --reload
 ```
 
-Finally, enable the RDP service:
+Enable the RDP service:
 
 ```command {.client}
 sudo grdctl --system rdp enable
+```
+
+And finally, restart GNOME Remote Desktop to pick up the new
+configuration.
+
+```command {.client}
+sudo systemctl restart gnome-remote-desktop
 ```
 
 

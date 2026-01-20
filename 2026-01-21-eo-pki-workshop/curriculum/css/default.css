@@ -157,7 +157,7 @@ code {
     background: #f7f7ff;
     color: #3f3f3f;
     border: solid 1px #d0d0f0;
-    padding: 2px;
+    padding: 1px 2px;
     hyphens: none;
     white-space: nowrap;
 }
