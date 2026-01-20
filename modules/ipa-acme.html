@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Practical PKI - ipa-acme</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <script src="../js/copy-button.js"></script>
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Practical PKI</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <div id="postContent">
+    <h1 id="the-freeipa-acme-server">The FreeIPA ACME server</h1>
+<p>ACME is not only for the public internet. The protocol can be used
+in enterprise environments for its automation benefits, which can
+reduce downtime and configuration errors that lead to security
+issues.</p>
+<p>The FreeIPA CA includes an ACME subsystem. In this module, you will
+enable it and use an ACME client to request a certificate.</p>
+<h2 id="enable-the-acme-service">Enable the ACME service <a href="#enable-the-acme-service" class="section">§</a></h2>
+<div class="note">
+<p>Perform the steps in this section on <strong><code>ipa.$DOMAIN</code></strong>.</p>
+</div>
+<p>On each FreeIPA ACME server in your deployment (in our case, that’s
+just <code>ipa.$DOMAIN</code>, execute <code>ipa-acme-manage enable</code> as <code>root</code>.</p>
+<pre class="command ipa"><code>sudo ipa-acme-manage enable</code></pre>
+<pre class="output"><code>The ipa-acme-manage command was successful</code></pre>
+<p>If you issue a lot of short-lived certificates, for performance
+reasons you should enable <strong><em>pruning</em></strong> to purge expired
+certificates from the CA’s database.</p>
+<pre class="command ipa"><code>sudo ipa-acme-manage pruning --enable</code></pre>
+<pre class="output"><code>Status: enabled
+Certificate Retention Time: 30
+Certificate Retention Unit: day
+Certificate Search Size Limit: 1000
+Certificate Search Time Limit: 0
+Request Retention Time: day
+Request Retention Unit: 30
+Request Search Size Limit: 1000
+Request Search Time Limit: 0
+cron Schedule:
+The CA service must be restarted for changes to take effect
+The ipa-acme-manage command was successful</code></pre>
+<p>As noted in the output, you need to restart the CA service. You
+<em>could</em> run <code>sudo ipactl restart</code> to restart the <em>entire</em> FreeIPA
+system. But to restart just the CA, do this:</p>
+<pre class="command ipa"><code>sudo systemctl restart pki-tomcatd@pki-tomcat</code></pre>
+<h2 id="request-a-certificate">Request a certificate <a href="#request-a-certificate" class="section">§</a></h2>
+<div class="note">
+<p>Perform the steps in this section on <strong><code>client.$DOMAIN</code></strong>.</p>
+</div>
+<p>By default Certbot wants to read and write system directories. Make
+a user-local directory to store the data instead:</p>
+<pre class="command client"><code>mkdir ~/certbot</code></pre>
+<p>Create a config file that will tell Certbot to use the local
+directory:</p>
+<pre class="command client"><code>sudo tee ~/certbot/cli.ini &gt;/dev/null &lt;&lt;EOF
+config-dir = $HOME/certbot/config
+work-dir = $HOME/certbot/work
+logs-dir = $HOME/certbot/logs
+server = https://ipa-ca.$DOMAIN/acme/directory
+EOF</code></pre>
+<p>The <code>server</code> directive tells Certbot to use the specified CA instead
+of Let’s Encrypt. It points to the FreeIPA ACME service URI.</p>
+<div class="note">
+<p><code>ipa-ca.$DOMAIN</code> is a DNS alias that points to the FreeIPA CA
+server(s).</p>
+</div>
+<p>Now register an account with FreeIPA’s ACME service. Note that
+these accounts are unrelated to the FreeIPA domain accounts.</p>
+<pre class="command client"><code>certbot --config ~/certbot/cli.ini register \
+  --email nope@example.com --agree-tos --no-eff-email</code></pre>
+<pre class="output"><code>Saving debug log to /home/fedora/certbot/logs/letsencrypt.log
+Account registered.</code></pre>
+<dl>
+<dt><code>--email</code></dt>
+<dd>
+provide your contact email (it’s part of the protocol, but
+the FreeIPA ACME server doesn’t do anything with it)
+</dd>
+<dt><code>--agree-tos</code></dt>
+<dd>
+agree to the terms of service of the ACME server
+</dd>
+<dt><code>--no-eff-email</code></dt>
+<dd>
+supress the “share email with EFF” prompt
+(which is only relevant when using Let’s Encrypt anyway).
+</dd>
+</dl>
+<p>Certbot has a built in HTTP server it can use to satisfy the ACME
+<code>http-01</code> domain validation challenge. To use this feature as an
+unprivileged user, we will tweak a <code>sysctl</code> to tell the kernel not
+to restrict use of port 80 and up.</p>
+<pre class="command client"><code>sudo sysctl -w net.ipv4.ip_unprivileged_port_start=80</code></pre>
+<p>Let port 80 through the firewall:</p>
+<pre class="command client"><code>sudo firewall-cmd --permanent --add-service=http \
+  &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<p>Now tell <code>certbot</code> to request a certificate for the host’s domain
+name, using the <code>--standalone</code> HTTP server.</p>
+<pre class="command client"><code>certbot --config ~/certbot/cli.ini certonly \
+  --standalone \
+  --key-type rsa \
+  --domain $(hostname)</code></pre>
+<pre class="output"><code>Saving debug log to /home/fedora/certbot/logs/letsencrypt.log
+Requesting a certificate for client.e1.pki.frase.id.au
+
+Successfully received certificate.
+Certificate is saved at: /home/fedora/certbot/config/live/client.e1.pki.frase.id.au/fullchain.pem
+Key is saved at:         /home/fedora/certbot/config/live/client.e1.pki.frase.id.au/privkey.pem
+This certificate expires on 2026-04-20.
+These files will be updated when the certificate renews.
+Certbot has set up a scheduled task to automatically renew this certificate in the background.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+If you like Certbot, please consider supporting our work by:
+ * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+ * Donating to EFF:                    https://eff.org/donate-le
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</code></pre>
+<p>Inspect the certificate issuer:</p>
+<pre class="command client"><code>openssl x509 -issuer -noout \
+  -in ~/certbot/config/live/$(hostname)/fullchain.pem</code></pre>
+<pre class="output"><code>issuer=O=E1.PKI.FRASE.ID.AU, CN=Certificate Authority</code></pre>
+<p>Indeed we see that the FreeIPA CA issued this certificate!</p>
+</div>
+<div id="nav" class="footer">
+    <div class="back">
+        
+    </div>
+    <div class="up">
+        
+    </div>
+    <div class="next">
+        
+    </div>
+</div>
+
+        </div>
+        <div class="clear"></div>
+
+        <div class="footer">
+
+<div id="license">
+    <div style="float: left">
+        <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by/4.0/88x31.png">
+        </a>
+    </div>
+    <div>
+        <p>
+        Except where otherwise noted, this work is licensed under a
+        <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+            Creative Commons Attribution 4.0 International License</a>.
+        </p>
+    </div>
+</div>
+
+<div id="hakyll">
+    Generated by
+    <a href="https://jaspervdj.be/hakyll">Hakyll</a>
+</div>
+
+        </div>
+    </body>
+</html>

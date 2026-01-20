@@ -248,9 +248,6 @@ Certmonger-managed key and certificate:</p>
 unrelated to FreeIPA or system accounts.</p>
 <pre class="command client"><code>sudo grdctl --system rdp \
   set-credentials rdp hunter2</code></pre>
-<p>Allow RDP traffic through the firewall:</p>
-<pre class="command client"><code>sudo firewall-cmd --permanent --add-service=rdp \
-  &amp;&amp; sudo firewall-cmd --reload</code></pre>
 <p>Enable the RDP service:</p>
 <pre class="command client"><code>sudo grdctl --system rdp enable</code></pre>
 <p>And finally, restart GNOME Remote Desktop to pick up the new

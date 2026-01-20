@@ -33,7 +33,12 @@ generate keys and create CSRs.</p>
 <div class="note">
 <p>All steps in this module are to be performed on <code>client.$DOMAIN</code>.
 SSH into this machine now:</p>
-<pre class="command"><code>ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au</code></pre>
+<pre class="command no-copy"><code>ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au</code></pre>
+<p>After logging in, set the <code>DOMAIN</code> shell variable, so that
+substitutions in shell commands work. For example:</p>
+<pre class="command client no-copy"><code>DOMAIN=e17.pki.frase.id.au</code></pre>
+<p>Also set the <code>REALM</code> shell variable (based on <code>$DOMAIN</code>):</p>
+<pre class="command client"><code>REALM=$(echo $DOMAIN | tr '[:lower:]' '[:upper:]')</code></pre>
 </div>
 <h2 id="service-csr-with-rsa-key">Service CSR with RSA key <a href="#service-csr-with-rsa-key" class="section">§</a></h2>
 <p>Let’s prepare a CSR suitable for a network service, such as an HTTP
@@ -51,7 +56,7 @@ key size currently recommended by NIST for secure services.</p>
 <p>The <code>-algorithm</code> and <code>-pkeyopt</code> arguments specify the public key
 algorithm and key parameters. <code>-out</code> is where to write the
 generated key.</p>
-<p><strong>When storing keys in disk you should encrypt them.</strong> The
+<p><strong>When storing keys on disk you should encrypt them.</strong> The
 <code>-aes256</code> option selects AES-256 for key encryption. The command
 will prompt you for a passphrase:</p>
 <pre class="output"><code>Enter PEM pass phrase:
@@ -69,10 +74,9 @@ just the DNS name used to reach it.</p>
 <p>Open an editor (<code>vi</code> or <code>nano</code>) and create a file named
 <code>service_csr.cnf</code> with the following content. <strong>Replace <code>$DOMAIN</code>
 with your environment’s domain.</strong></p>
-<pre><code>[ req ]
-default_bits        = 3072
+<pre class="command client"><code>tee service_csr.cnf &gt;/dev/null &lt;&lt;EOF
+[ req ]
 prompt              = no
-default_md          = sha384
 req_extensions      = req_ext
 distinguished_name  = dn
 
@@ -86,7 +90,8 @@ subjectAltName = @alt_names
 
 [ alt_names ]
 # The DNS name MUST match the Common Name for best practice.
-DNS.1 = client.$DOMAIN</code></pre>
+DNS.1 = client.$DOMAIN
+EOF</code></pre>
 <h3 id="generate-the-service-csr">Generate the service CSR <a href="#generate-the-service-csr" class="section">§</a></h3>
 <p>Execute the <code>openssl req</code> command below to build a CSR according to
 the config file and sign it with the private key. Note that it will
@@ -131,13 +136,6 @@ this workshop.</p>
 <h3 id="create-config-file-for-user-csr">Create config file for user CSR <a href="#create-config-file-for-user-csr" class="section">§</a></h3>
 <p>For user authentication certificates, the primary identifiers are
 usually the username (in CN) and the email address (in the SAN).</p>
-<div class="note">
-<p>Set the <code>DOMAIN</code> shell variable, so that substitutions in shell
-commands work:</p>
-<pre class="command client no-copy"><code>DOMAIN=e17.pki.frase.id.au</code></pre>
-<p>Also set the <code>REALM</code> shell variable (based on <code>$DOMAIN</code>):</p>
-<pre class="command client"><code>REALM=$(echo $DOMAIN | tr '[:lower:]' '[:upper:]')</code></pre>
-</div>
 <p>Create a file named <code>user_csr.cnf</code> with an OpenSSL configuration
 suitable for requesting an authentication certificate for <code>user1</code>:</p>
 <pre class="command client"><code>tee user_csr.cnf &gt;/dev/null &lt;&lt;EOF
