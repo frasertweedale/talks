@@ -396,13 +396,6 @@ sudo grdctl --system rdp \
   set-credentials rdp hunter2
 ```
 
-Allow RDP traffic through the firewall:
-
-```command {.client}
-sudo firewall-cmd --permanent --add-service=rdp \
-  && sudo firewall-cmd --reload
-```
-
 Enable the RDP service:
 
 ```command {.client}
