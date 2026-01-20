@@ -74,11 +74,12 @@ interface to interact with the token.</p>
 <code>--so-pin</code> set the codes for user and administrator access to the
 token.</p>
 <h3 id="generate-key-pair-and-csr">Generate key pair and CSR <a href="#generate-key-pair-and-csr" class="section">§</a></h3>
-<p>Now generate a private key (in this case, a NIST P-256 ECC key):</p>
+<p>Now generate a private key (in this case, a NIST P-384 ECC key):</p>
 <pre class="command client"><code>sudo p11-kit generate-keypair \
     pkcs11:token=FakeSmartCard --login \
-    --type=ecdsa --curve=secp256r1 \
+    --type=ecdsa --curve=secp384r1 \
     --label ipa-key --id deadbeef</code></pre>
+<pre class="output"><code>PIN for FakeSmartCard:</code></pre>
 <p>List objects and retrieve the PKCS #11 URI of the key:</p>
 <pre class="command client"><code>sudo p11-kit list-objects pkcs11:token=FakeSmartCard</code></pre>
 <pre class="output"><code>Object: #0
@@ -104,7 +105,6 @@ set when creating the token.</p>
   -engine pkcs11 -keyform engine -key $PKCS11_URI \
   -config user_csr.cnf -out softhsm-user.csr</code></pre>
 <pre class="output"><code>Engine &quot;pkcs11&quot; set.
-... some warnings (ignore them) ...
 Enter PKCS#11 token PIN for FakeSmartCard:</code></pre>
 <div class="note">
 <p>The OpenSSL PKCS #11 engine is provided by the <code>openssl-pkcs11</code> RPM
@@ -117,7 +117,7 @@ already authenticated as <code>user1</code>, do so now:</p>
 <pre class="command client"><code>echo Secret.123 | kinit user1</code></pre>
 <p>Now request the certificate from the CA. Given the context, this
 could also be called <em>enrolling</em> the smart card.</p>
-<pre class="command client"><code>ipa cert-request user.csr \
+<pre class="command client"><code>ipa cert-request softhsm-user.csr \
     --profile-id userCert \
     --principal user1 \
     --certificate-out softhsm-user.crt</code></pre>
@@ -197,10 +197,8 @@ don’t need these hacks.</p>
 </div>
 <p>Change the ownership of all the data to <code>sssd</code> user and group:</p>
 <pre class="command client"><code>sudo chown -R sssd:sssd /var/lib/softhsm/tokens</code></pre>
-<p>Grant all users access to the token. The directory and object names
-are randomly generated UUIDs; the wildcards match them.</p>
-<pre class="command client"><code>sudo sh -c 'chmod 775 /var/lib/softhsm/tokens/*'</code></pre>
-<pre class="command client"><code>sudo sh -c 'chmod 664 /var/lib/softhsm/tokens/*/*'</code></pre>
+<p>Grant all users access to the token:</p>
+<pre class="command client"><code>sudo chmod -R a+rX /var/lib/softhsm</code></pre>
 <p>One more thing: PKCS #11 tokens have a flag that indicates whether
 the device is <strong>removable</strong> or not. SSSD unconditionally ignores
 non-removable tokens. Fortunately, we can configure SoftHSM to make
@@ -253,8 +251,11 @@ unrelated to FreeIPA or system accounts.</p>
 <p>Allow RDP traffic through the firewall:</p>
 <pre class="command client"><code>sudo firewall-cmd --permanent --add-service=rdp \
   &amp;&amp; sudo firewall-cmd --reload</code></pre>
-<p>Finally, enable the RDP service:</p>
+<p>Enable the RDP service:</p>
 <pre class="command client"><code>sudo grdctl --system rdp enable</code></pre>
+<p>And finally, restart GNOME Remote Desktop to pick up the new
+configuration.</p>
+<pre class="command client"><code>sudo systemctl restart gnome-remote-desktop</code></pre>
 <h2 id="bringing-it-all-together">Bringing it all together <a href="#bringing-it-all-together" class="section">§</a></h2>
 <div class="note">
 <p>You need a RDP client on your local machine for these final steps.</p>

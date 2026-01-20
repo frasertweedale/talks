@@ -99,24 +99,24 @@ output. You will need it later. For example:</p>
 <dt><code>-k &lt;path&gt;</code></dt>
 <dd>
 Path to private key (Certmonger will generate it)
-<code>-f &lt;path&gt;</code>
 </dd>
+<dt><code>-f &lt;path&gt;</code></dt>
 <dd>
 Path to certificate (where it will be saved after being issued)
-<code>--key-owner</code> and <code>--cert-owner</code>
 </dd>
+<dt><code>--key-owner</code> and <code>--cert-owner</code></dt>
 <dd>
 When specified, Certmonger will change the ownership of the key or
 certificate to the given user (<code>root</code> by default). There are also
 options to change the mode (file permissions) if needed.
-<code>-K &lt;principal&gt;</code>
 </dd>
+<dt><code>-K &lt;principal&gt;</code></dt>
 <dd>
 Kerberos host or service principal; because different kinds of
 services may be accessed at one hostname, this argument tells
 Certmonger which service principal is the certificate subject
-<code>-D &lt;dnsname&gt;</code>
 </dd>
+<dt><code>-D &lt;dnsname&gt;</code></dt>
 <dd>
 Requests the given domain name to appear in the <em>Subject
 Alternative Name (SAN)</em> extension; today the <em>Common Name (CN)</em>
@@ -132,15 +132,15 @@ from the <code>ipa-getcert request</code> output:</p>
 Request ID '{TRACKING_ID}':
   status: MONITORING
   stuck: no
-  key pair storage: type=FILE,location='/etc/pki/tls/private/host.key'
-  certificate: type=FILE,location='/etc/pki/tls/certs/host.crt'
+  key pair storage: type=FILE,location='/etc/pki/tls/private/rdp.key',owner=gnome-remote-desktop
+  certificate: type=FILE,location='/etc/pki/tls/certs/rdp.crt',owner=gnome-remote-desktop
   CA: IPA
   issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
-  subject: CN=client.ipademo.local,O=E1.PKI.FRASE.ID.AU
-  issued: 2026-01-07 05:34:08 UTC
-  expires: 2028-01-08 05:34:08 UTC
+  subject: CN=client.e1.pki.frase.id.au,O=E1.PKI.FRASE.ID.AU
+  issued: 2026-01-20 05:21:36 UTC
+  expires: 2028-01-21 05:21:36 UTC
   dns: client.e1.pki.frase.id.au
-  principal name: host/client.ipademo.local@IPADEMO.LOCAL
+  principal name: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
   key usage: digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment
   eku: id-kp-serverAuth,id-kp-clientAuth
   pre-save command:
@@ -160,16 +160,16 @@ appears in the <code>ipa host-show</code> output:</p>
 <pre class="command client"><code>ipa host-show $(hostname)</code></pre>
 <pre class="output"><code>  Host name: client.e1.pki.frase.id.au
   Platform: x86_64
-  Operating system: 6.17.1-300.fc43.x86_64
-  Certificate: MIIFgDCCA+igAwIBAgIQOJ... (it's big!)
+  Operating system: 6.17.12-300.fc43.x86_64
+  Certificate: MIIFgTCCA+mgAwIBAgIRAP... (it's big!)
   Subject: CN=client.e1.pki.frase.id.au,O=E1.PKI.FRASE.ID.AU
-  Serial Number: 75212939205584776743200657781018594668
-  Serial Number (hex): 0x38957C34E5953F0FB537BB73C7440D6C
+  Serial Number: 326888291098119664476505843178022846962
+  Serial Number (hex): 0xF5EC65138C8B0C34BAD0B112CE0B41F2
   Issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
-  Not Before: Wed Jan 07 05:34:08 2026 UTC
-  Not After: Sat Jan 08 05:34:08 2028 UTC
-  Fingerprint (SHA1): 27:92:a6:69:64:c5:ec:7a:88:11:46:ea:ad:cd:64:74:50:4b:51:1e
-  Fingerprint (SHA256): 75:a1:d5:b1:ab:79:65:79:88:4a:a5:87:c5:d2:54:c6:4f:02:d1:3c:ad:9f:ab:54:26:70:57:e8:53:df:10:c9
+  Not Before: Tue Jan 20 05:21:36 2026 UTC
+  Not After: Fri Jan 21 05:21:36 2028 UTC
+  Fingerprint (SHA1): 55:89:0e:58:cc:ca:7a:10:5f:ad:5f:92:df:66:1b:06:16:be:92:26
+  Fingerprint (SHA256): 8d:b8:0f:e2:de:d6:f7:aa:8c:ef:93:63:b4:7c:2d:a4:38:d2:cf:c2:39:94:42:fc:0e:e8:0a:0d:16:e5:15:81
   Principal name: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
   Principal alias: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
   ...</code></pre>
@@ -195,12 +195,11 @@ want to renew it immediately:</p>
 the updated validity period:</p>
 <pre class="command client"><code>sudo getcert list -i $TRACKING_ID</code></pre>
 <pre class="output"><code>Number of certificates and requests being tracked: 1.
-Request ID '20260107053408':
+Request ID '{TRACKING_ID}':
         status: MONITORING
-        subject: CN=client.e1.pki.frase.id.au,O=E1.PKI.FRASE.ID.AU
-        issued: 2026-01-07 05:44:20 UTC
-        expires: 2028-01-08 05:44:20 UTC
-        dns: client.e1.pki.frase.id.au
+        ...
+        issued: 2026-01-20 05:27:35 UTC
+        expires: 2028-01-21 05:27:35 UTC
         ...</code></pre>
 </div>
 <div id="nav" class="footer">
