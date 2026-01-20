@@ -7,7 +7,7 @@ next-href: ipa-smart-cards.html
 next-text: Smart cards and workstation login
 ---
 
-# FreeIPA certificate profiles and user certificates
+# FreeIPA certificate profiles
 
 A *certificate profile* is a set of rules that defines and
 constrains what data appears in a certificate.  Different
@@ -36,7 +36,8 @@ In this scenario you will:
 3. Define *CA ACL* rules to allow certain users to request
    certificates using this profile.
 4. Confirm that the *CA ACL* is set up properly.
-5. Issue a user certificate using the new profile.
+
+Actually issuing a user certificate will happen in the next module.
 
 ::: note
 
@@ -293,7 +294,7 @@ ipa: ERROR: Insufficient access: Principal
 ```
 
 
-## Issue a user certificate
+## Add user to the `sclogin` group
 
 `kinit` as `admin` once more, and add `user1` to the `sclogin` user
 group:
@@ -317,26 +318,6 @@ Number of members added 1
 -------------------------
 ```
 
-Now become `user1` (again) and retry the `cert-request`.
-
-```command {.client}
-ipa cert-request user.csr \
-    --profile-id userCert \
-    --principal user1 \
-    --certificate-out user.crt
-```
-```output
-  Issuing CA: ipa
-  Certificate: MIIEJjCCAo6gAwIBAgIQRmeQcXH3o/...
-  Subject: CN=user1,O=E1.PKI.FRASE.ID.AU
-  Subject email address: user1@e1.pki.frase.id.au
-  Issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
-  Not Before: Wed Jan 07 08:00:16 2026 UTC
-  Not After: Sat Jan 08 08:00:16 2028 UTC
-  Serial number: 93583695936409673461838374248291191549
-  Serial number (hex): 0x4667907171F7A3FADA78A182C4EF4AFD
-  Request status: complete
-```
-
-Hooray!  Now that you have the user certificate, you can move on to
-the Smart Card login module.
+Now that `user1` is in the `sclogin` group, certificate requests
+using the `userCert` profile should succeed.  You will actually
+request the certificate in the Smart Card module.

@@ -147,8 +147,8 @@ resource "aws_instance" "ipa" {
 # 4. Instance: Client
 resource "aws_instance" "client" {
   count                  = var.env_count
-  ami                    = var.workshop_ami_id_main
-  instance_type          = "t3.micro"
+  ami                    = var.workshop_ami_id_workstation
+  instance_type          = "t3.small"
   subnet_id              = aws_subnet.main.id
   key_name               = aws_key_pair.generated[count.index].key_name
   vpc_security_group_ids = [aws_security_group.env_sg[count.index].id]
@@ -178,42 +178,6 @@ resource "aws_instance" "client" {
   EOF
 
   tags = { Name = "env${count.index + 1}-client" }
-}
-
-# 4.1. Instance: Workstation
-resource "aws_instance" "workstation" {
-  count                  = var.env_count
-  ami                    = var.workshop_ami_id_workstation
-  instance_type          = "t3.small"
-  subnet_id              = aws_subnet.main.id
-  key_name               = aws_key_pair.generated[count.index].key_name
-  vpc_security_group_ids = [aws_security_group.env_sg[count.index].id]
-
-  user_data = <<-EOF
-    #!/bin/bash
-    DOMAIN="e${count.index + 1}.${var.base_domain}"
-    hostnamectl set-hostname workstation.$DOMAIN
-
-    # Wait for IPA server to come up
-    # We verify the HTTP code is < 400 (server is responding)
-    echo "Waiting for IPA Server to be ready..."
-    until curl -s -k --output /dev/null --fail https://ipa.$DOMAIN/ipa/ui/; do
-      sleep 30
-    done
-    echo "IPA Server is up. Installation will proceed in 2 minutes."
-    sleep 120
-
-    ipa-client-install -U \
-      --no-ntp \
-      --server=ipa.$DOMAIN \
-      --domain=$DOMAIN \
-      --principal=admin \
-      --password="Secret.123" \
-      --force-join \
-      --mkhomedir
-  EOF
-
-  tags = { Name = "env${count.index + 1}-workstation" }
 }
 
 
@@ -280,15 +244,6 @@ resource "aws_route53_record" "client_private" {
   records = [aws_instance.client[count.index].private_ip]
 }
 
-resource "aws_route53_record" "workstation_private" {
-  count   = var.env_count
-  zone_id = aws_route53_zone.private.zone_id
-  name    = "workstation.e${count.index + 1}.${var.base_domain}"
-  type    = "A"
-  ttl     = "60"
-  records = [aws_instance.workstation[count.index].private_ip]
-}
-
 resource "aws_route53_record" "web_private" {
   count   = var.env_count
   zone_id = aws_route53_zone.private.zone_id
@@ -326,15 +281,6 @@ resource "aws_route53_record" "client_public" {
   type    = "A"
   ttl     = "60"
   records = [aws_instance.client[count.index].public_ip]
-}
-
-resource "aws_route53_record" "workstation_public" {
-  count   = var.env_count
-  zone_id = var.public_zone_id
-  name    = "workstation.e${count.index + 1}.${var.base_domain}"
-  type    = "A"
-  ttl     = "60"
-  records = [aws_instance.workstation[count.index].public_ip]
 }
 
 resource "aws_route53_record" "web_public" {

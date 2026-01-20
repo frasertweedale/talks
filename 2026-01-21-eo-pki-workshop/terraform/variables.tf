@@ -9,7 +9,7 @@ variable "workshop_ami_id_main" {
 
 variable "workshop_ami_id_workstation" {
   type        = string
-  default     = "ami-0b411eb7a789cdb65" # pki-workshop-f43-workstation-v1
+  default     = "ami-0863a1a91e6cb87e3" # pki-workshop-f43-workstation-v2
 }
 
 variable "base_domain" {

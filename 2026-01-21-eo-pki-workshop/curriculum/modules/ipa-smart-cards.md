@@ -44,7 +44,7 @@ walk through some real world scenarios:
 ::: note
 
 Most activities in this module are to be performed on
-`workstation.$DOMAIN`. SSH into this machine now.
+`client.$DOMAIN`.  SSH into this machine now.
 
 **You will also need an RDP client to perform the graphical
 workstation login.**  You can still do most of the activities
@@ -66,7 +66,7 @@ The first step is to create a token.  This is the only
 SoftHSM-specific operation.  Later steps will use the PKCS #11
 interface to interact with the token.
 
-```command {.workstation}
+```command {.client}
 sudo softhsm2-util --init-token --slot 0 \
   --label "FakeSmartCard" \
   --pin 1234 \
@@ -85,7 +85,7 @@ token.
 
 Now generate a private key (in this case, a NIST P-256 ECC key):
 
-```command {.workstation}
+```command {.client}
 sudo p11-kit generate-keypair \
     pkcs11:token=FakeSmartCard --login \
     --type=ecdsa --curve=secp256r1 \
@@ -94,7 +94,7 @@ sudo p11-kit generate-keypair \
 
 List objects and retrieve the PKCS #11 URI of the key:
 
-```command {.workstation}
+```command {.client}
 sudo p11-kit list-objects pkcs11:token=FakeSmartCard
 ```
 ```output
@@ -117,14 +117,14 @@ the new key on this specific token.  Save its value; you will need
 it in the next step.  **Make sure you surround the value in quotes
 (`"..."`).**
 
-```command {.workstation .no-copy}
+```command {.client .no-copy}
 PKCS11_URI="pkcs11:model=…;object=ipa-key;type=public"
 ```
 
 Now create the CSR.  **OpenSSL will prompt for the user PIN** you
 set when creating the token.
 
-```command {.workstation}
+```command {.client}
 sudo openssl req -new \
   -engine pkcs11 -keyform engine -key $PKCS11_URI \
   -config user_csr.cnf -out softhsm-user.csr
@@ -137,38 +137,47 @@ Enter PKCS#11 token PIN for FakeSmartCard:
 
 ::: note
 
-***TODO TODO TODO update image to include `openssl-pkcs11` module.***
-
 The OpenSSL PKCS #11 engine is provided by the `openssl-pkcs11` RPM
-package on Fedora and RHEL.  Other distributions may name it
-differently.
+package on Fedora and RHEL.  Other distributions might use a
+different package name.
 
 :::
 
 
-### Request and import certificate
+### Request user certificate and import into smart card
 
-To request the certificate from the FreeIPA CA you need to
-authenticate.  Authenticate as `admin`, because you'll need to use
-that account soon.
+Perform a *self-service* certificate request.  If you are not
+already authenticated as `user1`, do so now:
 
-```command {.workstation}
-kinit admin
+```command {.client}
+echo Secret.123 | kinit user1
 ```
 
 Now request the certificate from the CA.  Given the context, this
 could also be called *enrolling* the smart card.
 
-```command {.workstation}
+```command {.client}
 ipa cert-request user.csr \
     --profile-id userCert \
     --principal user1 \
     --certificate-out softhsm-user.crt
 ```
+```output
+  Issuing CA: ipa
+  Certificate: MIIEJjCCAo6gAwIBAgIQRmeQcXH3o/...
+  Subject: CN=user1,O=E1.PKI.FRASE.ID.AU
+  Subject email address: user1@e1.pki.frase.id.au
+  Issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
+  Not Before: Wed Jan 07 08:00:16 2026 UTC
+  Not After: Sat Jan 08 08:00:16 2028 UTC
+  Serial number: 93583695936409673461838374248291191549
+  Serial number (hex): 0x4667907171F7A3FADA78A182C4EF4AFD
+  Request status: complete
+```
 
 Finally, import the certificate into the token:
 
-```command {.workstation}
+```command {.client}
 sudo p11-kit import-object pkcs11:token=FakeSmartCard \
   --file softhsm-user.crt \
   --label ipa-key --id deadbeef
@@ -184,9 +193,13 @@ that can be used to further restrict certificate authentication.
 This is often used to ensure that only particular issuers are used.
 
 Let's just add a rule that accepts (valid) certificates from all
-issuers:
+issuers (but first become `admin`).
 
-```command {.workstation}
+```command {.client}
+echo Secret.123 | kinit admin
+```
+
+```command {.client}
 ipa certmaprule-add all-issuers \
     --matchrule '<ISSUER>.*'
 ```
@@ -225,7 +238,7 @@ Now that the match rule has been created and the smart card is
 ready, you can perform a Kerberos initial authentication.  Enter the
 PIN when `kinit` prompts for it.
 
-```command {.workstation}
+```command {.client}
 sudo kinit user1 \
      -X X509_user_identity=PKCS11:libsofthsm2.so
 ```
@@ -235,7 +248,7 @@ FakeSmartCard                    PIN:
 
 Run `klist` to observe that the authentication succeeded:
 
-```command {.workstation}
+```command {.client}
 sudo klist
 ```
 ```output
@@ -274,18 +287,18 @@ don't need these hacks.
 
 Change the ownership of all the data to `sssd` user and group:
 
-```command {.workstation}
+```command {.client}
 sudo chown -R sssd:sssd /var/lib/softhsm/tokens
 ```
 
 Grant all users access to the token.  The directory and object names
 are randomly generated UUIDs; the wildcards match them.
 
-```command {.workstation}
+```command {.client}
 sudo sh -c 'chmod 775 /var/lib/softhsm/tokens/*'
 ```
 
-```command {.workstation}
+```command {.client}
 sudo sh -c 'chmod 664 /var/lib/softhsm/tokens/*/*'
 ```
 
@@ -312,7 +325,7 @@ slots.removable = true
 Use `authselect` to configure the PAM stack to enable smart card
 login:
 
-```command {.workstation}
+```command {.client}
 sudo authselect enable-feature with-smartcard
 ```
 ```output
@@ -337,14 +350,14 @@ SSSD also needs to know what CAs are trusted for user login.  By
 default, SSSD looks at `/etc/sssd/pki/sssd_auth_ca_db.pem`.  Use a
 symlink to point that location the FreeIPA CA trust store:
 
-```command {.workstation}
+```command {.client}
 sudo ln -s /etc/ipa/ca.crt \
     /etc/sssd/pki/sssd_auth_ca_db.pem
 ```
 
 Now restart SSSD:
 
-```command {.workstation}
+```command {.client}
 sudo systemctl restart sssd
 ```
 
@@ -357,32 +370,17 @@ enable [*Remote Desktop Protocol (RDP)*][wiki-rdp] login, using
 
 [wiki-rdp]: https://en.wikipedia.org/wiki/Remote_Desktop_Protocol
 
-RDP uses TLS to secure the traffic between client and server.  Using
-Certmonger, request a service certificate for the RDP server to use:
+RDP uses TLS to secure the traffic between client and server.
+Recall that we already requested a suitable certificate in the
+*Certmonger* module!  Configure GNOME Remote Desktop to use the
+Certmonger-managed key and certificate:
 
 ```command {.client}
-sudo ipa-getcert request \
-    -f /etc/pki/tls/certs/rdp.crt \
-    -k /etc/pki/tls/private/rdp.key \
-    --key-owner gnome-remote-desktop \
-    --cert-owner gnome-remote-desktop \
-    -K host/$(hostname) \
-    -D $(hostname)
-```
-
-The `--key-owner` and `--cert-owner` options tell Certmonger to
-change the ownership of the files it creates, so the server process
-can read them.  There are also options to change the mode (file
-permissions), if you need that.
-
-Now, tell GNOME Remote Desktop about the key and certificate:
-
-```command {.workstation}
 sudo grdctl --system rdp \
   set-tls-key  /etc/pki/tls/private/rdp.key
 ```
 
-```command {.workstation}
+```command {.client}
 sudo grdctl --system rdp \
   set-tls-cert /etc/pki/tls/certs/rdp.crt
 ```
@@ -396,30 +394,36 @@ You can ignore error messages that mention TPM credentials.
 Configure an RDP username and password.  These credentials are
 unrelated to FreeIPA or system accounts.
 
-```command {.workstation}
+```command {.client}
 sudo grdctl --system rdp \
   set-credentials rdp hunter2
 ```
 
 Allow RDP traffic through the firewall:
 
-```command {.workstation}
+```command {.client}
 sudo firewall-cmd --permanent --add-service=rdp \
   && sudo firewall-cmd --reload
 ```
 
 Finally, enable the RDP service:
 
-```command {.workstation}
+```command {.client}
 sudo grdctl --system rdp enable
 ```
 
 
 ## Bringing it all together
 
-Use your RDP client to connect to
-`workstation.e$N.pki.frase.id.au`.  You may need to prefix the
-domain name with `rdp://`.  The TCP port is `3389`.
+::: note
+
+You need a RDP client on your local machine for these final steps.
+
+:::
+
+Use your RDP client to connect to `client.e$N.pki.frase.id.au`.
+You may need to prefix the domain name with `rdp://`.  The TCP port
+is `3389`.
 
 You may need to accept the server's certificate—which you issued and
 configured!

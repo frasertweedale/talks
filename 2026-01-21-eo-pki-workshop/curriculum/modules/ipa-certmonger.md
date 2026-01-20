@@ -13,9 +13,8 @@ issuing and managing host, service and user certificates.
 
 In this module you'll use the ***Certmonger*** program to request
 and manage (renew) a certificate for an enrolled host from the
-FreeIPA CA.  A real world use case for this might be to enable
-802.1X network authentication.
-
+FreeIPA CA.  We'll consider the real world use case of an RDP
+(*Remote Desktop Protocol*) server.
 
 ::: note
 
@@ -95,16 +94,18 @@ Use the `ipa-getcert` command, which is part of Certmonger, to
 request a certificate.  Certmonger will automatically perform the
 following steps:
 
-1. Generate a private key
+1. Generate a private key (with specified ownership)
 2. Sign a CSR (ephemeral)
 3. Submit the CSR to the FreeIPA CA for signing
-4. Save the issued certificate
+4. Save the issued certificate (with specified ownership)
 5. Monitor the certificate and renew it before expiry
 
 ```command {.client}
 sudo ipa-getcert request \
-    -f /etc/pki/tls/certs/host.crt \
-    -k /etc/pki/tls/private/host.key \
+    -f /etc/pki/tls/certs/rdp.crt \
+    -k /etc/pki/tls/private/rdp.key \
+    --key-owner gnome-remote-desktop \
+    --cert-owner gnome-remote-desktop \
     -K host/$(hostname) \
     -D $(hostname)
 ```
@@ -129,6 +130,10 @@ Let's break down some of those command arguments.
 : Path to private key (Certmonger will generate it)
 `-f <path>`
 : Path to certificate (where it will be saved after being issued)
+`--key-owner` and `--cert-owner`
+: When specified, Certmonger will change the ownership of the key or
+  certificate to the given user (`root` by default).  There are also
+  options to change the mode (file permissions) if needed.
 `-K <principal>`
 : Kerberos host or service principal; because different kinds of
   services may be accessed at one hostname, this argument tells

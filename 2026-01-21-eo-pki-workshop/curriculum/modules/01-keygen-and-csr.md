@@ -182,15 +182,30 @@ this workshop.
 For user authentication certificates, the primary identifiers are
 usually the username (in CN) and the email address (in the SAN).
 
-Create a file named `user_csr.cnf` with the following content.
-**Replace `$DOMAIN` with your environment's domain (not the machine
-hostname).**
+::: note
 
+Set the `DOMAIN` shell variable, so that substitutions in shell
+commands work:
+
+```command {.client .no-copy}
+DOMAIN=e17.pki.frase.id.au
 ```
+
+Also set the `REALM` shell variable (based on `$DOMAIN`):
+
+```command {.client}
+REALM=$(echo $DOMAIN | tr '[:lower:]' '[:upper:]')
+```
+
+:::
+
+Create a file named `user_csr.cnf` with an OpenSSL configuration
+suitable for requesting an authentication certificate for `user1`:
+
+```command {.client}
+tee user_csr.cnf >/dev/null <<EOF
 [ req ]
-default_bits        = 384
 prompt              = no
-default_md          = sha384
 req_extensions      = req_ext
 distinguished_name  = dn
 
@@ -202,7 +217,27 @@ subjectAltName = @alt_names
 
 [ alt_names ]
 email = user1@$DOMAIN
+otherName = 1.3.6.1.5.2.2;SEQUENCE:krb5principal
+
+[ krb5principal ]
+realm = EXPLICIT:0,GeneralString:$REALM
+principalname = EXPLICIT:1,SEQUENCE:principalname
+
+[ principalname ]
+nametype = EXPLICIT:0,INT:1
+namestring = EXPLICIT:1,SEQUENCE:namestring
+
+[ namestring ]
+part1 = GeneralString:user1
+EOF
 ```
+
+::: note
+
+The CSR's SAN extension includes the user's email address, and a
+representation of their Kerberos principal name.
+
+:::
 
 ### Generate the User CSR
 

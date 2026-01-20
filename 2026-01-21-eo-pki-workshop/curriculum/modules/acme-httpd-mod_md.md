@@ -123,8 +123,13 @@ Restart the server:
 sudo systemctl restart httpd
 ```
 
-Check the httpd error log for ACME-related messages.  The message
-that indicates success will look like:
+Check the httpd error log for ACME-related messages.
+
+```command {.web}
+sudo tail -f /var/log/httpd/error_log
+```
+
+The message that indicates success will look like:
 
 ```output
 [Thu Jan 08 06:44:32.452115 2026] [md:notice] [pid 4358:tid 4361]
