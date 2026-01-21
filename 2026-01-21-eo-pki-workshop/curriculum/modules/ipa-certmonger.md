@@ -36,7 +36,7 @@ account* is the equivalent).  Before proceeding, let's inspect this
 entry.
 
 FreeIPA uses the **Kerberos** protocol for authentication.
-Authenticate as user `user1` (initial password = `Secret.123).  You
+Authenticate as user `user1` (initial password = `Secret.123`).  You
 will be prompted to set a new password when authenticating for the
 first time (you can use the same password).
 

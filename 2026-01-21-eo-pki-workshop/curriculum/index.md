@@ -86,7 +86,7 @@ environment's domain.
 
 There are several machines in the environment:
 
-- `server.e$N.pki.frase.id.au` - the FreeIPA server
+- `ipa.e$N.pki.frase.id.au` - the FreeIPA server
 - `client.e$N.pki.frase.id.au` - an enrolled client machine
 - `web.e$N.pki.frase.id.au` - a web server
 
@@ -106,16 +106,22 @@ shell session on your local machine.
 
 ### Accessing the environment
 
-The machines in your environment can be accessed over SSH.  The
-unique SSH private key for your environment is available for
-[**download here**](keys/).  Download your private key and provide it
-to your SSH client.  Then you can log into any of the machines in
-your environment, using the `fedora` user account.
+The unique SSH private key you'll use to access your environment is
+available at **`https://eo2026.frase.id.au/keys/e$N.pem`**.
+Download it and provide it to your SSH client.  Then you can log
+into any of the machines in your environment, using the `fedora`
+user account.
 
 If you use OpenSSH, the login command is:
 
 ```command
 ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au
+```
+
+You will need to change the permissions on the key file:
+
+```command {.no-copy}
+chmod 600 path/to/key.pem
 ```
 
 Accept the host key prompt and log in.
