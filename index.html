@@ -87,11 +87,11 @@ export REALM=E17.PKI.FRASE.ID.AU</code></pre>
 <p>You might also find it convenient to set these variables in your
 shell session on your local machine.</p>
 <h3 id="accessing-the-environment">Accessing the environment</h3>
-<p>The machines in your environment can be accessed over SSH. The
-unique SSH private key for your environment is available at
-<code>http://eo2026.frase.id.au/keys/e$N.pem</code>. Download your private key
-and provide it to your SSH client. Then you can log into any of the
-machines in your environment, using the <code>fedora</code> user account.</p>
+<p>The unique SSH private key you’ll use to access your environment is
+available at <strong><code>https://eo2026.frase.id.au/keys/e$N.pem</code></strong>.
+Download it and provide it to your SSH client. Then you can log
+into any of the machines in your environment, using the <code>fedora</code>
+user account.</p>
 <p>If you use OpenSSH, the login command is:</p>
 <pre class="command"><code>ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au</code></pre>
 <p>You will need to change the permissions on the key file:</p>
