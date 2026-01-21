@@ -75,7 +75,7 @@ domain <code>e$N.pki.frase.id.au</code> (where <code>$N</code> is your particpan
 environment’s domain.</p>
 <p>There are several machines in the environment:</p>
 <ul>
-<li><code>server.e$N.pki.frase.id.au</code> - the FreeIPA server</li>
+<li><code>ipa.e$N.pki.frase.id.au</code> - the FreeIPA server</li>
 <li><code>client.e$N.pki.frase.id.au</code> - an enrolled client machine</li>
 <li><code>web.e$N.pki.frase.id.au</code> - a web server</li>
 </ul>
@@ -94,6 +94,8 @@ to your SSH client. Then you can log into any of the machines in
 your environment, using the <code>fedora</code> user account.</p>
 <p>If you use OpenSSH, the login command is:</p>
 <pre class="command"><code>ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au</code></pre>
+<p>You will need to change the permissions on the key file:</p>
+<pre class="command no-copy"><code>chmod 600 path/to/key.pem</code></pre>
 <p>Accept the host key prompt and log in.</p>
 <div class="note">
 <p>Do not access or interfere with other participants’ environments!</p>
