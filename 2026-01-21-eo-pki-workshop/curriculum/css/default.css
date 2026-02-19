@@ -74,6 +74,21 @@ div#header #navigation a {
     text-align: right;
 }
 
+#nav .back a::before {
+    content: "<\a";
+    white-space: pre;
+}
+
+#nav .up a::before {
+    content: "^\a";
+    white-space: pre;
+}
+
+#nav .next a::before {
+    content: ">\a";
+    white-space: pre;
+}
+
 #license {
     width: 70%;
 }
