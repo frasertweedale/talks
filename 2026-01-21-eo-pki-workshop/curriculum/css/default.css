@@ -14,6 +14,12 @@ div#header {
     padding: 12px 0px 12px 0px;
 }
 
+div#header::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
 div#logo a {
     color: black;
     float: left;
