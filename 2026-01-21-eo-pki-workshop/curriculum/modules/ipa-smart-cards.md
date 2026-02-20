@@ -167,9 +167,9 @@ ipa cert-request softhsm-user.csr \
 ```output
   Issuing CA: ipa
   Certificate: MIIEJjCCAo6gAwIBAgIQRmeQcXH3o/...
-  Subject: CN=user1,O=E1.PKI.FRASE.ID.AU
-  Subject email address: user1@e1.pki.frase.id.au
-  Issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
+  Subject: CN=user1,O=E1.__BASE_REALM__
+  Subject email address: user1@e1.__BASE_DOMAIN__
+  Issuer: CN=Certificate Authority,O=E1.__BASE_REALM__
   Not Before: Wed Jan 07 08:00:16 2026 UTC
   Not After: Sat Jan 08 08:00:16 2028 UTC
   Serial number: 93583695936409673461838374248291191549
@@ -255,10 +255,10 @@ sudo klist
 ```
 ```output
 Ticket cache: KCM:0
-Default principal: user1@E1.PKI.FRASE.ID.AU
+Default principal: user1@E1.__BASE_REALM__
 
 Valid starting       Expires              Service principal
-01/18/2026 13:29:42  01/19/2026 12:35:00  krbtgt/E1.PKI.FRASE.ID.AU@E1.PKI.FRASE.ID.AU
+01/18/2026 13:29:42  01/19/2026 12:35:00  krbtgt/E1.__BASE_REALM__@E1.__BASE_REALM__
 ```
 
 The explicit `kinit` is useful to verify the smart card is working
@@ -418,7 +418,7 @@ You need a RDP client on your local machine for these final steps.
 
 :::
 
-Use your RDP client to connect to `client.e$N.pki.frase.id.au`.
+Use your RDP client to connect to `client.e$N.__BASE_DOMAIN__`.
 You may need to prefix the domain name with `rdp://`.  The TCP port
 is `3389`.
 

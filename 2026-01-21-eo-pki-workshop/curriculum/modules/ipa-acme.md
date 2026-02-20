@@ -171,11 +171,11 @@ certbot --config ~/certbot/cli.ini certonly \
 ```
 ```output
 Saving debug log to /home/fedora/certbot/logs/letsencrypt.log
-Requesting a certificate for client.e1.pki.frase.id.au
+Requesting a certificate for client.e1.__BASE_DOMAIN__
 
 Successfully received certificate.
-Certificate is saved at: /home/fedora/certbot/config/live/client.e1.pki.frase.id.au/fullchain.pem
-Key is saved at:         /home/fedora/certbot/config/live/client.e1.pki.frase.id.au/privkey.pem
+Certificate is saved at: /home/fedora/certbot/config/live/client.e1.__BASE_DOMAIN__/fullchain.pem
+Key is saved at:         /home/fedora/certbot/config/live/client.e1.__BASE_DOMAIN__/privkey.pem
 This certificate expires on 2026-04-20.
 These files will be updated when the certificate renews.
 Certbot has set up a scheduled task to automatically renew this certificate in the background.
@@ -194,7 +194,7 @@ openssl x509 -issuer -noout \
   -in ~/certbot/config/live/$(hostname)/fullchain.pem
 ```
 ```output
-issuer=O=E1.PKI.FRASE.ID.AU, CN=Certificate Authority
+issuer=O=E1.__BASE_REALM__, CN=Certificate Authority
 ```
 
 Indeed we see that the FreeIPA CA issued this certificate!

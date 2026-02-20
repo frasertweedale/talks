@@ -276,7 +276,7 @@ CA ACLs.
 echo Secret.123 | kinit user1
 ```
 ```output
-Password for user1@E1.PKI.FRASE.ID.AU:
+Password for user1@E1.__BASE_REALM__:
 ```
 
 :::
@@ -289,7 +289,7 @@ ipa cert-request user.csr \
 ```
 ```output
 ipa: ERROR: Insufficient access: Principal
-  'user1@E1.PKI.FRASE.ID.AU' is not permitted to use CA
+  'user1@E1.__BASE_REALM__' is not permitted to use CA
   'ipa' with profile 'userCert' for certificate issuance.
 ```
 
@@ -303,7 +303,7 @@ group:
 echo Secret.123 | kinit admin
 ```
 ```output
-Password for admin@E1.PKI.FRASE.ID.AU:
+Password for admin@E1.__BASE_REALM__:
 ```
 
 ```command {.client}

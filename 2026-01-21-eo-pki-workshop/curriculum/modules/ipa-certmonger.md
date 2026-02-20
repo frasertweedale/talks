@@ -44,7 +44,7 @@ first time (you can use the same password).
 kinit user1
 ```
 ```output
-Password for user1@E1.PKI.FRASE.ID.AU:
+Password for user1@E1.__BASE_REALM__:
 Password expired.  You must change it now.
 Enter new password:
 Enter it again:
@@ -54,15 +54,15 @@ Enter it again:
 ipa host-show $(hostname)
 ```
 ```output
-  Host name: client.e1.pki.frase.id.au
+  Host name: client.e1.__BASE_DOMAIN__
   Platform: x86_64
   Operating system: 6.17.1-300.fc43.x86_64
-  Principal name: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
-  Principal alias: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
+  Principal name: host/client.e1.__BASE_DOMAIN__@E1.__BASE_REALM__
+  Principal alias: host/client.e1.__BASE_DOMAIN__@E1.__BASE_REALM__
   SSH public key fingerprint: ...
   Password: False
   Keytab: True
-  Managed by: client.e1.pki.frase.id.au
+  Managed by: client.e1.__BASE_DOMAIN__
 ```
 
 (Some details elided.  Also, your domain and realm names will differ
@@ -166,12 +166,12 @@ Request ID '{TRACKING_ID}':
   key pair storage: type=FILE,location='/etc/pki/tls/private/rdp.key',owner=gnome-remote-desktop
   certificate: type=FILE,location='/etc/pki/tls/certs/rdp.crt',owner=gnome-remote-desktop
   CA: IPA
-  issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
-  subject: CN=client.e1.pki.frase.id.au,O=E1.PKI.FRASE.ID.AU
+  issuer: CN=Certificate Authority,O=E1.__BASE_REALM__
+  subject: CN=client.e1.__BASE_DOMAIN__,O=E1.__BASE_REALM__
   issued: 2026-01-20 05:21:36 UTC
   expires: 2028-01-21 05:21:36 UTC
-  dns: client.e1.pki.frase.id.au
-  principal name: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
+  dns: client.e1.__BASE_DOMAIN__
+  principal name: host/client.e1.__BASE_DOMAIN__@E1.__BASE_REALM__
   key usage: digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment
   eku: id-kp-serverAuth,id-kp-clientAuth
   pre-save command:
@@ -195,20 +195,20 @@ appears in the `ipa host-show` output:
 ipa host-show $(hostname)
 ```
 ```output
-  Host name: client.e1.pki.frase.id.au
+  Host name: client.e1.__BASE_DOMAIN__
   Platform: x86_64
   Operating system: 6.17.12-300.fc43.x86_64
   Certificate: MIIFgTCCA+mgAwIBAgIRAP... (it's big!)
-  Subject: CN=client.e1.pki.frase.id.au,O=E1.PKI.FRASE.ID.AU
+  Subject: CN=client.e1.__BASE_DOMAIN__,O=E1.__BASE_REALM__
   Serial Number: 326888291098119664476505843178022846962
   Serial Number (hex): 0xF5EC65138C8B0C34BAD0B112CE0B41F2
-  Issuer: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
+  Issuer: CN=Certificate Authority,O=E1.__BASE_REALM__
   Not Before: Tue Jan 20 05:21:36 2026 UTC
   Not After: Fri Jan 21 05:21:36 2028 UTC
   Fingerprint (SHA1): 55:89:0e:58:cc:ca:7a:10:5f:ad:5f:92:df:66:1b:06:16:be:92:26
   Fingerprint (SHA256): 8d:b8:0f:e2:de:d6:f7:aa:8c:ef:93:63:b4:7c:2d:a4:38:d2:cf:c2:39:94:42:fc:0e:e8:0a:0d:16:e5:15:81
-  Principal name: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
-  Principal alias: host/client.e1.pki.frase.id.au@E1.PKI.FRASE.ID.AU
+  Principal name: host/client.e1.__BASE_DOMAIN__@E1.__BASE_REALM__
+  Principal alias: host/client.e1.__BASE_DOMAIN__@E1.__BASE_REALM__
   ...
 ```
 

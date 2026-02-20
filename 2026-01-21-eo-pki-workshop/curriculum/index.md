@@ -16,7 +16,8 @@ application areas:
 
 ::: note
 
-Please [**give your feedback**](feedback.html) at the end of the session!
+Please [**give your feedback**](__FEEDBACK_URL__){target=_blank}
+at the end of the session!
 
 :::
 
@@ -79,16 +80,16 @@ the modules in order**.
 
 You will have received a card bearing your participant number and
 some access details.  Your workshop environment is hosted under the
-domain `e$N.pki.frase.id.au` (where `$N` is your particpant number).
+domain `e$N.__BASE_DOMAIN__` (where `$N` is your particpant number).
 
 Throughout the curriculum, the variable `$DOMAIN` refers to your
 environment's domain.
 
 There are several machines in the environment:
 
-- `ipa.e$N.pki.frase.id.au` - the FreeIPA server
-- `client.e$N.pki.frase.id.au` - an enrolled client machine
-- `web.e$N.pki.frase.id.au` - a web server
+- `ipa.e$N.__BASE_DOMAIN__` - the FreeIPA server
+- `client.e$N.__BASE_DOMAIN__` - an enrolled client machine
+- `web.e$N.__BASE_DOMAIN__` - a web server
 
 ### Environment variables
 
@@ -96,8 +97,8 @@ On all three machines, login shells will automatically set the
 `DOMAIN` and `REALM` environment variables.  For example:
 
 ```
-export DOMAIN=e17.pki.frase.id.au
-export REALM=E17.PKI.FRASE.ID.AU
+export DOMAIN=e17.__BASE_DOMAIN__
+export REALM=E17.__BASE_REALM__
 ```
 
 You might also find it convenient to set these variables in your
@@ -107,7 +108,7 @@ shell session on your local machine.
 ### Accessing the environment
 
 The unique SSH private key you'll use to access your environment is
-available at **`https://eo2026.frase.id.au/keys/e$N.pem`**.
+available at **`__KEY_LOCATION__`**.
 Download it and provide it to your SSH client.  Then you can log
 into any of the machines in your environment, using the `fedora`
 user account.
@@ -115,7 +116,7 @@ user account.
 If you use OpenSSH, the login command is:
 
 ```command
-ssh -i path/to/key.pem fedora@client.e$N.pki.frase.id.au
+ssh -i path/to/key.pem fedora@client.e$N.__BASE_DOMAIN__
 ```
 
 You will need to change the permissions on the key file:

@@ -85,7 +85,7 @@ sudo openssl x509 \
 ```
 ```output
 Certificate request self-signature ok
-subject=O=E1.PKI.FRASE.ID.AU, CN=Certificate Authority
+subject=O=E1.__BASE_REALM__, CN=Certificate Authority
 ```
 
 
@@ -139,8 +139,8 @@ echo Secret.123 | kinit admin
 ipa ca-show ipa --raw |grep dn
 ```
 ```output
-  ipacasubjectdn: CN=Certificate Authority,O=E1.PKI.FRASE.ID.AU
-  ipacaissuerdn: O=PKI.FRASE.ID.AU,CN=PKI Workshop CA
+  ipacasubjectdn: CN=Certificate Authority,O=E1.__BASE_REALM__
+  ipacaissuerdn: O=__BASE_REALM__,CN=PKI Workshop CA
 ```
 
 ::: note

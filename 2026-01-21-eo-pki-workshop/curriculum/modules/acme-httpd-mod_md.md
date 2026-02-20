@@ -17,7 +17,7 @@ All steps in this module are to be performed on `web.$DOMAIN`.
 SSH into this machine now:
 
 ```
-ssh -i path/to/key.pem fedora@web.e$N.pki.frase.id.au
+ssh -i path/to/key.pem fedora@web.e$N.__BASE_DOMAIN__
 ```
 
 :::
@@ -49,17 +49,17 @@ openssl s_client \
 ```output
 Connecting to fe80::85d:bbff:feda:7911%ens5
 CONNECTED(00000003)
-depth=1 C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.pki.frase.id.au
+depth=1 C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.__BASE_DOMAIN__
 verify error:num=19:self-signed certificate in certificate chain
 C0D265F5407F0000:error:0A000086:SSL routines:tls_post_process_server_certificate:certificate verify failed:ssl/statem/statem_clnt.c:2123:
 ---
 Certificate chain
- 0 s:C=US, O=Unspecified, CN=web, emailAddress=root@web.e2.pki.frase.id.au
-   i:C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.pki.frase.id.au
+ 0 s:C=US, O=Unspecified, CN=web, emailAddress=root@web.e2.__BASE_DOMAIN__
+   i:C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.__BASE_DOMAIN__
    a:PKEY: RSA, 2048 (bit); sigalg: sha256WithRSAEncryption
    v:NotBefore: Jan  8 01:31:02 2026 GMT; NotAfter: Jan  8 01:31:02 2027 GMT
- 1 s:C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.pki.frase.id.au
-   i:C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.pki.frase.id.au
+ 1 s:C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.__BASE_DOMAIN__
+   i:C=US, O=Unspecified, OU=ca-2871753292585466680, CN=web, emailAddress=root@web.e2.__BASE_DOMAIN__
    a:PKEY: RSA, 2048 (bit); sigalg: sha256WithRSAEncryption
    v:NotBefore: Jan  8 01:31:02 2026 GMT; NotAfter: Jan  8 01:31:02 2027 GMT
 ---
@@ -135,7 +135,7 @@ The message that indicates success will look like:
 
 ```output
 [Thu Jan 08 06:44:32.452115 2026] [md:notice] [pid 4358:tid 4361]
-AH10059: The Managed Domain web.e2.pki.frase.id.au has been setup
+AH10059: The Managed Domain web.e2.__BASE_DOMAIN__ has been setup
 and changes will be activated on next (graceful) server restart.
 ```
 
