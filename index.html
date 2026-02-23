@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Practical PKI - Start</title>
-        <link rel="stylesheet" type="text/css" href="./css/default.css" />
+        <link rel="stylesheet" href="./css/default.css">
         <script src="./js/copy-button.js"></script>
     </head>
     <body>
@@ -28,7 +28,8 @@ application areas:</p>
 <li>Enterprise PKI for Linx / Unix environments (with FreeIPA)</li>
 </ul>
 <div class="note">
-<p>Please <a href="feedback.html"><strong>give your feedback</strong></a> at the end of the session!</p>
+<p>Please <a href="https://feedback-form.example.com/" target="_blank"><strong>give your feedback</strong></a>
+at the end of the session!</p>
 </div>
 <h2 id="prerequisites">Prerequisites</h2>
 <p>The workshop is designed to make it as easy as possible to
@@ -88,7 +89,7 @@ export REALM=E17.PKI.FRASE.ID.AU</code></pre>
 shell session on your local machine.</p>
 <h3 id="accessing-the-environment">Accessing the environment</h3>
 <p>The unique SSH private key you’ll use to access your environment is
-available at <strong><code>https://eo2026.frase.id.au/keys/e$N.pem</code></strong>.
+available at <strong><code>{{KEY_LOCATION}}</code></strong>.
 Download it and provide it to your SSH client. Then you can log
 into any of the machines in your environment, using the <code>fedora</code>
 user account.</p>
@@ -126,26 +127,17 @@ credentials are as follows:</p>
     </div>
     <div class="up">
         
-        <a href="#toc">
-            ^
-            <br />
-            Go to index
-        </a>
+        <a href="#toc">Go to index</a>
         
     </div>
     <div class="next">
         
-        <a href="modules/01-keygen-and-csr.html">
-            >
-            <br />
-            Key generation and CSR creation with OpenSSL
-        </a>
+        <a href="modules/01-keygen-and-csr.html">Key generation and CSR creation with OpenSSL</a>
         
     </div>
 </div>
 
         </div>
-        <div class="clear"></div>
 
         <div class="footer">
 
