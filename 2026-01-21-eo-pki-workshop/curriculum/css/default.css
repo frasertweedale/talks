@@ -3,7 +3,10 @@ body {
     font-size: 16px;
     font-family: sans-serif;
     margin: 0px auto 0px auto;
-    width: 650px;
+    max-width: 650px;
+    width: 100%;
+    padding: 0 15px;
+    box-sizing: border-box;
     line-height: 1.5;
 }
 
@@ -75,18 +78,27 @@ div#header #navigation a {
 }
 
 #nav .back a::before {
-    content: "<\a";
+    content: "←\a";
     white-space: pre;
 }
 
 #nav .up a::before {
-    content: "^\a";
+    content: "↑\a";
     white-space: pre;
 }
 
 #nav .next a::before {
-    content: ">\a";
+    content: "→\a";
     white-space: pre;
+}
+
+#nav a {
+    text-decoration: none;
+    color: #333;
+}
+
+#nav a:hover {
+    color: #000;
 }
 
 #license {
@@ -310,3 +322,141 @@ pre {
 .sourceCode .an { color: red; } /* annotation */
 .sourceCode .wa { color: red; } /* warning */
 .sourceCode .in { color: red; } /* info */
+
+/* ========== RESPONSIVE MOBILE STYLES ========== */
+
+/* Make tables scrollable on small screens */
+@media (max-width: 650px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 480px) {
+    body {
+        font-size: 15px;
+        padding: 0 10px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    div#header {
+        padding: 10px 0;
+    }
+
+    div#logo a,
+    div#header #navigation a {
+        font-size: 16px;
+    }
+
+    /* Stack footer items vertically on mobile */
+    .footer {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    #license {
+        width: 100%;
+    }
+
+    #license > div {
+        float: none;
+    }
+
+    #license img {
+        display: none;
+    }
+
+    /* Improve navigation for mobile */
+    #nav {
+        border-top: 2px solid black;
+        padding-top: 15px;
+        padding-bottom: 0px;
+        margin-bottom: 15px;
+        margin-top: 20px;
+        gap: 8px;
+    }
+
+    #nav .back,
+    #nav .up,
+    #nav .next {
+        font-size: 15px;
+        padding: 0;
+        width: auto;
+        flex: 1;
+        min-width: 0;
+    }
+
+    #nav a {
+        display: block;
+        padding: 12px 8px;
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        text-align: center;
+        font-weight: 500;
+        transition: all 0.15s ease;
+    }
+
+    #nav a:active {
+        background: #e0e0e0;
+    }
+
+    #nav .back a::before {
+        content: "← ";
+        white-space: normal;
+    }
+
+    #nav .up a::before, #nav .up a::after {
+        content: " ↑ ";
+        white-space: normal;
+    }
+
+    #nav .next a::before {
+        content: "";
+    }
+    #nav .next a::after {
+        content: " →";
+        white-space: normal;
+    }
+
+    /* Make code blocks more mobile-friendly */
+    pre {
+        padding: 5px;
+        font-size: 13px;
+    }
+
+    code {
+        font-size: 13px;
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+
+    pre code {
+        word-break: normal;
+        white-space: pre;
+    }
+
+    /* Allow inline code to wrap on mobile */
+    p code,
+    li code,
+    td code {
+        white-space: pre-wrap;
+    }
+
+    /* Adjust copy button position for mobile */
+    .copy-button {
+        font-size: 11px;
+        padding: 2px 4px;
+    }
+
+}

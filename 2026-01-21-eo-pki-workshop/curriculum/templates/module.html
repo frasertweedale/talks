@@ -2,19 +2,19 @@
     $body$
 </div>
 <div id="nav" class="footer">
+    $if(back-href)$
     <div class="back">
-        $if(back-href)$
         <a href="$back-href$">$back-text$</a>
-        $endif$
     </div>
+    $endif$
+    $if(up-href)$
     <div class="up">
-        $if(up-href)$
         <a href="$up-href$">$up-text$</a>
-        $endif$
     </div>
+    $endif$
+    $if(next-href)$
     <div class="next">
-        $if(next-href)$
         <a href="$next-href$">$next-text$</a>
-        $endif$
     </div>
+    $endif$
 </div>
