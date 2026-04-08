@@ -21,7 +21,7 @@ Smart cards use a variety of physical interfaces including USB, NFC,
 and the classic plastic card with contact pad.  TPMs and smartphone
 *secure elements* can also be configured as smart cards.  The **PKCS
 #11** standard provides a common interface to access smart card
-crytpographic operations, including key generation and signing.  The
+cryptographic operations, including key generation and signing.  The
 principle is that keys cannot be extracted from the hardware.
 
 ::: note
@@ -35,7 +35,7 @@ In this module you will configure a *software* smart card token and
 walk through some real world scenarios:
 
 - Generate a key on the token and sign a CSR
-- Install the issued certifiate on the device
+- Install the issued certificate on the device
 - Configure a FreeIPA domain for smart card authentication
 - Authenticate to Kerberos using the smart card
 - Configure a workstation for smart card based login
@@ -414,7 +414,7 @@ sudo systemctl restart gnome-remote-desktop
 
 ::: note
 
-You need a RDP client on your local machine for these final steps.
+You need an RDP client on your local machine for these final steps.
 
 :::
 

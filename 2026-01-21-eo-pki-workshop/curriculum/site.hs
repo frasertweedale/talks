@@ -85,7 +85,8 @@ main = hakyll $ do
 context :: Context String
 context =
   dateField "date" "%Y-%m-%d"
-  <> snapshotField "title" "moduleTitle"
+  <> snapshotField "title" "title"
+  <> snapshotField "fancyTitle" "fancyTitle"
   <> constField "siteTitle" siteTitle
   <> urlFieldNoVersion "url0"
   <> defaultContext

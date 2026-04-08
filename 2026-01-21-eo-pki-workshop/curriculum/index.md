@@ -12,7 +12,7 @@ X.509 fundamentals, and real-world applications.  There are two main
 application areas:
 
 - TLS certificates for public websites and services (via ACME)
-- Enterprise PKI for Linx / Unix environments (with FreeIPA)
+- Enterprise PKI for Linux / Unix environments (with FreeIPA)
 
 ::: note
 

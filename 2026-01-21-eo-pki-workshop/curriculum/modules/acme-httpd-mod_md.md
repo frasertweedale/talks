@@ -139,7 +139,7 @@ AH10059: The Managed Domain web.e2.__BASE_DOMAIN__ has been setup
 and changes will be activated on next (graceful) server restart.
 ```
 
-Now preform a graceful restart to pick up the new certificate:
+Now perform a graceful restart to pick up the new certificate:
 
 ```command {.web}
 sudo systemctl reload httpd

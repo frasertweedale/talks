@@ -140,7 +140,7 @@ Account registered.
 : agree to the terms of service of the ACME server
 
 `--no-eff-email`
-: supress the "share email with EFF" prompt
+: suppress the "share email with EFF" prompt
   (which is only relevant when using Let's Encrypt anyway).
 
 

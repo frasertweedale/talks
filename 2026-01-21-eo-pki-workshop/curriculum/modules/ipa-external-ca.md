@@ -15,7 +15,7 @@ subordinated to some other CA operated by the organisation.  In
 other words, the CA has to be *externally signed*.
 
 Because external signing does not change the Subject DN or the
-signing key, a CA can change it's chaining during its lifetime.  It
+signing key, a CA can change its chaining during its lifetime.  It
 can go from self-signed to externally-signed, or vice versa.
 
 In this module, you will change the FreeIPA CA in your workshop
