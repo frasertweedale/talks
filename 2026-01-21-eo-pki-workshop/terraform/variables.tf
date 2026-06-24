@@ -1,25 +1,27 @@
 variable "region" {
-  default = "ap-southeast-2"
+  default = "eu-central-1"
 }
 
 variable "workshop_ami_id_main" {
   type        = string
-  default     = "ami-00688f06e94d76a7b" # pki-workshop-f43-v4-tpm
+  #default     = "ami-00688f06e94d76a7b" # pki-workshop-f43-v4-tpm ap-southeast-2
+  default     = "ami-0501c16d695c2b0f2" # pki-workshop-f43-v4-tpm eu-central-1
 }
 
 variable "workshop_ami_id_workstation" {
   type        = string
-  default     = "ami-0863a1a91e6cb87e3" # pki-workshop-f43-workstation-v2
+  #default     = "ami-0863a1a91e6cb87e3" # pki-workshop-f43-workstation-v2 ap-southeast-2
+  default     = "ami-0115fbc59011444f2" # pki-workshop-f43-workstation-v2 eu-central-1
 }
 
 variable "base_domain" {
-  default = "pki.frase.id.au"
+  default = "cz2026.workshop.freeipa.org"
 }
 
 variable "public_zone_id" {
-  description = "The Hosted Zone ID for pki.frase.id.au (Found in Route53 console)"
+  description = "The AWS Hosted Zone ID for workshop.freeipa.org"
   type        = string
-	default     = "Z07020222557K96HMZHF8"
+	default     = "Z09692993UOYQ3AYWAS0A"
 }
 
 variable "env_count" {
